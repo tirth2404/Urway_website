@@ -95,8 +95,8 @@ export default function Roadmap({ apiBaseUrl, onBackHome, onLogout }: RoadmapPro
       {/* ── TOP NAV ────────────────────────────────────── */}
       <nav className="sticky top-0 z-50 flex items-center justify-between px-6 md:px-10 py-4 border-b-2 border-ink bg-paper/90 backdrop-blur-sm">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full border-2 border-ink flex items-center justify-center font-display text-base font-bold bg-ink text-paper">
-            U
+          <div className="w-9 h-9 overflow-hidden bg-white">
+            <img src="/doodles/logo.jpeg" alt="U'rWay logo" className="w-full h-full object-cover" />
           </div>
           <span className="font-display text-xl font-bold">U'rWay</span>
         </div>

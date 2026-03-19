@@ -148,7 +148,9 @@ export default function OnboardingFlow({ onBackToLanding, onComplete }) {
         </button>
 
         <div className="flex items-center gap-3 mb-12">
-          <div className="w-8 h-8 rounded-full border-2 border-paper flex items-center justify-center font-display text-sm font-bold">U</div>
+          <div className="w-8 h-8 rounded-full border-2 border-paper overflow-hidden bg-white">
+            <img src="/doodles/logo.jpeg" alt="U'rWay logo" className="w-full h-full object-cover" />
+          </div>
           <span className="font-display text-lg font-bold">U'rWay</span>
         </div>
 

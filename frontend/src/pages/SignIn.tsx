@@ -65,7 +65,9 @@ export default function SignIn({ onBack, onSuccess, apiBaseUrl }: SignInProps) {
         <div className="pointer-events-none absolute bottom-0 left-0 w-48 h-48 rounded-full bg-teal opacity-20 blur-3xl" />
 
         <div className="flex items-center gap-3 relative z-10">
-          <div className="w-9 h-9 rounded-full border-2 border-paper flex items-center justify-center font-display text-base font-bold">U</div>
+          <div className="w-9 h-9 rounded-full border-2 border-paper overflow-hidden bg-white">
+            <img src="/doodles/logo.jpeg" alt="U'rWay logo" className="w-full h-full object-cover" />
+          </div>
           <span className="font-display text-xl font-bold">U'rWay</span>
         </div>
 

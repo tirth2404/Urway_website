@@ -53,8 +53,8 @@ function Landing() {
       {/* ── NAV ──────────────────────────────────────────── */}
       <nav className="sticky top-0 z-50 flex items-center justify-between px-6 md:px-12 py-4 border-b-2 border-ink bg-paper/90 backdrop-blur-sm">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full border-2 border-ink flex items-center justify-center font-display text-base font-bold bg-ink text-paper">
-            U
+          <div className="w-9 h-9 overflow-hidden bg-white">
+            <img src="/doodles/logo.jpeg" alt="U'rWay logo" className="w-full h-full object-cover" />
           </div>
           <span className="font-display text-xl font-bold">U'rWay</span>
         </div>
@@ -181,7 +181,9 @@ function Landing() {
       {/* ── FOOTER ───────────────────────────────────────── */}
       <footer className="px-6 md:px-12 py-8 border-t-2 border-ink flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-full border-2 border-ink flex items-center justify-center font-display text-sm font-bold bg-ink text-paper">U</div>
+          <div className="w-7 h-7 overflow-hidden bg-white">
+            <img src="/doodles/logo.jpeg" alt="U'rWay logo" className="w-full h-full object-cover" />
+          </div>
           <span className="font-display font-bold">U'rWay</span>
         </div>
         <p className="text-ink-muted text-sm">© 2026 U'rWay. Built for ambitious learners.</p>
