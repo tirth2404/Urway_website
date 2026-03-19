@@ -1,0 +1,101 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'DM Sans', 'Inter', sans-serif;
+  background-color: #ffffff;
+  color: #18181b;
+}
+
+.font-display {
+  font-family: 'Clash Display', 'Inter', sans-serif;
+}
+
+.range-black {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 10px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  border: 2px solid #18181b;
+}
+
+
+.range-black::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  background: #18181b;
+  border-radius: 999px;
+  border: 2px solid #18181b;
+}
+
+
+.range-black::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  background: #18181b;
+  border-radius: 999px;
+  border: 2px solid #18181b;
+}
+
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #262626;
+}
+
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #404040;
+  border-radius: 4px;
+}
+
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #525252;
+}
+
+
+@keyframes heroCardIn {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  12% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  80% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+.hero-card {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: heroCardIn 5s ease-in-out infinite;
+  animation-fill-mode: both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-card {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+}

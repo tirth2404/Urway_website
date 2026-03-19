@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <style>
+    @keyframes arrowSlide {
+      0% { stroke-dashoffset: 100; opacity: 0.3; }
+      50% { opacity: 1; }
+      100% { stroke-dashoffset: 0; opacity: 0.3; }
+    }
+    
+    @keyframes dollarPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+    
+    .arrow-line {
+      stroke-dasharray: 100;
+      stroke-dashoffset: 100;
+      animation: arrowSlide 3s ease-in-out infinite;
+    }
+    
+    .arrow-line:nth-child(2) {
+      animation-delay: 0.5s;
+    }
+    
+    .dollar {
+      transform-origin: center;
+      animation: dollarPulse 2s ease-in-out infinite;
+    }
+  </style>
+  
+  <!-- Background -->
+  <rect width="400" height="400" rx="80" fill="#FEF3C7"/>
+  
+  <!-- Person body -->
+  <ellipse cx="140" cy="280" rx="40" ry="55" fill="#18181B"/>
+  
+  <!-- Person head -->
+  <circle cx="140" cy="210" r="30" fill="#FEF3C7" stroke="#18181B" stroke-width="3"/>
+  
+  <!-- Hair bun -->
+  <circle cx="155" cy="185" r="18" fill="#18181B"/>
+  
+  <!-- Face features -->
+  <circle cx="133" cy="205" r="2" fill="#18181B"/>
+  <circle cx="147" cy="205" r="2" fill="#18181B"/>
+  <path d="M133 218 Q140 222 147 218" fill="none" stroke="#18181B" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- Arm with phone -->
+  <path d="M115 240 Q90 245 75 260" fill="none" stroke="#18181B" stroke-width="7" stroke-linecap="round"/>
+  
+  <!-- Phone/tablet -->
+  <rect x="50" y="250" width="40" height="60" rx="5" fill="#FEF3C7" stroke="#18181B" stroke-width="3"/>
+  <line x1="60" y1="260" x2="80" y2="260" stroke="#18181B" stroke-width="1"/>
+  <line x1="60" y1="265" x2="75" y2="265" stroke="#18181B" stroke-width="1"/>
+  
+  <!-- Large chart board -->
+  <rect x="180" y="80" width="180" height="140" rx="10" fill="#FFF" stroke="#18181B" stroke-width="3"/>
+  
+  <!-- Chart title lines -->
+  <line x1="195" y1="100" x2="250" y2="100" stroke="#18181B" stroke-width="2"/>
+  <line x1="195" y1="110" x2="230" y2="110" stroke="#18181B" stroke-width="1.5"/>
+  
+  <!-- Animated arrow 1 (upward trend) -->
+  <polyline class="arrow-line" points="200,180 220,160 240,170 260,140 280,150 300,120" 
+            fill="none" stroke="#18181B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <polygon points="300,120 295,128 305,125" fill="#18181B"/>
+  
+  <!-- Animated arrow 2 (second trend line) -->
+  <polyline class="arrow-line" points="200,200 215,190 230,195 250,175 270,180 300,155" 
+            fill="none" stroke="#18181B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+  <polygon points="300,155 295,162 304,160" fill="#18181B" opacity="0.6"/>
+  
+  <!-- Dollar sign (pulsing) -->
+  <g class="dollar">
+    <text x="330" y="195" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#18181B">$</text>
+  </g>
+  
+  <!-- Small screen next to chart -->
+  <rect x="200" y="240" width="80" height="70" rx="8" fill="#FEF3C7" stroke="#18181B" stroke-width="3"/>
+  
+  <!-- Mini wavy line in small screen -->
+  <path d="M215 265 Q225 255 235 265 Q245 275 255 265 Q265 255 265 265" 
+        fill="none" stroke="#18181B" stroke-width="2" stroke-linecap="round"/>
+  
+  <!-- Bottom line in small screen -->
+  <line x1="215" y1="290" x2="265" y2="290" stroke="#18181B" stroke-width="2"/>
+</svg>

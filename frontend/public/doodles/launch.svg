@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <style>
+    @keyframes rocketLaunch {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+    }
+    
+    @keyframes smokeFloat {
+      0% { opacity: 0.7; transform: translateY(0) scale(1); }
+      100% { opacity: 0; transform: translateY(-30px) scale(1.5); }
+    }
+    
+    @keyframes starTwinkle {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+    
+    .rocket {
+      transform-origin: center;
+      animation: rocketLaunch 2s ease-in-out infinite;
+    }
+    
+    .smoke {
+      animation: smokeFloat 1.5s ease-out infinite;
+    }
+    
+    .smoke:nth-child(2) { animation-delay: 0.3s; }
+    .smoke:nth-child(3) { animation-delay: 0.6s; }
+    
+    .star {
+      animation: starTwinkle 2s ease-in-out infinite;
+    }
+    
+    .star:nth-child(2) { animation-delay: 0.4s; }
+    .star:nth-child(3) { animation-delay: 0.8s; }
+    .star:nth-child(4) { animation-delay: 1.2s; }
+  </style>
+  
+  <!-- Background -->
+  <rect width="400" height="400" rx="80" fill="#DBEAFE"/>
+  
+  <!-- Twinkling stars -->
+  <g>
+    <circle class="star" cx="80" cy="100" r="3" fill="#18181B"/>
+    <circle class="star" cx="340" cy="130" r="2.5" fill="#18181B"/>
+    <circle class="star" cx="90" cy="200" r="2" fill="#18181B"/>
+    <circle class="star" cx="330" cy="220" r="3" fill="#18181B"/>
+  </g>
+  
+  <!-- Person (scientist/engineer) -->
+  <g>
+    <!-- Body -->
+    <ellipse cx="280" cy="290" rx="35" ry="50" fill="#18181B"/>
+    
+    <!-- Head -->
+    <circle cx="280" cy="220" r="28" fill="#DBEAFE" stroke="#18181B" stroke-width="3"/>
+    
+    <!-- Hair -->
+    <path d="M255 210 Q260 195 275 200 Q285 190 295 205" fill="#18181B"/>
+    
+    <!-- Cap/hardhat -->
+    <ellipse cx="280" cy="200" rx="32" ry="12" fill="#18181B"/>
+    <rect x="260" y="195" width="40" height="8" rx="2" fill="#18181B"/>
+    
+    <!-- Eyes -->
+    <circle cx="272" cy="218" r="2.5" fill="#18181B"/>
+    <circle cx="288" cy="218" r="2.5" fill="#18181B"/>
+    
+    <!-- Smile -->
+    <path d="M272 228 Q280 234 288 228" fill="none" stroke="#18181B" stroke-width="2" stroke-linecap="round"/>
+    
+    <!-- Arm pointing up -->
+    <path d="M250 255 Q230 240 220 210" fill="none" stroke="#18181B" stroke-width="7" stroke-linecap="round"/>
+    
+    <!-- Hand -->
+    <circle cx="218" cy="205" r="10" fill="#DBEAFE" stroke="#18181B" stroke-width="3"/>
+    <line x1="218" y1="195" x2="218" y2="185" stroke="#18181B" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Animated Rocket -->
+  <g class="rocket">
+    <!-- Rocket body -->
+    <ellipse cx="180" cy="140" rx="25" ry="50" fill="#FFF" stroke="#18181B" stroke-width="3"/>
+    
+    <!-- Rocket nose cone -->
+    <path d="M180 90 L155 100 L180 85 L205 100 Z" fill="#18181B"/>
+    
+    <!-- Rocket window -->
+    <circle cx="180" cy="130" r="12" fill="#DBEAFE" stroke="#18181B" stroke-width="2"/>
+    <circle cx="180" cy="130" r="6" fill="#18181B"/>
+    
+    <!-- Rocket fins -->
+    <path d="M155 170 L145 190 L155 185 Z" fill="#18181B"/>
+    <path d="M205 170 L215 190 L205 185 Z" fill="#18181B"/>
+    
+    <!-- Rocket stripe -->
+    <line x1="165" y1="155" x2="195" y2="155" stroke="#18181B" stroke-width="2"/>
+    
+    <!-- Flames/exhaust -->
+    <ellipse cx="180" cy="195" rx="15" ry="8" fill="#FF6B6B" opacity="0.7"/>
+    <ellipse cx="180" cy="200" rx="12" ry="6" fill="#FFD93D" opacity="0.8"/>
+  </g>
+  
+  <!-- Smoke puffs (below rocket) -->
+  <g>
+    <ellipse class="smoke" cx="180" cy="220" rx="12" ry="10" fill="#A0A0A0" opacity="0.5"/>
+    <ellipse class="smoke" cx="175" cy="235" rx="15" ry="12" fill="#A0A0A0" opacity="0.4"/>
+    <ellipse class="smoke" cx="185" cy="235" rx="13" ry="11" fill="#A0A0A0" opacity="0.4"/>
+  </g>
+</svg>
