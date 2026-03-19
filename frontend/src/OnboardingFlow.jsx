@@ -1,550 +1,430 @@
 import React, { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowLeft, ChevronLeft, ChevronRight, Wifi } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, Loader2, Eye, EyeOff, Wifi } from 'lucide-react';
 
-const stepThemes = [
-  {
-    id: 1,
-    title: 'Identity',
-    description: 'Tell us who you are and where you want to go.',
-    banner: 'bg-rose-100',
-  },
-  {
-    id: 2,
-    title: 'Habits',
-    description: 'How you study and show up every week.',
-    banner: 'bg-amber-100',
-  },
-  {
-    id: 3,
-    title: 'Profile',
-    description: 'Your experience and community footprint.',
-    banner: 'bg-blue-100',
-  },
-  {
-    id: 4,
-    title: 'Wellness',
-    description: 'Balance check-in before we build the plan.',
-    banner: 'bg-emerald-100',
-  },
-  {
-    id: 5,
-    title: 'Account',
-    description: 'Create your sign-in credentials before finishing.',
-    banner: 'bg-violet-100',
-  },
+const TOTAL_STEPS = 5;
+
+const stepMeta = [
+  { id: 1, title: 'Identity', desc: 'Tell us who you are and where you want to go.', accent: 'card-accent' },
+  { id: 2, title: 'Habits', desc: 'How you study and show up every week.', accent: 'card-gold' },
+  { id: 3, title: 'Profile', desc: 'Your experience and community footprint.', accent: 'card-teal' },
+  { id: 4, title: 'Wellness', desc: 'Physical and mental health signals.', accent: 'card-brutal' },
+  { id: 5, title: 'Account', desc: 'Secure your U\'rWay account.', accent: 'card-brutal' },
 ];
 
-const techSkillOptions = ['Python', 'Java', 'React', 'SQL', 'UI/UX', 'Cloud', 'Data Science', 'AI/ML'];
-const interestOptions = ['Product', 'Startups', 'Research', 'Hackathons', 'Open Source', 'Design', 'Fintech', 'HealthTech'];
-const clubOptions = ['Debate Club', 'Coding Club', 'Sports Team', 'Art Club', 'Music Club', 'Volunteering'];
-
-const travelTimeOptions = [
-  { label: '<15 min', value: 1 },
-  { label: '15-30 min', value: 2 },
-  { label: '30-60 min', value: 3 },
-  { label: '>1 hour', value: 4 },
-];
-
+const techSkillOptions = ['Python', 'JavaScript', 'Java', 'C/C++', 'SQL', 'React', 'Node.js', 'HTML/CSS', 'TypeScript', 'Rust', 'Go', 'Swift', 'Kotlin', 'Docker', 'AWS', 'Git'];
+const interestOptions = ['Machine Learning', 'Web Dev', 'Mobile Dev', 'Cybersecurity', 'Data Science', 'DevOps', 'UI/UX', 'Game Dev', 'Blockchain', 'Cloud'];
+const clubOptions = ['Coding Club', 'Robotics', 'Debate', 'Sports', 'Music', 'Drama', 'Research', 'Entrepreneurship'];
 const softSkillsList = [
-  { key: 'communication', label: 'Communication' },
-  { key: 'problem_solving', label: 'Problem Solving' },
-  { key: 'teamwork', label: 'Teamwork' },
-  { key: 'analytical', label: 'Analytical' },
-  { key: 'presentation', label: 'Presentation' },
-  { key: 'networking', label: 'Networking' },
+  { key: 'communication_score', label: 'Communication' },
+  { key: 'teamwork_score', label: 'Teamwork' },
+  { key: 'leadership_score', label: 'Leadership' },
+  { key: 'time_management_score', label: 'Time Management' },
 ];
+const goalOptions = ['Software Engineer', 'Data Scientist', 'Product Manager', 'UI/UX Designer', 'DevOps Engineer', 'Cybersecurity Analyst', 'Machine Learning Engineer', 'Entrepreneur'];
+const studyTimeOptions = ['< 1 hour', '1–2 hours', '2–4 hours', '4–6 hours', '6+ hours'];
 
-const OnboardingFlow = ({ onBackToLanding, onComplete }) => {
+const defaultFormData = {
+  name: '',
+  age: '',
+  target_goal: '',
+  cgpa: '',
+  study_hours_per_day: '2–4 hours',
+  preferred_study_time: 'Morning',
+  learning_style: 'Visual',
+  weak_areas: [],
+  internet_access: true,
+  internship_count: 0,
+  project_count: 0,
+  tech_skills: [],
+  interests: [],
+  club_memberships: [],
+  communication_score: 3,
+  teamwork_score: 3,
+  leadership_score: 3,
+  time_management_score: 3,
+  sleep_hours: 7,
+  stress_level: 3,
+  physical_activity_min: 30,
+  activity_frequency: 3,
+  activity_type: 'Walking',
+  email: '',
+  password: '',
+};
+
+function ToggleButton({ active, onClick, children }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`tag text-sm py-1.5 px-4 ${active ? 'active' : ''}`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function SliderField({ label, keyName, min, max, value, onChange, unit = '' }) {
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <label className="text-xs font-semibold uppercase tracking-widest font-display">{label}</label>
+        <span className="font-display font-bold text-lg">{value}{unit}</span>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        value={value}
+        onChange={e => onChange(keyName, Number(e.target.value))}
+        className="range-ink w-full"
+      />
+      <div className="flex justify-between text-xs text-ink-muted mt-1">
+        <span>{min}{unit}</span>
+        <span>{max}{unit}</span>
+      </div>
+    </div>
+  );
+}
+
+export default function OnboardingFlow({ onBackToLanding, onComplete }) {
+  const [step, setStep] = useState(1);
+  const [dir, setDir] = useState(1);
+  const [formData, setFormData] = useState(defaultFormData);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPw, setShowPw] = useState(false);
+
   const apiBaseUrl = import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:5000';
 
-  const [step, setStep] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    ug_course: '',
-    specialization: '',
-    cgpa: 75,
-    target_goal: '',
-    tech_skills: [],
-    interests: [],
+  const handleChange = (key, value) => setFormData(prev => ({ ...prev, [key]: value }));
 
-    weekly_study_hours: 12,
-    exam_prep_method: '',
-    internet_access: true,
-    free_time: 3,
-    go_out_freq: 2,
-    travel_time: 2,
-    failures: 0,
-    school_support: false,
-    family_support: true,
-    paid_classes: false,
-    attendance: 85,
-    scholarship_status: false,
-
-    internship_count: 0,
-    project_count: 0,
-    leadership_roles: false,
-    club_memberships: [],
-    communication: 3,
-    problem_solving: 3,
-    teamwork: 3,
-    analytical: 3,
-    presentation: 2,
-    networking: 2,
-
-    sleep_hours: 7,
-    sleep_quality: 2,
-    stress_level: 3,
-    physical_activity_min: 30,
-    diet_quality: 1,
-    activity_type: 'Walking',
-    activity_frequency: 3,
-
-    email: '',
-    password: '',
-  });
-
-  const theme = useMemo(() => stepThemes[step - 1], [step]);
-
-  const handleChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const toggleSelection = (field, item) => {
-    setFormData((prev) => {
-      const current = prev[field];
-      if (current.includes(item)) {
-        return { ...prev, [field]: current.filter((entry) => entry !== item) };
-      }
-      return { ...prev, [field]: [...current, item] };
+  const toggleSelection = (key, value) => {
+    setFormData(prev => {
+      const arr = prev[key];
+      return { ...prev, [key]: arr.includes(value) ? arr.filter(v => v !== value) : [...arr, value] };
     });
   };
 
-  const goNext = () => setStep((prev) => Math.min(prev + 1, 5));
-  const goBack = () => setStep((prev) => Math.max(prev - 1, 1));
+  const goNext = () => { setDir(1); setStep(s => Math.min(s + 1, TOTAL_STEPS)); };
+  const goBack = () => {
+    if (step === 1) { onBackToLanding(); return; }
+    setDir(-1); setStep(s => s - 1);
+  };
 
   const handleFinish = async () => {
-    const email = String(formData.email || '').trim().toLowerCase();
-    const password = String(formData.password || '');
-
-    if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
-      alert('Please enter a valid email address.');
-      return;
+    if (!formData.email || !formData.password) {
+      alert('Please enter your email and password to continue.'); return;
     }
-
-    if (password.length < 8) {
-      alert('Password must be at least 8 characters long.');
-      return;
+    if (formData.password.length < 8) {
+      alert('Password must be at least 8 characters.'); return;
     }
-
     setIsSubmitting(true);
     try {
-      const existingUserId = localStorage.getItem('urway_user_id') || '';
-      const payload = { ...formData, email, password, userId: existingUserId };
-
-      const response = await fetch(`${apiBaseUrl}/api/onboarding`, {
+      const res = await fetch(`${apiBaseUrl}/api/onboarding`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
       });
-
-      let data = null;
-      try {
-        data = await response.json();
-      } catch {
-        data = null;
-      }
-
-      if (!response.ok) {
-        throw new Error(
-          data?.detail || data?.error || data?.message || 'Failed to complete onboarding'
-        );
-      }
-
-      localStorage.setItem('urway_user_id', data?.userId || existingUserId);
-      onComplete?.(data);
-    } catch (error) {
-      console.error('Error calling backend:', error);
-      alert(
-        error?.message || 'Something went wrong while connecting to the recommendation engine.'
-      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || 'Onboarding failed.');
+      if (data.userId) localStorage.setItem('urway_user_id', data.userId);
+      onComplete({ userId: data.userId });
+    } catch (err) {
+      alert((err).message || 'Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const meta = stepMeta[step - 1];
+  const progress = ((step - 1) / (TOTAL_STEPS - 1)) * 100;
+
   return (
-    <div className="min-h-screen bg-white text-neutral-900 px-6 py-10">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <button
-            onClick={() => onBackToLanding?.()}
-            className="inline-flex items-center gap-2 rounded-full border-2 border-neutral-900 px-4 py-2 text-sm font-medium hover:bg-neutral-900 hover:text-white transition"
-          >
-            <ArrowLeft size={16} /> Back
-          </button>
-          <div className="text-sm font-semibold">Step {String(step).padStart(2, '0')} / 05</div>
+    <div className="min-h-screen bg-paper text-ink flex">
+      {/* ── Sidebar ─────────────────────────────────────── */}
+      <div className="hidden lg:flex lg:w-[300px] shrink-0 bg-ink text-paper flex-col p-10 border-r-2 border-ink">
+        <button onClick={onBackToLanding} className="flex items-center gap-2 text-paper/60 hover:text-paper text-sm transition-colors mb-10">
+          <ArrowLeft size={14} /> Home
+        </button>
+
+        <div className="flex items-center gap-3 mb-12">
+          <div className="w-8 h-8 rounded-full border-2 border-paper flex items-center justify-center font-display text-sm font-bold">U</div>
+          <span className="font-display text-lg font-bold">U'rWay</span>
         </div>
 
-        <div className="space-y-10">
-          <div className={`rounded-3xl border-2 border-neutral-900 ${theme.banner} px-8 py-6 shadow-[6px_6px_0_#18181B]`}>
-            <h2 className="font-display text-3xl font-bold tracking-tight">{theme.title}</h2>
-            <p className="text-neutral-700 mt-1">{theme.description}</p>
+        <div className="space-y-1 flex-1">
+          {stepMeta.map((s, i) => {
+            const done = step > s.id;
+            const current = step === s.id;
+            return (
+              <div key={s.id} className={`flex items-center gap-3 px-3 py-2.5 rounded-2xl transition-colors ${current ? 'bg-paper/10' : ''}`}>
+                <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center font-display text-xs font-bold shrink-0 transition-all ${done ? 'bg-teal border-teal text-white' : current ? 'bg-paper border-paper text-ink' : 'border-paper/30 text-paper/30'}`}>
+                  {done ? '✓' : s.id}
+                </div>
+                <div>
+                  <p className={`text-sm font-semibold font-display transition-colors ${current ? 'text-paper' : done ? 'text-paper/70' : 'text-paper/30'}`}>{s.title}</p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="mt-auto">
+          <div className="flex justify-between text-xs text-paper/40 mb-2">
+            <span>Progress</span>
+            <span>{step}/{TOTAL_STEPS}</span>
+          </div>
+          <div className="h-1.5 bg-paper/10 rounded-full overflow-hidden">
+            <div className="h-full bg-paper/60 rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />
+          </div>
+        </div>
+      </div>
+
+      {/* ── Main form area ──────────────────────────────── */}
+      <div className="flex-1 flex flex-col min-h-screen">
+        {/* mobile header */}
+        <div className="lg:hidden flex items-center justify-between px-6 py-4 border-b-2 border-ink bg-paper">
+          <button onClick={goBack} className="btn-pill text-sm gap-2">
+            <ArrowLeft size={14} /> Back
+          </button>
+          <span className="font-display font-bold text-sm">{step} / {TOTAL_STEPS}</span>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-6 md:px-12 lg:px-16 py-10 max-w-2xl w-full mx-auto">
+          {/* step header */}
+          <div className={`${meta.accent} p-6 rounded-3xl mb-8`}>
+            <p className="font-display text-xs font-semibold uppercase tracking-widest text-ink-muted mb-1">
+              Step {step} of {TOTAL_STEPS}
+            </p>
+            <h2 className="font-display text-3xl font-bold">{meta.title}</h2>
+            <p className="text-ink-muted text-sm mt-1">{meta.desc}</p>
           </div>
 
-          <AnimatePresence mode="wait">
+          {/* step content */}
+          <AnimatePresence mode="wait" custom={dir}>
             <motion.div
               key={step}
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -30 }}
-              transition={{ duration: 0.3 }}
-              className="space-y-8"
+              custom={dir}
+              variants={{
+                enter: (d) => ({ opacity: 0, x: d > 0 ? 40 : -40 }),
+                center: { opacity: 1, x: 0 },
+                exit: (d) => ({ opacity: 0, x: d > 0 ? -40 : 40 }),
+              }}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              className="space-y-6"
             >
+
+              {/* ── STEP 1: Identity ──────────────────────── */}
               {step === 1 && (
-                <div className="space-y-8">
-                  <div className="grid md:grid-cols-2 gap-6">
+                <>
+                  <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs font-semibold uppercase tracking-wider">Current Course</label>
-                      <select
-                        className="mt-2 w-full rounded-2xl border-2 border-neutral-900 bg-white px-4 py-3 focus:outline-none"
-                        onChange={(e) => handleChange('ug_course', e.target.value)}
-                        value={formData.ug_course}
-                      >
-                        <option value="">Select course</option>
-                        <option value="B.Tech">B.Tech / B.E</option>
-                        <option value="B.Sc">B.Sc</option>
-                        <option value="BCA">BCA</option>
-                        <option value="Medical">Medical / MBBS</option>
-                      </select>
+                      <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Full Name</label>
+                      <input value={formData.name} onChange={e => handleChange('name', e.target.value)} placeholder="Your name" className="input-field" />
                     </div>
                     <div>
-                      <label className="text-xs font-semibold uppercase tracking-wider">Specialization</label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Computer Science"
-                        className="mt-2 w-full rounded-2xl border-2 border-neutral-900 bg-white px-4 py-3 focus:outline-none"
-                        onChange={(e) => handleChange('specialization', e.target.value)}
-                        value={formData.specialization}
-                      />
+                      <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Age</label>
+                      <input type="number" min="10" max="60" value={formData.age} onChange={e => handleChange('age', e.target.value)} placeholder="e.g. 20" className="input-field" />
                     </div>
                   </div>
 
                   <div>
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-semibold uppercase tracking-wider">Current Score (CGPA/%)</label>
-                      <span className="font-semibold text-lg">{formData.cgpa}%</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={formData.cgpa}
-                      onChange={(e) => handleChange('cgpa', Number(e.target.value))}
-                      className="mt-3 w-full range-black"
-                    />
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-semibold uppercase tracking-wider">Attendance</label>
-                      <span className="font-semibold text-lg">{formData.attendance}%</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={formData.attendance}
-                      onChange={(e) => handleChange('attendance', Number(e.target.value))}
-                      className="mt-3 w-full range-black"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-semibold uppercase tracking-wider">Primary Goal</label>
-                    <div className="mt-3 grid md:grid-cols-2 gap-4">
-                      {['Placement', 'Masters', 'Govt', 'Freelance'].map((goal) => (
-                        <button
-                          key={goal}
-                          onClick={() => handleChange('target_goal', goal)}
-                          className={`rounded-3xl border-2 border-neutral-900 px-5 py-4 text-left font-medium transition ${
-                            formData.target_goal === goal ? 'bg-neutral-900 text-white' : 'bg-white hover:bg-neutral-50'
-                          }`}
-                        >
-                          {goal}
-                        </button>
+                    <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Target Career Goal</label>
+                    <div className="flex flex-wrap gap-2">
+                      {goalOptions.map(g => (
+                        <ToggleButton key={g} active={formData.target_goal === g} onClick={() => handleChange('target_goal', g)}>{g}</ToggleButton>
                       ))}
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => handleChange('scholarship_status', !formData.scholarship_status)}
-                    className={`rounded-full border-2 border-neutral-900 px-4 py-2 text-sm font-semibold ${formData.scholarship_status ? 'bg-neutral-900 text-white' : 'bg-white'}`}
-                  >
-                    Scholarship: {formData.scholarship_status ? 'Yes' : 'No'}
-                  </button>
-                </div>
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Academic Score / GPA</label>
+                    <input type="number" min="0" max="100" value={formData.cgpa} onChange={e => handleChange('cgpa', e.target.value)} placeholder="e.g. 75 (out of 100)" className="input-field" />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Weak Areas (optional)</label>
+                    <input value={formData.weak_areas?.join(', ') || ''} onChange={e => handleChange('weak_areas', e.target.value.split(',').map(s => s.trim()).filter(Boolean))} placeholder="e.g. Algorithms, DSA, System Design" className="input-field" />
+                  </div>
+                </>
               )}
 
+              {/* ── STEP 2: Habits ────────────────────────── */}
               {step === 2 && (
-                <div className="space-y-8">
+                <>
                   <div>
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-semibold uppercase tracking-wider">Weekly Study Hours</label>
-                      <span className="font-semibold text-lg">{formData.weekly_study_hours} hrs</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="0"
-                      max="60"
-                      value={formData.weekly_study_hours}
-                      onChange={(e) => handleChange('weekly_study_hours', Number(e.target.value))}
-                      className="mt-3 w-full range-black"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-semibold uppercase tracking-wider">Travel Time to College</label>
-                    <div className="mt-3 grid grid-cols-4 gap-3">
-                      {travelTimeOptions.map((opt) => (
-                        <button
-                          key={opt.value}
-                          onClick={() => handleChange('travel_time', opt.value)}
-                          className={`rounded-2xl border-2 border-neutral-900 px-3 py-3 text-sm font-medium transition ${
-                            formData.travel_time === opt.value ? 'bg-neutral-900 text-white' : 'bg-white hover:bg-neutral-50'
-                          }`}
-                        >
-                          {opt.label}
-                        </button>
+                    <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Study Hours Per Day</label>
+                    <div className="flex flex-wrap gap-2">
+                      {studyTimeOptions.map(opt => (
+                        <ToggleButton key={opt} active={formData.study_hours_per_day === opt} onClick={() => handleChange('study_hours_per_day', opt)}>{opt}</ToggleButton>
                       ))}
                     </div>
                   </div>
 
-                  <div className="grid md:grid-cols-3 gap-4">
-                    {[
-                      ['school_support', 'School Support'],
-                      ['family_support', 'Family Support'],
-                      ['paid_classes', 'Paid Tutoring'],
-                    ].map(([key, label]) => (
-                      <div key={key} className="flex items-center justify-between rounded-2xl border-2 border-neutral-900 px-4 py-3">
-                        <div className="text-sm font-medium">{label}</div>
-                        <button
-                          onClick={() => handleChange(key, !formData[key])}
-                          className={`rounded-full border-2 border-neutral-900 px-3 py-1 text-xs font-semibold ${formData[key] ? 'bg-neutral-900 text-white' : 'bg-white'}`}
-                        >
-                          {formData[key] ? 'Yes' : 'No'}
-                        </button>
-                      </div>
-                    ))}
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Preferred Study Time</label>
+                    <div className="flex flex-wrap gap-2">
+                      {['Morning', 'Afternoon', 'Evening', 'Night'].map(t => (
+                        <ToggleButton key={t} active={formData.preferred_study_time === t} onClick={() => handleChange('preferred_study_time', t)}>{t}</ToggleButton>
+                      ))}
+                    </div>
                   </div>
 
-                  <div className="flex items-center justify-between rounded-3xl border-2 border-neutral-900 px-5 py-4">
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Learning Style</label>
+                    <div className="flex flex-wrap gap-2">
+                      {['Visual', 'Auditory', 'Reading/Writing', 'Kinesthetic'].map(s => (
+                        <ToggleButton key={s} active={formData.learning_style === s} onClick={() => handleChange('learning_style', s)}>{s}</ToggleButton>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 rounded-2xl border-2 border-ink bg-paper-warm">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-2xl border-2 border-neutral-900 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-2xl border-2 border-ink flex items-center justify-center bg-white">
                         <Wifi size={18} />
                       </div>
                       <div>
-                        <div className="font-semibold">Internet Access</div>
-                        <div className="text-sm text-neutral-600">Toggle your connectivity</div>
+                        <div className="font-semibold text-sm">Internet Access</div>
+                        <div className="text-xs text-ink-muted">Regular connectivity</div>
                       </div>
                     </div>
                     <button
+                      type="button"
                       onClick={() => handleChange('internet_access', !formData.internet_access)}
-                      className={`rounded-full border-2 border-neutral-900 px-4 py-2 text-sm font-semibold ${formData.internet_access ? 'bg-neutral-900 text-white' : 'bg-white'}`}
+                      className={`btn-pill text-sm ${formData.internet_access ? 'btn-pill-filled' : ''}`}
                     >
                       {formData.internet_access ? 'Yes' : 'No'}
                     </button>
                   </div>
-                </div>
+                </>
               )}
 
+              {/* ── STEP 3: Profile ────────────────────────── */}
               {step === 3 && (
-                <div className="space-y-8">
+                <>
                   <div className="grid md:grid-cols-2 gap-4">
-                    <div className="rounded-3xl border-2 border-neutral-900 px-6 py-5">
-                      <label className="text-xs font-semibold uppercase tracking-wider">Internships</label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={formData.internship_count}
-                        onChange={(e) => handleChange('internship_count', Number(e.target.value))}
-                        className="mt-2 w-full rounded-xl border-2 border-neutral-900 px-3 py-2"
-                      />
+                    <div>
+                      <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Internships</label>
+                      <input type="number" min="0" value={formData.internship_count} onChange={e => handleChange('internship_count', Number(e.target.value))} className="input-field" />
                     </div>
-                    <div className="rounded-3xl border-2 border-neutral-900 px-6 py-5">
-                      <label className="text-xs font-semibold uppercase tracking-wider">Projects</label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={formData.project_count}
-                        onChange={(e) => handleChange('project_count', Number(e.target.value))}
-                        className="mt-2 w-full rounded-xl border-2 border-neutral-900 px-3 py-2"
-                      />
+                    <div>
+                      <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Projects</label>
+                      <input type="number" min="0" value={formData.project_count} onChange={e => handleChange('project_count', Number(e.target.value))} className="input-field" />
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold uppercase tracking-wider">Tech Skills</label>
-                    <div className="mt-3 flex flex-wrap gap-3">
-                      {techSkillOptions.map((skill) => (
-                        <button
-                          key={skill}
-                          onClick={() => toggleSelection('tech_skills', skill)}
-                          className={`rounded-full border-2 border-neutral-900 px-4 py-2 text-sm font-medium ${
-                            formData.tech_skills.includes(skill) ? 'bg-neutral-900 text-white' : 'bg-white'
-                          }`}
-                        >
-                          {skill}
-                        </button>
+                    <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Tech Skills</label>
+                    <div className="flex flex-wrap gap-2">
+                      {techSkillOptions.map(s => (
+                        <ToggleButton key={s} active={formData.tech_skills.includes(s)} onClick={() => toggleSelection('tech_skills', s)}>{s}</ToggleButton>
                       ))}
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold uppercase tracking-wider">Interests</label>
-                    <div className="mt-3 flex flex-wrap gap-3">
-                      {interestOptions.map((interest) => (
-                        <button
-                          key={interest}
-                          onClick={() => toggleSelection('interests', interest)}
-                          className={`rounded-full border-2 border-neutral-900 px-4 py-2 text-sm font-medium ${
-                            formData.interests.includes(interest) ? 'bg-neutral-900 text-white' : 'bg-white'
-                          }`}
-                        >
-                          {interest}
-                        </button>
+                    <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Interests</label>
+                    <div className="flex flex-wrap gap-2">
+                      {interestOptions.map(s => (
+                        <ToggleButton key={s} active={formData.interests.includes(s)} onClick={() => toggleSelection('interests', s)}>{s}</ToggleButton>
                       ))}
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold uppercase tracking-wider">Club Memberships</label>
-                    <div className="mt-3 flex flex-wrap gap-3">
-                      {clubOptions.map((club) => (
-                        <button
-                          key={club}
-                          onClick={() => toggleSelection('club_memberships', club)}
-                          className={`rounded-full border-2 border-neutral-900 px-4 py-2 text-sm font-medium ${
-                            formData.club_memberships.includes(club) ? 'bg-neutral-900 text-white' : 'bg-white'
-                          }`}
-                        >
-                          {club}
-                        </button>
+                    <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Club Memberships</label>
+                    <div className="flex flex-wrap gap-2">
+                      {clubOptions.map(s => (
+                        <ToggleButton key={s} active={formData.club_memberships.includes(s)} onClick={() => toggleSelection('club_memberships', s)}>{s}</ToggleButton>
                       ))}
                     </div>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-6">
-                    {softSkillsList.map((skill) => (
-                      <div key={skill.key}>
-                        <div className="flex items-center justify-between">
-                          <label className="text-xs font-semibold uppercase tracking-wider">{skill.label}</label>
-                          <span className="font-semibold">{formData[skill.key]}/5</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="1"
-                          max="5"
-                          value={formData[skill.key]}
-                          onChange={(e) => handleChange(skill.key, Number(e.target.value))}
-                          className="mt-3 w-full range-black"
-                        />
-                      </div>
+                    {softSkillsList.map(skill => (
+                      <SliderField key={skill.key} label={skill.label} keyName={skill.key} min={1} max={5} value={formData[skill.key]} onChange={handleChange} />
                     ))}
                   </div>
-                </div>
+                </>
               )}
 
+              {/* ── STEP 4: Wellness ──────────────────────── */}
               {step === 4 && (
-                <div className="space-y-8">
-                  {[['sleep_hours', 'Sleep Hours', 0, 12], ['stress_level', 'Stress Level', 1, 5], ['physical_activity_min', 'Physical Activity (mins/day)', 0, 180], ['activity_frequency', 'Activity Frequency (days/week)', 0, 7]].map(([key, label, min, max]) => (
-                    <div key={key}>
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs font-semibold uppercase tracking-wider">{label}</label>
-                        <span className="font-semibold text-lg">{formData[key]}</span>
-                      </div>
-                      <input
-                        type="range"
-                        min={min}
-                        max={max}
-                        value={formData[key]}
-                        onChange={(e) => handleChange(key, Number(e.target.value))}
-                        className="mt-3 w-full range-black"
-                      />
-                    </div>
-                  ))}
+                <>
+                  <SliderField label="Sleep Hours" keyName="sleep_hours" min={0} max={12} value={formData.sleep_hours} onChange={handleChange} unit="h" />
+                  <SliderField label="Stress Level" keyName="stress_level" min={1} max={10} value={formData.stress_level} onChange={handleChange} />
+                  <SliderField label="Physical Activity" keyName="physical_activity_min" min={0} max={180} value={formData.physical_activity_min} onChange={handleChange} unit="min" />
+                  <SliderField label="Activity Frequency" keyName="activity_frequency" min={0} max={7} value={formData.activity_frequency} onChange={handleChange} unit=" days/wk" />
 
                   <div>
-                    <label className="text-xs font-semibold uppercase tracking-wider">Activity Type</label>
-                    <select
-                      value={formData.activity_type}
-                      onChange={(e) => handleChange('activity_type', e.target.value)}
-                      className="mt-2 w-full rounded-2xl border-2 border-neutral-900 bg-white px-4 py-3"
-                    >
-                      {['Walking', 'Running', 'Gym', 'Yoga', 'Sports', 'Dance', 'None'].map((type) => (
-                        <option key={type} value={type}>{type}</option>
+                    <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Activity Type</label>
+                    <div className="flex flex-wrap gap-2">
+                      {['Walking', 'Running', 'Gym', 'Yoga', 'Sports', 'Dance', 'None'].map(t => (
+                        <ToggleButton key={t} active={formData.activity_type === t} onClick={() => handleChange('activity_type', t)}>{t}</ToggleButton>
                       ))}
-                    </select>
+                    </div>
                   </div>
-                </div>
+                </>
               )}
 
+              {/* ── STEP 5: Account ────────────────────────── */}
               {step === 5 && (
-                <div className="space-y-8">
-                  <div className="rounded-3xl border-2 border-neutral-900 px-6 py-5">
-                    <label className="text-xs font-semibold uppercase tracking-wider">Email</label>
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => handleChange('email', e.target.value)}
-                      placeholder="you@example.com"
-                      className="mt-2 w-full rounded-2xl border-2 border-neutral-900 bg-white px-4 py-3 focus:outline-none"
-                    />
+                <>
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Email Address</label>
+                    <input type="email" value={formData.email} onChange={e => handleChange('email', e.target.value)} placeholder="you@example.com" className="input-field" />
                   </div>
 
-                  <div className="rounded-3xl border-2 border-neutral-900 px-6 py-5">
-                    <label className="text-xs font-semibold uppercase tracking-wider">Password</label>
-                    <input
-                      type="password"
-                      value={formData.password}
-                      onChange={(e) => handleChange('password', e.target.value)}
-                      placeholder="At least 8 characters"
-                      className="mt-2 w-full rounded-2xl border-2 border-neutral-900 bg-white px-4 py-3 focus:outline-none"
-                    />
-                    <p className="mt-2 text-sm text-neutral-600">
-                      Use a strong password with letters, numbers, and symbols.
-                    </p>
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Password</label>
+                    <div className="relative">
+                      <input
+                        type={showPw ? 'text' : 'password'}
+                        value={formData.password}
+                        onChange={e => handleChange('password', e.target.value)}
+                        placeholder="At least 8 characters"
+                        className="input-field pr-12"
+                      />
+                      <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-4 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink transition-colors">
+                        {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
+                    <p className="mt-2 text-xs text-ink-muted">Use a mix of letters, numbers, and symbols for security.</p>
                   </div>
-                </div>
+
+                  <div className="p-4 rounded-2xl bg-paper-warm border-2 border-border text-sm text-ink-muted">
+                    By creating an account you agree to our terms of service. Your password is stored securely using bcrypt hashing.
+                  </div>
+                </>
               )}
             </motion.div>
           </AnimatePresence>
 
-          <div className="flex items-center justify-between">
-            <button
-              onClick={goBack}
-              disabled={step === 1}
-              className="inline-flex items-center gap-2 rounded-full border-2 border-neutral-900 px-4 py-2 text-sm font-medium disabled:opacity-40"
-            >
-              <ChevronLeft size={16} /> Back
+          {/* ── Navigation ──────────────────────────────── */}
+          <div className="flex items-center justify-between mt-10">
+            <button onClick={goBack} className="btn-pill text-sm gap-2">
+              <ChevronLeft size={15} /> {step === 1 ? 'Home' : 'Back'}
             </button>
 
-            {step < 5 ? (
-              <button
-                onClick={goNext}
-                className="inline-flex items-center gap-2 rounded-full bg-neutral-900 text-white px-5 py-2 text-sm font-semibold"
-              >
-                Next <ChevronRight size={16} />
+            {step < TOTAL_STEPS ? (
+              <button onClick={goNext} className="btn-pill-filled text-sm gap-2">
+                Next <ChevronRight size={15} />
               </button>
             ) : (
               <button
                 onClick={handleFinish}
                 disabled={isSubmitting}
-                className="inline-flex items-center gap-2 rounded-full bg-neutral-900 text-white px-5 py-2 text-sm font-semibold disabled:opacity-60"
+                className="btn-pill-accent text-sm gap-2 disabled:opacity-60 disabled:cursor-not-allowed min-w-[160px] justify-center"
               >
-                {isSubmitting ? 'Generating...' : 'Finish'}
+                {isSubmitting ? (
+                  <><Loader2 size={15} className="animate-spin" /> Generating…</>
+                ) : (
+                  <>Complete Setup <ChevronRight size={15} /></>
+                )}
               </button>
             )}
           </div>
@@ -552,6 +432,4 @@ const OnboardingFlow = ({ onBackToLanding, onComplete }) => {
       </div>
     </div>
   );
-};
-
-export default OnboardingFlow;
+}

@@ -14,37 +14,24 @@ import {
   requestExamQuestions,
 } from "./genaiClientController.js";
 
+// ── Fallbacks ─────────────────────────────────────────────────────────────
+
 function fallbackCluster() {
   return {
     clusterTag: "The Steady Explorer",
-    rationale: "Fallback cluster used because genai-service was unavailable.",
+    rationale: "Fallback cluster — genai-service was unavailable.",
   };
 }
 
 function fallbackRoadmap() {
   return {
     steps: [
-      {
-        id: "S1",
-        title: "Foundation sprint",
-        status: "in-progress",
-        dueDate: "Week 1",
-        notes: "Start with core concepts.",
-      },
-      {
-        id: "S2",
-        title: "Guided practice",
-        status: "remaining",
-        dueDate: "Week 2",
-        notes: "Solve practical exercises daily.",
-      },
-      {
-        id: "S3",
-        title: "Mini project",
-        status: "remaining",
-        dueDate: "Week 3",
-        notes: "Build and document one project.",
-      },
+      { id: "S1", title: "Assess your starting point", status: "in-progress", dueDate: "Day 1–3", notes: "List your current skills, identify gaps, and set a clear daily schedule." },
+      { id: "S2", title: "Build the foundation", status: "remaining", dueDate: "Week 1–2", notes: "Cover core concepts through structured resources or a beginner course." },
+      { id: "S3", title: "Hands-on practice", status: "remaining", dueDate: "Week 2–3", notes: "Solve exercises and small challenges daily to reinforce learning." },
+      { id: "S4", title: "Build a mini project", status: "remaining", dueDate: "Week 3–5", notes: "Apply what you've learned by building something tangible." },
+      { id: "S5", title: "Review and fill gaps", status: "remaining", dueDate: "Week 5–6", notes: "Revisit weak areas, take mock tests, and document what you've learned." },
+      { id: "S6", title: "Final milestone", status: "remaining", dueDate: "Week 7–8", notes: "Present, publish, or submit your work. Reflect on the journey." },
     ],
   };
 }
@@ -52,14 +39,18 @@ function fallbackRoadmap() {
 function fallbackExamQuestions() {
   return {
     questions: [
-      "Explain the core concept from your latest study source in your own words.",
-      "Solve a practical scenario related to your target domain.",
-      "List three mistakes beginners make and how to avoid them.",
+      "Explain the core concept from your study material in your own words.",
+      "Describe a real-world scenario where this skill or concept would be applied.",
+      "What are three common mistakes beginners make in this area, and how would you avoid them?",
+      "How would you explain this topic to someone with no prior background?",
+      "What is the single most important thing you learned from your source material today?",
     ],
   };
 }
 
-const aiDomains = [
+// ── Helpers ───────────────────────────────────────────────────────────────
+
+const AI_DOMAINS = [
   "chat.openai.com",
   "gemini.google.com",
   "claude.ai",
@@ -68,13 +59,13 @@ const aiDomains = [
 ];
 
 function isAiDomain(url = "") {
-  return aiDomains.some((domain) => url.includes(domain));
+  return AI_DOMAINS.some((d) => url.includes(d));
 }
 
 function classifyActivity(url = "") {
   const lower = url.toLowerCase();
-  if (lower.includes("youtube.com") || lower.includes("coursera") || lower.includes("docs")) return "learning";
-  if (lower.includes("f1") || lower.includes("instagram") || lower.includes("twitter") || lower.includes("x.com")) return "distracting";
+  if (lower.includes("youtube.com") || lower.includes("coursera") || lower.includes("udemy") || lower.includes("docs.") || lower.includes("developer.")) return "learning";
+  if (lower.includes("instagram") || lower.includes("twitter") || lower.includes("x.com") || lower.includes("tiktok") || lower.includes("reddit")) return "distracting";
   if (isAiDomain(lower)) return "ai-site";
   return "neutral";
 }
@@ -87,29 +78,35 @@ function validateEmail(email = "") {
   return /^\S+@\S+\.\S+$/.test(email);
 }
 
-function sanitizeOnboardingInputs(inputs = {}) {
+function stripCredentials(inputs = {}) {
   const copy = { ...inputs };
   delete copy.password;
   delete copy.confirmPassword;
   return copy;
 }
 
+// ── Controllers ───────────────────────────────────────────────────────────
+
 export async function getHealth(_req, res) {
   const mongoState = mongoose.connection.readyState === 1 ? "connected" : "disconnected";
   res.json({
     status: "ok",
-    service: "urway-mern-backend",
+    service: "urway-backend",
     mongo: mongoState,
     genaiServiceUrl: getGenaiBaseUrl(),
   });
 }
 
+/**
+ * POST /api/auth/signin
+ * Verify email + password, return userId.
+ */
 export async function authSignIn(req, res) {
   const email = normalizeEmail(req.body?.email || "");
   const password = String(req.body?.password || "");
 
   if (!validateEmail(email) || password.length < 8) {
-    return res.status(400).json({ error: "Valid email and password are required." });
+    return res.status(400).json({ error: "Valid email and password (min 8 chars) are required." });
   }
 
   const credential = await UserCredential.findOne({ email }).lean();
@@ -130,26 +127,39 @@ export async function authSignIn(req, res) {
   });
 }
 
+/**
+ * POST /api/onboarding
+ *
+ * Full flow:
+ *  1. Validate email + password
+ *  2. Call GenAI to classify user into a cluster
+ *  3. Save UserProfile (with all onboarding inputs)
+ *  4. Save UserCredential (hashed password)
+ *  5. Call GenAI to generate a personalized roadmap from all user inputs
+ *  6. Save initial Target with that roadmap
+ *  7. Return userId + cluster tag + initial target
+ */
 export async function onboarding(req, res) {
   const inputs = req.body || {};
   const userId = inputs.userId || randomUUID();
   const email = normalizeEmail(inputs.email || "");
   const password = String(inputs.password || "");
-  const onboardingInputs = sanitizeOnboardingInputs(inputs);
+  const onboardingInputs = stripCredentials(inputs);
 
   if (!validateEmail(email)) {
-    return res.status(400).json({ error: "A valid email is required." });
+    return res.status(400).json({ error: "A valid email address is required." });
   }
-
   if (password.length < 8) {
     return res.status(400).json({ error: "Password must be at least 8 characters." });
   }
 
-  const existingByEmail = await UserCredential.findOne({ email }).lean();
-  if (existingByEmail && existingByEmail.userId !== userId) {
-    return res.status(409).json({ error: "Email already exists. Please sign in." });
+  // Check for existing email
+  const existing = await UserCredential.findOne({ email }).lean();
+  if (existing && existing.userId !== userId) {
+    return res.status(409).json({ error: "This email is already registered. Please sign in." });
   }
 
+  // 1. Classify cluster (non-blocking fallback)
   let cluster = fallbackCluster();
   try {
     cluster = await requestCluster(onboardingInputs);
@@ -157,6 +167,7 @@ export async function onboarding(req, res) {
     cluster = fallbackCluster();
   }
 
+  // 2. Save profile
   const profile = await UserProfile.findOneAndUpdate(
     { userId },
     {
@@ -167,6 +178,7 @@ export async function onboarding(req, res) {
     { upsert: true, new: true }
   );
 
+  // 3. Save credentials
   const passwordHash = await bcrypt.hash(password, 12);
   await UserCredential.findOneAndUpdate(
     { userId },
@@ -174,69 +186,100 @@ export async function onboarding(req, res) {
     { upsert: true, new: true, setDefaultsOnInsert: true }
   );
 
-  const initialTargetPayload = {
-    targetName: onboardingInputs.target_goal ? `${onboardingInputs.target_goal} Launch Plan` : "Personal Growth Plan",
-    timeline: "8 weeks",
-    priorKnowledge: Math.max(1, Math.min(10, Math.round((Number(onboardingInputs.cgpa) || 50) / 10))),
-    description: "Auto-generated roadmap from onboarding clusters and profile signals.",
-    clusterTag: profile.virtualClusterTag,
-    onboardingInputs,
-    extensionSummary: "No extension data yet.",
-  };
+  // 4. Generate personalized roadmap from ALL onboarding inputs
+  const targetName = onboardingInputs.target_goal
+    ? `${onboardingInputs.target_goal} Roadmap`
+    : "Personal Growth Roadmap";
 
   let roadmapResult = fallbackRoadmap();
   try {
-    roadmapResult = await requestRoadmap(initialTargetPayload);
+    roadmapResult = await requestRoadmap({
+      // Pass everything so the GenAI service can use all signals
+      ...onboardingInputs,
+      targetName,
+      timeline: "8 weeks",
+      clusterTag: profile.virtualClusterTag,
+      extensionSummary: "No extension data yet — first session.",
+    });
   } catch {
     roadmapResult = fallbackRoadmap();
   }
 
+  // 5. Create initial target
   const target = await Target.create({
     userId,
-    targetName: initialTargetPayload.targetName,
-    timeline: initialTargetPayload.timeline,
-    priorKnowledge: initialTargetPayload.priorKnowledge,
-    description: initialTargetPayload.description,
+    targetName,
+    timeline: "8 weeks",
+    priorKnowledge: Math.max(1, Math.min(10, Math.round((Number(onboardingInputs.cgpa) || 50) / 10))),
+    description: `Auto-generated roadmap for ${cluster.clusterTag || "your learner profile"}.`,
     roadmap: roadmapResult.steps || [],
     status: "in-progress",
   });
 
-  res.json({
+  return res.status(201).json({
     userId: profile.userId,
     virtualClusterTag: profile.virtualClusterTag,
     rationale: cluster.rationale || "",
-    onboardingInputs: profile.onboardingInputs,
     initialTarget: target,
   });
 }
 
+/**
+ * GET /api/dashboard/:userId
+ * Return user profile + all targets.
+ */
 export async function dashboard(req, res) {
   const { userId } = req.params;
+  if (!userId) return res.status(400).json({ error: "userId is required." });
+
   const profile = await UserProfile.findOne({ userId }).lean();
+  if (!profile) return res.status(404).json({ error: "User not found. Please complete onboarding." });
+
   const targets = await Target.find({ userId }).sort({ createdAt: -1 }).lean();
 
-  res.json({
+  return res.json({
     profile,
     targets,
     isNewUser: !targets.length,
   });
 }
 
+/**
+ * POST /api/targets/:userId
+ * Create a new target with a GenAI-generated roadmap.
+ */
 export async function createTarget(req, res) {
   const { userId } = req.params;
   const payload = req.body || {};
+
+  if (!payload.targetName || !payload.timeline || !payload.description) {
+    return res.status(400).json({ error: "targetName, timeline, and description are required." });
+  }
 
   const profile = await UserProfile.findOne({ userId }).lean();
   if (!profile) {
     return res.status(404).json({ error: "User profile not found. Complete onboarding first." });
   }
 
-  const extensionEvents = await ExtensionActivity.find({ userId }).sort({ createdAt: -1 }).limit(30).lean();
-  const distractionSeconds = extensionEvents
-    .filter((event) => event.category === "distracting")
-    .reduce((sum, event) => sum + (event.secondsSpent || 0), 0);
+  // Get recent extension data for context
+  const recentActivity = await ExtensionActivity.find({ userId })
+    .sort({ createdAt: -1 })
+    .limit(30)
+    .lean();
 
-  const extensionSummary = `Recent distracting time: ${Math.round(distractionSeconds / 60)} minutes.`;
+  const distractingMins = Math.round(
+    recentActivity
+      .filter((e) => e.category === "distracting")
+      .reduce((sum, e) => sum + (e.secondsSpent || 0), 0) / 60
+  );
+  const learningMins = Math.round(
+    recentActivity
+      .filter((e) => e.category === "learning")
+      .reduce((sum, e) => sum + (e.secondsSpent || 0), 0) / 60
+  );
+  const extensionSummary = recentActivity.length
+    ? `Recent: ${learningMins} mins on learning sites, ${distractingMins} mins on distracting sites.`
+    : "No extension data available.";
 
   let roadmapResult = fallbackRoadmap();
   try {
@@ -254,7 +297,7 @@ export async function createTarget(req, res) {
     userId,
     targetName: payload.targetName,
     timeline: payload.timeline,
-    priorKnowledge: Number(payload.priorKnowledge),
+    priorKnowledge: Number(payload.priorKnowledge) || 5,
     description: payload.description,
     roadmap: roadmapResult.steps || [],
     status: "in-progress",
@@ -263,12 +306,16 @@ export async function createTarget(req, res) {
   return res.status(201).json(target);
 }
 
+/**
+ * POST /api/exam/start
+ * Start a proctored exam session.
+ */
 export async function startExam(req, res) {
   const { userId, targetId = "", sourceMaterial = [] } = req.body || {};
   if (!userId) return res.status(400).json({ error: "userId is required." });
 
   const profile = await UserProfile.findOne({ userId }).lean();
-  if (!profile) return res.status(404).json({ error: "Profile not found." });
+  if (!profile) return res.status(404).json({ error: "User profile not found." });
 
   let questionSet = fallbackExamQuestions();
   try {
@@ -287,6 +334,10 @@ export async function startExam(req, res) {
   return res.status(201).json(session);
 }
 
+/**
+ * POST /api/exam/flag/:sessionId
+ * Flag an exam session as violated.
+ */
 export async function flagExam(req, res) {
   const { sessionId } = req.params;
   const { reason = "Policy violation", url = "" } = req.body || {};
@@ -303,13 +354,18 @@ export async function flagExam(req, res) {
   );
 
   if (!session) return res.status(404).json({ error: "Exam session not found." });
-
   return res.json(session);
 }
 
+/**
+ * POST /api/extension/sync/:userId
+ * Record a browser activity event and update the user's extension insight.
+ */
 export async function syncExtension(req, res) {
   const { userId } = req.params;
   const { url = "", title = "", secondsSpent = 0 } = req.body || {};
+
+  if (!url) return res.status(400).json({ error: "url is required." });
 
   const category = classifyActivity(url);
 
@@ -317,25 +373,21 @@ export async function syncExtension(req, res) {
     userId,
     url,
     title,
-    secondsSpent: Number(secondsSpent) || 0,
+    secondsSpent: Math.max(0, Number(secondsSpent) || 0),
     category,
     capturedAt: new Date(),
   });
 
-  let suggestion = "On track";
-  if (category === "distracting") {
-    suggestion = "Roadmap shifted toward orange due to off-target browsing.";
-  }
-
-  if (category === "ai-site") {
-    suggestion = "AI site detected. Exam sessions should be red-flagged.";
-  }
+  let insight = "Browsing looks on track.";
+  if (category === "distracting") insight = "Off-track browsing detected — try to refocus on your roadmap.";
+  if (category === "ai-site") insight = "AI site detected — exam sessions will be flagged if active.";
+  if (category === "learning") insight = "Great — learning content detected in your recent browsing.";
 
   await UserProfile.findOneAndUpdate(
     { userId },
-    { lastExtensionInsight: suggestion },
+    { lastExtensionInsight: insight },
     { upsert: false }
   );
 
-  return res.json({ event, suggestion, category, aiDomainDetected: isAiDomain(url) });
+  return res.json({ event, insight, category, aiDomainDetected: isAiDomain(url) });
 }

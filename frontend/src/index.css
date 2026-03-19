@@ -2,100 +2,254 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --ink: #0a0a0f;
+  --ink-muted: #3d3d4f;
+  --paper: #f5f3ee;
+  --paper-warm: #ede9e0;
+  --accent: #d4502a;
+  --accent-light: #f5cbbf;
+  --accent-gold: #c9963b;
+  --accent-gold-light: #f5e8cc;
+  --teal: #1a7a6e;
+  --teal-light: #b8e0da;
+  --border: #c8c4ba;
+  --border-strong: #0a0a0f;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  font-family: 'DM Sans', 'Inter', sans-serif;
-  background-color: #ffffff;
-  color: #18181b;
+  font-family: 'Instrument Sans', 'Helvetica Neue', sans-serif;
+  background-color: var(--paper);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .font-display {
-  font-family: 'Clash Display', 'Inter', sans-serif;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
-.range-black {
+.font-serif-italic {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-style: italic;
+}
+
+/* ── Noise texture overlay ─────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.4;
+}
+
+/* ── Pill button ────────────────────────────────────────── */
+.btn-pill {
+  @apply inline-flex items-center gap-2 rounded-full border-2 border-[--ink] px-5 py-2.5 text-sm font-semibold transition-all duration-200;
+  font-family: 'Syne', sans-serif;
+}
+
+.btn-pill:hover {
+  background-color: var(--ink);
+  color: var(--paper);
+  transform: translateY(-1px);
+}
+
+.btn-pill-filled {
+  @apply btn-pill;
+  background-color: var(--ink);
+  color: var(--paper);
+}
+
+.btn-pill-filled:hover {
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: white;
+  transform: translateY(-1px);
+}
+
+.btn-pill-accent {
+  @apply btn-pill;
+  background-color: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.btn-pill-accent:hover {
+  background-color: #b83d1a;
+  border-color: #b83d1a;
+  transform: translateY(-1px);
+}
+
+/* ── Card styles ────────────────────────────────────────── */
+.card-brutal {
+  border: 2px solid var(--ink);
+  border-radius: 20px;
+  background-color: var(--paper);
+  box-shadow: 5px 5px 0 var(--ink);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.card-brutal:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0 var(--ink);
+}
+
+.card-accent {
+  border: 2px solid var(--ink);
+  border-radius: 20px;
+  background-color: var(--accent-light);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+
+.card-teal {
+  border: 2px solid var(--ink);
+  border-radius: 20px;
+  background-color: var(--teal-light);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+
+.card-gold {
+  border: 2px solid var(--ink);
+  border-radius: 20px;
+  background-color: var(--accent-gold-light);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+
+/* ── Form inputs ────────────────────────────────────────── */
+.input-field {
+  @apply w-full rounded-2xl border-2 border-[--ink] bg-white px-4 py-3 text-sm font-medium outline-none transition-all duration-150;
+}
+
+.input-field:focus {
+  border-color: var(--accent);
+  box-shadow: 3px 3px 0 var(--accent);
+}
+
+.input-field::placeholder {
+  color: var(--ink-muted);
+  font-weight: 400;
+}
+
+/* ── Tag / badge ────────────────────────────────────────── */
+.tag {
+  @apply inline-flex items-center rounded-full border-2 border-[--ink] px-3 py-1 text-xs font-semibold transition-all duration-150;
+  font-family: 'Syne', sans-serif;
+}
+
+.tag.active {
+  background-color: var(--ink);
+  color: var(--paper);
+}
+
+/* ── Range slider ────────────────────────────────────────── */
+.range-ink {
   -webkit-appearance: none;
   appearance: none;
-  height: 10px;
+  height: 6px;
   border-radius: 999px;
-  background: #e5e7eb;
-  border: 2px solid #18181b;
+  background: var(--border);
+  border: 2px solid var(--ink);
+  outline: none;
 }
 
-
-.range-black::-webkit-slider-thumb {
+.range-ink::-webkit-slider-thumb {
   -webkit-appearance: none;
-  appearance: none;
-  width: 24px;
-  height: 24px;
-  background: #18181b;
+  width: 22px;
+  height: 22px;
+  background: var(--ink);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid var(--paper);
+  box-shadow: 0 0 0 2px var(--ink);
+}
+
+.range-ink::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  background: var(--ink);
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid var(--paper);
+  box-shadow: 0 0 0 2px var(--ink);
+}
+
+/* ── Progress bar ────────────────────────────────────────── */
+.progress-track {
+  height: 6px;
+  background: var(--border);
   border-radius: 999px;
-  border: 2px solid #18181b;
+  border: 1.5px solid var(--ink);
+  overflow: hidden;
 }
 
-
-.range-black::-moz-range-thumb {
-  width: 24px;
-  height: 24px;
-  background: #18181b;
+.progress-fill {
+  height: 100%;
+  background: var(--ink);
   border-radius: 999px;
-  border: 2px solid #18181b;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ── Scrollbar ──────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--paper-warm); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ink-muted); }
 
-.custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
+/* ── Logo mark animation ─────────────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
 }
 
+.logo-float { animation: float 4s ease-in-out infinite; }
 
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: #262626;
+/* ── Roadmap step status ─────────────────────────────────── */
+.step-complete   { background: #d1fae5; border-color: #059669; }
+.step-progress   { background: var(--accent-gold-light); border-color: var(--accent-gold); }
+.step-remaining  { background: var(--paper-warm); border-color: var(--border); }
+.step-overdue    { background: #fee2e2; border-color: #ef4444; }
+
+/* ── Skeleton loader ─────────────────────────────────────── */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--paper-warm) 25%, var(--border) 50%, var(--paper-warm) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+  border-radius: 12px;
 }
 
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #404040;
-  border-radius: 4px;
+/* ── Hero entrance ──────────────────────────────────────── */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
+.rise { animation: rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.rise-1 { animation-delay: 0.05s; }
+.rise-2 { animation-delay: 0.12s; }
+.rise-3 { animation-delay: 0.22s; }
+.rise-4 { animation-delay: 0.34s; }
 
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #525252;
-}
-
-
-@keyframes heroCardIn {
-  0% {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-
-  12% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  80% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  100% {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-}
-
-.hero-card {
-  opacity: 0;
-  transform: translateY(16px);
-  animation: heroCardIn 5s ease-in-out infinite;
-  animation-fill-mode: both;
+/* ── Diagonal section divider ─────────────────────────────── */
+.diagonal-divider {
+  clip-path: polygon(0 0, 100% 6%, 100% 100%, 0 94%);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-card {
-    opacity: 1;
-    transform: none;
-    animation: none;
-  }
+  *, .rise, .logo-float { animation: none !important; transition: none !important; }
 }
