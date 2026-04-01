@@ -1,0 +1,1001 @@
+Student_ID,Extracurricular_Activity,GPA,Wellbeing_Score
+S0001,Volunteer Work (Low Hours),2.78,5.8
+S0002,Sports (High Intensity),3.43,6.2
+S0003,Sports (High Intensity),2.44,5
+S0004,Volunteer Work (Low Hours),3.13,6.3
+S0005,Clubs (High Involvement),2.88,6.3
+S0006,Sports (Low Intensity),2.41,6.5
+S0007,Sports (Low Intensity),2,6.5
+S0008,Sports (Low Intensity),2,7.1
+S0009,Volunteer Work (Low Hours),2.48,5.9
+S0010,Sports (High Intensity),2.64,9.3
+S0011,Volunteer Work (Low Hours),3.2,4.1
+S0012,Volunteer Work (Low Hours),3.01,7.3
+S0013,Volunteer Work (High Hours),3.55,8.5
+S0014,Sports (High Intensity),2.98,8.5
+S0015,Volunteer Work (High Hours),3.41,9.4
+S0016,Clubs (Low Involvement),3.41,7.6
+S0017,Sports (High Intensity),3.8,6.9
+S0018,Sports (High Intensity),4,9.3
+S0019,Sports (High Intensity),3.31,8.3
+S0020,Sports (Low Intensity),2.32,9.1
+S0021,Sports (Low Intensity),2.52,6.5
+S0022,Volunteer Work (High Hours),2.56,9.3
+S0023,Volunteer Work (High Hours),2.99,9.1
+S0024,Sports (High Intensity),3.38,9.5
+S0025,Volunteer Work (High Hours),2.91,7
+S0026,Sports (Low Intensity),3.01,4.9
+S0027,Volunteer Work (Low Hours),3.62,6.4
+S0028,Volunteer Work (Low Hours),2.43,6
+S0029,Volunteer Work (Low Hours),3.58,7
+S0030,Volunteer Work (High Hours),4,7.1
+S0031,Clubs (Low Involvement),2.53,8.3
+S0032,Sports (Low Intensity),2.64,7.5
+S0033,Clubs (Low Involvement),3.04,6.4
+S0034,Volunteer Work (High Hours),3.2,6.8
+S0035,Clubs (High Involvement),2.84,8.5
+S0036,None,3.14,6.9
+S0037,None,3.94,6.7
+S0038,Sports (High Intensity),3.32,9.5
+S0039,None,3.15,6.2
+S0040,None,2.83,4.8
+S0041,Sports (Low Intensity),2.48,7.2
+S0042,Volunteer Work (Low Hours),3.45,5.6
+S0043,Clubs (Low Involvement),2.89,9.1
+S0044,Clubs (High Involvement),3.21,9.3
+S0045,Clubs (High Involvement),3.13,6.8
+S0046,Sports (Low Intensity),2.8,7.4
+S0047,Sports (Low Intensity),3.07,5.7
+S0048,None,3.05,7
+S0049,Clubs (High Involvement),3.5,8.6
+S0050,Sports (High Intensity),2.87,8.1
+S0051,Sports (High Intensity),2.74,8.7
+S0052,Clubs (Low Involvement),2.35,7.6
+S0053,Sports (High Intensity),2.51,8.5
+S0054,Clubs (High Involvement),2.4,8.2
+S0055,None,3.37,5.9
+S0056,Clubs (High Involvement),3.22,8.9
+S0057,Volunteer Work (High Hours),2.63,8.9
+S0058,Clubs (High Involvement),2.71,7.3
+S0059,None,2.89,8
+S0060,Sports (High Intensity),3.36,7.3
+S0061,Volunteer Work (Low Hours),3,6.6
+S0062,Clubs (Low Involvement),3.71,7.4
+S0063,Volunteer Work (High Hours),2.83,8.9
+S0064,Sports (High Intensity),3.04,6.5
+S0065,Clubs (Low Involvement),3.65,6.8
+S0066,Sports (High Intensity),2.37,8.3
+S0067,Volunteer Work (High Hours),3.27,10
+S0068,Clubs (High Involvement),3.71,8.7
+S0069,None,2.34,6.7
+S0070,Volunteer Work (Low Hours),3.46,6.3
+S0071,Volunteer Work (High Hours),3.09,10
+S0072,None,3.06,5.4
+S0073,Clubs (High Involvement),2.47,7.8
+S0074,Volunteer Work (High Hours),2.53,9.5
+S0075,Sports (Low Intensity),2.29,7
+S0076,Volunteer Work (Low Hours),3.96,5.9
+S0077,Sports (High Intensity),3.74,8
+S0078,Sports (High Intensity),2.9,7.4
+S0079,Volunteer Work (Low Hours),3.03,5.8
+S0080,Sports (Low Intensity),2.76,7.4
+S0081,None,2.7,6.8
+S0082,Clubs (High Involvement),3.22,6.3
+S0083,Sports (High Intensity),2.55,6.8
+S0084,None,2.79,6.3
+S0085,Sports (Low Intensity),3.09,7.1
+S0086,None,3.27,4.6
+S0087,Sports (High Intensity),2.82,9.2
+S0088,Clubs (Low Involvement),3.48,6.2
+S0089,Clubs (High Involvement),2.46,7.9
+S0090,Clubs (Low Involvement),2.56,8.1
+S0091,Volunteer Work (Low Hours),3.3,6.2
+S0092,None,2.35,6.4
+S0093,Clubs (High Involvement),3.26,9.2
+S0094,Sports (Low Intensity),3.12,8.6
+S0095,Clubs (High Involvement),2.79,8.5
+S0096,Clubs (High Involvement),2.8,9
+S0097,Sports (Low Intensity),2,8
+S0098,Volunteer Work (Low Hours),2.56,6.8
+S0099,Clubs (High Involvement),2.75,8.3
+S0100,Volunteer Work (Low Hours),3.31,6
+S0101,Volunteer Work (Low Hours),3.4,6.3
+S0102,Volunteer Work (Low Hours),3.13,6.4
+S0103,Sports (High Intensity),3.74,9.2
+S0104,Volunteer Work (High Hours),3.49,9.8
+S0105,Volunteer Work (Low Hours),3.37,7.2
+S0106,Sports (Low Intensity),3.61,4.7
+S0107,Volunteer Work (High Hours),2.53,8.4
+S0108,Volunteer Work (Low Hours),3.84,8
+S0109,Sports (Low Intensity),2.23,6.2
+S0110,Sports (Low Intensity),2.37,5.8
+S0111,Clubs (Low Involvement),3.47,7.4
+S0112,Clubs (Low Involvement),3.04,6.4
+S0113,Clubs (High Involvement),2.62,9.6
+S0114,Volunteer Work (Low Hours),2.87,7.4
+S0115,Volunteer Work (Low Hours),3,8.1
+S0116,Volunteer Work (High Hours),3.2,9.4
+S0117,Sports (Low Intensity),3.42,6.2
+S0118,Volunteer Work (Low Hours),3.39,4.5
+S0119,Clubs (High Involvement),3.27,10
+S0120,None,3.16,6.5
+S0121,None,2.81,9.3
+S0122,None,2.99,7
+S0123,Sports (High Intensity),2.86,9.5
+S0124,Sports (Low Intensity),3.82,5.8
+S0125,None,2.34,6.5
+S0126,Sports (High Intensity),2.98,8.6
+S0127,None,2.57,7.1
+S0128,Clubs (High Involvement),3.82,7.9
+S0129,Clubs (Low Involvement),2.98,6.8
+S0130,Clubs (High Involvement),3.6,8.4
+S0131,Sports (High Intensity),3.95,7.5
+S0132,Sports (Low Intensity),3.09,6.2
+S0133,Volunteer Work (High Hours),3.12,8
+S0134,Volunteer Work (Low Hours),2.8,5
+S0135,Clubs (High Involvement),2.89,8.3
+S0136,Sports (Low Intensity),2.22,6.7
+S0137,Volunteer Work (Low Hours),2.43,5.9
+S0138,Clubs (Low Involvement),3.39,7.2
+S0139,Clubs (Low Involvement),3.11,4
+S0140,Volunteer Work (Low Hours),3.42,5.7
+S0141,Clubs (Low Involvement),3.37,8.2
+S0142,Sports (Low Intensity),2.96,5.6
+S0143,Clubs (High Involvement),2.99,8.8
+S0144,Sports (Low Intensity),2.91,5.4
+S0145,Sports (Low Intensity),2.64,5.1
+S0146,Volunteer Work (Low Hours),3.08,6.5
+S0147,Volunteer Work (High Hours),3.27,7.6
+S0148,Volunteer Work (High Hours),3.58,10
+S0149,Clubs (High Involvement),2.7,7.1
+S0150,Volunteer Work (Low Hours),2.57,6.5
+S0151,Volunteer Work (High Hours),2.22,8.3
+S0152,Clubs (Low Involvement),3.01,8.3
+S0153,Volunteer Work (High Hours),3.69,10
+S0154,Clubs (Low Involvement),3.14,6.7
+S0155,Clubs (High Involvement),2.89,7.2
+S0156,Sports (Low Intensity),2.51,6.9
+S0157,Sports (Low Intensity),2.23,5.1
+S0158,Volunteer Work (High Hours),2.59,4.9
+S0159,Clubs (Low Involvement),2.5,6.2
+S0160,Sports (High Intensity),2.86,7.6
+S0161,None,2.75,6.5
+S0162,Sports (High Intensity),2.54,7.7
+S0163,None,3.65,6.4
+S0164,Sports (High Intensity),2.84,8.1
+S0165,Sports (Low Intensity),2.81,7.2
+S0166,Volunteer Work (Low Hours),2.71,5.1
+S0167,Sports (Low Intensity),2.67,5.6
+S0168,None,2.3,8.6
+S0169,Volunteer Work (Low Hours),3.14,6.3
+S0170,Clubs (Low Involvement),3.78,5.9
+S0171,Volunteer Work (High Hours),2.63,6.8
+S0172,Sports (High Intensity),3.33,7.4
+S0173,Clubs (Low Involvement),3.54,3.8
+S0174,Clubs (Low Involvement),2,6.2
+S0175,Volunteer Work (High Hours),2.88,7.4
+S0176,Clubs (Low Involvement),3.21,6.8
+S0177,Volunteer Work (High Hours),3.01,8.7
+S0178,Clubs (High Involvement),2.72,6.2
+S0179,Volunteer Work (High Hours),2.65,6.8
+S0180,None,3,6.8
+S0181,Sports (High Intensity),3.25,7.4
+S0182,Volunteer Work (Low Hours),2.62,7.6
+S0183,Volunteer Work (Low Hours),3.63,7.8
+S0184,Sports (High Intensity),2.82,8.5
+S0185,Volunteer Work (Low Hours),2,7.2
+S0186,Volunteer Work (High Hours),2.8,8.4
+S0187,None,3.43,7.5
+S0188,Clubs (High Involvement),2.92,8
+S0189,None,2.99,7.7
+S0190,Volunteer Work (Low Hours),3.71,6.8
+S0191,Clubs (High Involvement),4,9.8
+S0192,Sports (High Intensity),3.08,6.5
+S0193,Clubs (High Involvement),3.61,6.5
+S0194,Clubs (Low Involvement),3.23,7.9
+S0195,Sports (Low Intensity),2.99,7.6
+S0196,Clubs (Low Involvement),3.4,5.2
+S0197,Sports (High Intensity),3.41,7.3
+S0198,Volunteer Work (Low Hours),2.62,6.9
+S0199,Volunteer Work (Low Hours),2.01,4.3
+S0200,Clubs (High Involvement),2.24,7.9
+S0201,Volunteer Work (High Hours),2.64,9
+S0202,None,2.93,7.1
+S0203,Sports (Low Intensity),3.58,7.3
+S0204,Volunteer Work (High Hours),2.71,8.1
+S0205,Sports (High Intensity),3.19,8.7
+S0206,None,2.27,5.9
+S0207,Volunteer Work (Low Hours),2.43,7.3
+S0208,Clubs (High Involvement),2.86,7.5
+S0209,None,2,6.8
+S0210,Volunteer Work (Low Hours),3.22,7.8
+S0211,Volunteer Work (High Hours),2.66,6.2
+S0212,Volunteer Work (High Hours),3.35,9.9
+S0213,Sports (Low Intensity),2.7,5.9
+S0214,Sports (Low Intensity),4,6.9
+S0215,Clubs (High Involvement),3.19,7.8
+S0216,None,3.48,7.1
+S0217,Sports (Low Intensity),3.01,6.6
+S0218,Volunteer Work (High Hours),2.78,7.6
+S0219,None,3.44,7.5
+S0220,Volunteer Work (High Hours),2.45,7.4
+S0221,Sports (High Intensity),2.03,8.5
+S0222,Volunteer Work (High Hours),3.4,8.8
+S0223,Clubs (High Involvement),3.08,7
+S0224,Clubs (Low Involvement),2,6.6
+S0225,Sports (High Intensity),2.64,7.7
+S0226,Sports (High Intensity),3,8.9
+S0227,Clubs (High Involvement),2.87,7.6
+S0228,None,3.17,8
+S0229,None,3.23,9.8
+S0230,Clubs (High Involvement),2,8.7
+S0231,Sports (Low Intensity),3.42,7.2
+S0232,Sports (High Intensity),4,8.5
+S0233,Sports (Low Intensity),3.42,5
+S0234,Volunteer Work (High Hours),3.05,9.7
+S0235,Sports (High Intensity),3.05,7.2
+S0236,Sports (High Intensity),2.47,10
+S0237,Volunteer Work (Low Hours),2.86,5.9
+S0238,Clubs (Low Involvement),2,5.9
+S0239,None,3.72,8.7
+S0240,Sports (High Intensity),3.61,7.6
+S0241,None,2.21,7.4
+S0242,Volunteer Work (High Hours),3.86,8.9
+S0243,None,2.26,5.9
+S0244,Sports (Low Intensity),2.8,8.4
+S0245,Sports (Low Intensity),3.4,6.7
+S0246,Volunteer Work (Low Hours),3.09,9
+S0247,Clubs (Low Involvement),2.88,7.8
+S0248,Volunteer Work (High Hours),3.58,8.5
+S0249,Sports (Low Intensity),2.84,5.4
+S0250,Clubs (High Involvement),3.12,8
+S0251,Volunteer Work (High Hours),3.1,8.1
+S0252,None,2.98,7.6
+S0253,Volunteer Work (High Hours),2.96,5
+S0254,Clubs (Low Involvement),2.16,6.4
+S0255,Sports (Low Intensity),3.36,6.3
+S0256,Volunteer Work (High Hours),2.24,7.5
+S0257,None,2.46,8.3
+S0258,Volunteer Work (Low Hours),2.83,8.7
+S0259,Volunteer Work (Low Hours),2.88,5.7
+S0260,Sports (Low Intensity),2.86,6.6
+S0261,Volunteer Work (Low Hours),3.27,8.2
+S0262,Clubs (High Involvement),3.89,7.2
+S0263,Clubs (Low Involvement),3.61,7.4
+S0264,Volunteer Work (Low Hours),2.51,8
+S0265,Volunteer Work (Low Hours),3.56,3.7
+S0266,Clubs (High Involvement),2.58,8.3
+S0267,Clubs (Low Involvement),3.18,7.1
+S0268,Volunteer Work (High Hours),3.41,9.6
+S0269,Clubs (Low Involvement),3.7,9.5
+S0270,Sports (High Intensity),3.25,7.4
+S0271,Sports (Low Intensity),2.28,6.3
+S0272,Sports (Low Intensity),3.34,6.5
+S0273,Sports (High Intensity),3,8
+S0274,Clubs (High Involvement),2.52,8.1
+S0275,Sports (High Intensity),2.86,8.6
+S0276,Volunteer Work (High Hours),2.6,7.2
+S0277,Volunteer Work (High Hours),3.9,9.2
+S0278,Sports (Low Intensity),3.21,6.2
+S0279,Volunteer Work (High Hours),4,6.2
+S0280,Sports (Low Intensity),2.17,6.2
+S0281,Sports (High Intensity),3.1,8.1
+S0282,Sports (High Intensity),3.64,7.8
+S0283,Volunteer Work (Low Hours),2.66,7.5
+S0284,Volunteer Work (Low Hours),2.86,7
+S0285,Sports (High Intensity),2,5.5
+S0286,Sports (Low Intensity),3.03,6.3
+S0287,Sports (High Intensity),3.57,8.7
+S0288,Sports (High Intensity),3.11,8.5
+S0289,None,4,4.6
+S0290,Clubs (High Involvement),3.22,9.2
+S0291,Sports (High Intensity),3.26,8.2
+S0292,Volunteer Work (High Hours),3.5,8.9
+S0293,Sports (Low Intensity),3.29,6.4
+S0294,Clubs (High Involvement),3.26,8.1
+S0295,Volunteer Work (Low Hours),3.03,8.2
+S0296,Clubs (Low Involvement),2.65,7.6
+S0297,Sports (Low Intensity),3.76,6.6
+S0298,Volunteer Work (High Hours),2.83,5.9
+S0299,Sports (Low Intensity),3.2,7
+S0300,Volunteer Work (Low Hours),2.75,5
+S0301,Volunteer Work (High Hours),3.08,8.1
+S0302,Volunteer Work (High Hours),2.89,9.3
+S0303,Clubs (Low Involvement),3.22,5.9
+S0304,Sports (Low Intensity),2.59,7.2
+S0305,None,2.85,7.5
+S0306,Clubs (Low Involvement),3.04,6.1
+S0307,None,2.85,9
+S0308,Clubs (Low Involvement),2.72,5.8
+S0309,Sports (Low Intensity),2.21,6
+S0310,Sports (High Intensity),2.91,8.6
+S0311,Sports (High Intensity),3.29,7
+S0312,Volunteer Work (Low Hours),2.63,6
+S0313,Clubs (Low Involvement),3.27,6.6
+S0314,Clubs (High Involvement),2.56,9.8
+S0315,Clubs (Low Involvement),2.41,8.6
+S0316,Clubs (Low Involvement),2.63,5.3
+S0317,Clubs (Low Involvement),2.41,7.7
+S0318,None,2.98,8.4
+S0319,Volunteer Work (Low Hours),2.73,5.6
+S0320,Sports (High Intensity),3.2,6.8
+S0321,Volunteer Work (Low Hours),2.71,7.5
+S0322,Volunteer Work (Low Hours),4,5.6
+S0323,Volunteer Work (Low Hours),2.63,5.3
+S0324,Sports (High Intensity),2.8,7
+S0325,Sports (High Intensity),2.54,8.3
+S0326,Clubs (Low Involvement),3.56,4.9
+S0327,Volunteer Work (Low Hours),2,7.5
+S0328,Clubs (High Involvement),3.56,6.2
+S0329,None,3.22,7.5
+S0330,None,2.81,8.8
+S0331,Sports (High Intensity),2.6,9.1
+S0332,Sports (Low Intensity),3.26,8.1
+S0333,Sports (Low Intensity),2.87,6.5
+S0334,Sports (Low Intensity),3.29,8.5
+S0335,Volunteer Work (High Hours),2.97,7.1
+S0336,Clubs (Low Involvement),3.62,6.2
+S0337,Sports (Low Intensity),3.21,6.2
+S0338,Clubs (Low Involvement),2.12,6.5
+S0339,Sports (Low Intensity),3.87,5.3
+S0340,Clubs (High Involvement),3.52,9.3
+S0341,Clubs (Low Involvement),3.19,6.4
+S0342,Sports (Low Intensity),3.24,5.1
+S0343,None,3.28,6.7
+S0344,Sports (High Intensity),3.29,7.3
+S0345,Clubs (Low Involvement),2.86,7.3
+S0346,None,3,7.3
+S0347,None,2.46,7.5
+S0348,None,2.66,5.1
+S0349,Volunteer Work (High Hours),3.04,8.1
+S0350,Sports (High Intensity),3.26,7.2
+S0351,Sports (High Intensity),2.89,7.7
+S0352,Volunteer Work (Low Hours),2.61,4.8
+S0353,Volunteer Work (High Hours),2.74,8.4
+S0354,None,3.03,7.5
+S0355,Sports (High Intensity),3.66,8.7
+S0356,Sports (High Intensity),2.79,8.5
+S0357,None,2.69,6.7
+S0358,None,2.57,6.8
+S0359,Sports (Low Intensity),2.48,6.4
+S0360,Sports (Low Intensity),2.4,6.9
+S0361,Clubs (Low Involvement),3.16,7.1
+S0362,Clubs (Low Involvement),2.92,6.4
+S0363,Clubs (Low Involvement),3.34,6.4
+S0364,Sports (Low Intensity),3.6,7.7
+S0365,None,2.2,6.8
+S0366,Clubs (Low Involvement),3.29,6.2
+S0367,Sports (High Intensity),3.17,9.6
+S0368,Sports (Low Intensity),2.86,6.4
+S0369,Clubs (Low Involvement),3.67,6.5
+S0370,Sports (High Intensity),3.01,8
+S0371,Clubs (Low Involvement),2.82,7.6
+S0372,Clubs (High Involvement),3.56,8.2
+S0373,None,3.83,5.1
+S0374,None,2.87,5.3
+S0375,Clubs (Low Involvement),2.81,4.8
+S0376,Clubs (High Involvement),3.56,8.7
+S0377,Clubs (Low Involvement),2.94,6.5
+S0378,Volunteer Work (Low Hours),2.92,7.2
+S0379,Volunteer Work (Low Hours),3.41,6.7
+S0380,None,2.87,7.4
+S0381,Volunteer Work (High Hours),2.25,7.4
+S0382,Volunteer Work (Low Hours),2.85,7.6
+S0383,Volunteer Work (Low Hours),3.47,5.2
+S0384,Clubs (Low Involvement),3.35,5.9
+S0385,Sports (Low Intensity),2.86,8.7
+S0386,Sports (Low Intensity),3.82,6.6
+S0387,Clubs (High Involvement),2.72,9.8
+S0388,Sports (Low Intensity),3.33,4.9
+S0389,Sports (High Intensity),2.78,9.8
+S0390,Volunteer Work (High Hours),3.42,6.4
+S0391,Volunteer Work (Low Hours),3.18,6.5
+S0392,Volunteer Work (High Hours),3.7,7.5
+S0393,Sports (High Intensity),2.88,6.2
+S0394,Volunteer Work (Low Hours),2.8,6.8
+S0395,Clubs (High Involvement),2.92,8.6
+S0396,Sports (High Intensity),2.64,8.9
+S0397,Sports (High Intensity),2.5,7.9
+S0398,Volunteer Work (High Hours),2.52,5.7
+S0399,Clubs (Low Involvement),2.44,5.7
+S0400,Volunteer Work (High Hours),3.21,6.6
+S0401,None,2,7.1
+S0402,Volunteer Work (High Hours),3.87,8.6
+S0403,Sports (Low Intensity),2.53,7.3
+S0404,Sports (High Intensity),3.81,9.2
+S0405,Volunteer Work (High Hours),2.72,7.1
+S0406,Sports (High Intensity),2.88,7.5
+S0407,None,3.39,8.1
+S0408,Sports (Low Intensity),2.68,7
+S0409,Sports (High Intensity),3.37,9.2
+S0410,Volunteer Work (High Hours),3.03,8.8
+S0411,Sports (High Intensity),2.75,8.3
+S0412,Volunteer Work (Low Hours),2.04,4.6
+S0413,None,3.41,6.5
+S0414,Sports (Low Intensity),2,6.1
+S0415,Clubs (Low Involvement),2.62,6.9
+S0416,Sports (High Intensity),3.52,7.9
+S0417,Volunteer Work (High Hours),2.1,8.7
+S0418,Sports (Low Intensity),2.82,5.8
+S0419,Volunteer Work (High Hours),3.18,7.3
+S0420,Volunteer Work (High Hours),3.67,6.5
+S0421,Sports (High Intensity),4,6.4
+S0422,Volunteer Work (High Hours),3.05,9.9
+S0423,Sports (High Intensity),2,8.4
+S0424,Clubs (Low Involvement),2.97,5.7
+S0425,Volunteer Work (Low Hours),2.39,6.8
+S0426,Volunteer Work (High Hours),3.22,7.9
+S0427,Volunteer Work (High Hours),2.75,8.2
+S0428,Volunteer Work (High Hours),3.83,7.4
+S0429,Clubs (High Involvement),3,7.7
+S0430,Clubs (High Involvement),2.95,6
+S0431,Sports (Low Intensity),3.29,5.3
+S0432,Volunteer Work (Low Hours),3.1,6.7
+S0433,Volunteer Work (Low Hours),2.51,5.9
+S0434,Clubs (High Involvement),2.96,8.4
+S0435,Sports (Low Intensity),2.27,7
+S0436,Clubs (High Involvement),3.16,9.7
+S0437,Clubs (Low Involvement),2.87,7.9
+S0438,Sports (Low Intensity),3.42,7.9
+S0439,Volunteer Work (Low Hours),2.59,9.1
+S0440,Volunteer Work (Low Hours),2.56,5.1
+S0441,Clubs (High Involvement),2.63,7.9
+S0442,Clubs (Low Involvement),2.43,7.1
+S0443,Clubs (High Involvement),3.25,7.9
+S0444,None,2.71,5.4
+S0445,Sports (High Intensity),3.66,7.5
+S0446,Sports (High Intensity),3.83,7.2
+S0447,Clubs (Low Involvement),3.31,7.2
+S0448,Volunteer Work (High Hours),3.36,7.6
+S0449,Volunteer Work (High Hours),3.37,7.4
+S0450,Sports (High Intensity),2.17,7.8
+S0451,Sports (High Intensity),3.14,6.7
+S0452,Volunteer Work (High Hours),2.87,7.5
+S0453,Sports (Low Intensity),2.39,8.7
+S0454,Volunteer Work (High Hours),2.83,10
+S0455,Clubs (High Involvement),2.53,10
+S0456,Sports (Low Intensity),4,4.6
+S0457,Clubs (High Involvement),2.98,8.2
+S0458,Sports (High Intensity),3.69,5.9
+S0459,Sports (Low Intensity),2,8.1
+S0460,Clubs (High Involvement),3.84,7.9
+S0461,Clubs (High Involvement),3.53,10
+S0462,Sports (Low Intensity),3.69,6.7
+S0463,Clubs (Low Involvement),2.64,6.5
+S0464,None,2.9,6.6
+S0465,Volunteer Work (High Hours),3.81,8.4
+S0466,Volunteer Work (Low Hours),3.07,6.8
+S0467,Clubs (High Involvement),2.35,9.4
+S0468,Volunteer Work (High Hours),3.11,10
+S0469,None,3.17,9.1
+S0470,Volunteer Work (Low Hours),2.73,6.3
+S0471,Volunteer Work (High Hours),3.42,7.4
+S0472,Sports (High Intensity),2.75,8.6
+S0473,Volunteer Work (Low Hours),2.85,8.6
+S0474,None,3.41,6.7
+S0475,Volunteer Work (High Hours),3.44,6.7
+S0476,Clubs (High Involvement),3.14,7.5
+S0477,Volunteer Work (Low Hours),2.99,5.7
+S0478,Sports (High Intensity),3.39,7.9
+S0479,Sports (Low Intensity),2.75,5.8
+S0480,Clubs (High Involvement),3.42,8.8
+S0481,Sports (High Intensity),2.52,7.1
+S0482,Sports (High Intensity),2.18,6.6
+S0483,Volunteer Work (Low Hours),2.29,6.9
+S0484,Volunteer Work (High Hours),3.11,8
+S0485,Sports (Low Intensity),3.27,6.2
+S0486,Clubs (High Involvement),3.44,8.1
+S0487,Clubs (High Involvement),3.38,8.7
+S0488,Volunteer Work (High Hours),2.29,7.7
+S0489,Sports (Low Intensity),3.08,7
+S0490,Volunteer Work (Low Hours),3.01,7
+S0491,Clubs (High Involvement),3.46,6.5
+S0492,Sports (Low Intensity),3.74,6.5
+S0493,Volunteer Work (Low Hours),2.69,5.4
+S0494,Volunteer Work (Low Hours),3.49,7
+S0495,None,2.57,6
+S0496,Clubs (High Involvement),3.09,9.1
+S0497,Volunteer Work (High Hours),3.61,7.7
+S0498,Clubs (Low Involvement),2.78,7.5
+S0499,Clubs (High Involvement),2.94,6.6
+S0500,None,3.05,7.3
+S0501,Sports (High Intensity),2.45,9.1
+S0502,Sports (High Intensity),3.03,7
+S0503,Volunteer Work (Low Hours),2.88,6
+S0504,Clubs (Low Involvement),3.22,8
+S0505,None,3.32,6.3
+S0506,Clubs (High Involvement),2.68,7.6
+S0507,Sports (High Intensity),3.07,9.3
+S0508,Sports (High Intensity),2.85,6.2
+S0509,Clubs (High Involvement),2.78,7.6
+S0510,None,3.63,5.5
+S0511,Sports (Low Intensity),2.14,6.2
+S0512,Volunteer Work (Low Hours),3.35,7.6
+S0513,Clubs (High Involvement),2.3,8.7
+S0514,Sports (Low Intensity),2.88,7.2
+S0515,Volunteer Work (Low Hours),2.59,6.4
+S0516,Clubs (Low Involvement),2.89,7
+S0517,Volunteer Work (High Hours),3.25,8.8
+S0518,Volunteer Work (Low Hours),2.75,7.1
+S0519,Clubs (Low Involvement),3.42,5.3
+S0520,Volunteer Work (High Hours),3.05,8.5
+S0521,Sports (High Intensity),3.16,8
+S0522,Sports (High Intensity),2.79,7.6
+S0523,Sports (High Intensity),3.27,5.7
+S0524,Volunteer Work (Low Hours),2.67,6.7
+S0525,Sports (Low Intensity),2.24,5.8
+S0526,Volunteer Work (High Hours),2.71,10
+S0527,Sports (High Intensity),3.36,8.6
+S0528,None,2,6.3
+S0529,Clubs (High Involvement),2.64,7.2
+S0530,Volunteer Work (High Hours),2.36,9.4
+S0531,Volunteer Work (High Hours),4,7.2
+S0532,Sports (Low Intensity),3.59,4.5
+S0533,Clubs (Low Involvement),2.57,6.3
+S0534,Sports (Low Intensity),3.52,6.8
+S0535,Sports (High Intensity),2.91,7.1
+S0536,Clubs (High Involvement),2.44,7.1
+S0537,Clubs (High Involvement),3.23,8.4
+S0538,None,2.79,4.4
+S0539,None,3.42,6.3
+S0540,Sports (High Intensity),3.49,6.2
+S0541,Clubs (High Involvement),3.48,8.4
+S0542,Sports (Low Intensity),2.91,6
+S0543,Volunteer Work (Low Hours),2.85,7.2
+S0544,Sports (Low Intensity),3.41,7
+S0545,Volunteer Work (Low Hours),2,7.1
+S0546,Sports (High Intensity),3.33,8
+S0547,Clubs (High Involvement),2.68,8.3
+S0548,None,3.11,7.3
+S0549,Volunteer Work (High Hours),2.64,8.7
+S0550,None,3.57,6.9
+S0551,Clubs (Low Involvement),2.95,8.1
+S0552,Volunteer Work (High Hours),3.05,8.5
+S0553,Volunteer Work (Low Hours),3.43,5.6
+S0554,Sports (Low Intensity),3.83,8.3
+S0555,Sports (Low Intensity),2.54,5.1
+S0556,None,3.59,6.5
+S0557,Sports (Low Intensity),3.73,6.7
+S0558,None,3.12,5.7
+S0559,None,3.6,7.5
+S0560,Sports (Low Intensity),3.64,7.1
+S0561,Clubs (Low Involvement),3.15,6.9
+S0562,Sports (High Intensity),2.42,6.3
+S0563,Sports (Low Intensity),2.38,6.1
+S0564,Volunteer Work (Low Hours),2.59,5.5
+S0565,Clubs (High Involvement),3.82,8.3
+S0566,None,3.44,7.1
+S0567,Clubs (Low Involvement),3.22,6
+S0568,None,2,5.3
+S0569,Volunteer Work (Low Hours),3.53,5.5
+S0570,None,3.08,8
+S0571,Volunteer Work (Low Hours),3.22,6.1
+S0572,None,2.97,5.9
+S0573,Sports (Low Intensity),2.18,6.9
+S0574,Clubs (High Involvement),3.64,9.1
+S0575,Sports (Low Intensity),3.21,5.7
+S0576,None,3.16,9.2
+S0577,Volunteer Work (Low Hours),2.7,9.5
+S0578,Sports (High Intensity),2.15,9.5
+S0579,Clubs (Low Involvement),2.92,5.4
+S0580,None,3,7.7
+S0581,Sports (High Intensity),2.2,6.4
+S0582,None,2,8.3
+S0583,Clubs (Low Involvement),2.71,5.3
+S0584,Sports (Low Intensity),3.03,5.7
+S0585,Sports (Low Intensity),2.6,5.7
+S0586,None,2.94,7.7
+S0587,Clubs (Low Involvement),2.56,6
+S0588,Clubs (High Involvement),3.19,7.2
+S0589,Clubs (High Involvement),3,8.1
+S0590,None,2.7,8.8
+S0591,None,2.04,7.7
+S0592,None,3.09,7.5
+S0593,Sports (Low Intensity),3.32,7.6
+S0594,Sports (Low Intensity),2.84,8.4
+S0595,Sports (High Intensity),3.55,10
+S0596,Volunteer Work (Low Hours),3.04,7.3
+S0597,Sports (Low Intensity),2.89,7.8
+S0598,Clubs (Low Involvement),2.37,4.9
+S0599,Clubs (High Involvement),2.92,10
+S0600,Clubs (High Involvement),3.67,5.2
+S0601,None,2.09,5.4
+S0602,Sports (High Intensity),2.49,7.3
+S0603,None,2.05,5
+S0604,Clubs (High Involvement),3.43,7.2
+S0605,Clubs (High Involvement),2.96,8.1
+S0606,Volunteer Work (Low Hours),3.21,6.8
+S0607,Volunteer Work (High Hours),3.65,6.2
+S0608,Clubs (Low Involvement),3.41,7.9
+S0609,Volunteer Work (Low Hours),3.06,5.9
+S0610,None,2.69,7.6
+S0611,Volunteer Work (High Hours),2.96,9.8
+S0612,Clubs (High Involvement),4,7.4
+S0613,Sports (High Intensity),3.81,8.7
+S0614,Sports (High Intensity),3.08,7.3
+S0615,Clubs (High Involvement),3.19,7.9
+S0616,Sports (Low Intensity),2.99,5.1
+S0617,Volunteer Work (High Hours),2.87,8.9
+S0618,Clubs (High Involvement),2.73,7.6
+S0619,Sports (High Intensity),3.01,8.1
+S0620,Sports (High Intensity),3.68,5.7
+S0621,Volunteer Work (High Hours),2.57,7
+S0622,Clubs (Low Involvement),3.88,7.8
+S0623,Clubs (High Involvement),3.11,8.6
+S0624,Volunteer Work (Low Hours),2.62,7.3
+S0625,None,2.46,8.1
+S0626,Clubs (High Involvement),3.01,7.4
+S0627,Clubs (Low Involvement),2.94,6.5
+S0628,Volunteer Work (High Hours),3.05,6.8
+S0629,Volunteer Work (High Hours),3.11,7.5
+S0630,Sports (High Intensity),2.35,4.5
+S0631,Clubs (Low Involvement),3.1,4.3
+S0632,Volunteer Work (High Hours),3.67,6.2
+S0633,Sports (Low Intensity),2.18,5.1
+S0634,Clubs (High Involvement),2.33,7.8
+S0635,Sports (High Intensity),3.08,7.7
+S0636,Volunteer Work (Low Hours),2.16,8.4
+S0637,Clubs (Low Involvement),3.05,3.9
+S0638,Sports (High Intensity),3.86,8.3
+S0639,Volunteer Work (High Hours),3.31,7.7
+S0640,None,2.33,6.5
+S0641,Volunteer Work (High Hours),4,10
+S0642,Volunteer Work (Low Hours),2.99,6.3
+S0643,Volunteer Work (Low Hours),2.16,7.8
+S0644,Volunteer Work (Low Hours),2.63,6
+S0645,Volunteer Work (Low Hours),3.1,8.2
+S0646,Volunteer Work (Low Hours),2.69,6.2
+S0647,Sports (Low Intensity),3.64,7.3
+S0648,Clubs (High Involvement),3.38,9.2
+S0649,Clubs (Low Involvement),3.22,3.6
+S0650,Sports (High Intensity),3.68,8.9
+S0651,Volunteer Work (Low Hours),2.6,6.8
+S0652,Clubs (High Involvement),2.57,7.3
+S0653,Volunteer Work (High Hours),3.26,8.2
+S0654,Clubs (High Involvement),3.67,7.9
+S0655,Volunteer Work (Low Hours),2.82,8.1
+S0656,None,2,7.3
+S0657,Sports (High Intensity),2.77,8.4
+S0658,Volunteer Work (Low Hours),3.01,7.5
+S0659,Clubs (High Involvement),2.55,7.7
+S0660,Volunteer Work (High Hours),3.29,8.2
+S0661,Clubs (High Involvement),2.82,7.8
+S0662,Volunteer Work (Low Hours),2.75,7.1
+S0663,Clubs (Low Involvement),2.58,6
+S0664,Clubs (High Involvement),3.39,8.4
+S0665,Clubs (Low Involvement),3.2,9.4
+S0666,Volunteer Work (Low Hours),2.19,8.9
+S0667,Clubs (High Involvement),3.8,6.7
+S0668,Volunteer Work (High Hours),2.99,8.5
+S0669,Sports (Low Intensity),2.68,5.7
+S0670,Sports (Low Intensity),2.3,5.2
+S0671,Clubs (Low Involvement),2.68,5.5
+S0672,Volunteer Work (Low Hours),2.43,4.8
+S0673,Clubs (Low Involvement),3.04,7.7
+S0674,Volunteer Work (Low Hours),3.4,6.9
+S0675,Volunteer Work (Low Hours),3.03,7.5
+S0676,Sports (Low Intensity),2,6.5
+S0677,Volunteer Work (High Hours),2.87,8
+S0678,Volunteer Work (High Hours),4,9.2
+S0679,Clubs (High Involvement),3.18,6.9
+S0680,Clubs (Low Involvement),2.86,6.2
+S0681,Volunteer Work (High Hours),2.7,9
+S0682,None,3.47,7.2
+S0683,Sports (High Intensity),3.8,7.5
+S0684,Clubs (High Involvement),2,10
+S0685,Clubs (High Involvement),2.73,7.1
+S0686,Sports (Low Intensity),3.3,7
+S0687,Clubs (Low Involvement),2.55,6.8
+S0688,None,3.13,7.3
+S0689,Volunteer Work (High Hours),3.05,6.6
+S0690,Volunteer Work (High Hours),2.42,8.9
+S0691,Volunteer Work (Low Hours),3.05,8.2
+S0692,Clubs (High Involvement),3.24,9.5
+S0693,Clubs (Low Involvement),3.23,6.3
+S0694,Clubs (Low Involvement),3.41,5.4
+S0695,Clubs (Low Involvement),2.16,4.8
+S0696,Volunteer Work (Low Hours),3.92,7.9
+S0697,Sports (Low Intensity),2.65,8.1
+S0698,Volunteer Work (High Hours),2.83,6.9
+S0699,Clubs (Low Involvement),2.54,7.2
+S0700,None,3.07,5.3
+S0701,None,2.77,6.8
+S0702,Volunteer Work (Low Hours),4,8.2
+S0703,Sports (Low Intensity),2.99,7.9
+S0704,Volunteer Work (Low Hours),3.69,4.9
+S0705,Sports (High Intensity),2.53,8.4
+S0706,Clubs (High Involvement),2.94,7.3
+S0707,Volunteer Work (High Hours),3.16,7
+S0708,Volunteer Work (Low Hours),2.42,7.5
+S0709,Volunteer Work (Low Hours),3.15,6.8
+S0710,Volunteer Work (High Hours),2.79,9.5
+S0711,Clubs (High Involvement),2.96,8.1
+S0712,Sports (High Intensity),3.08,7.2
+S0713,None,2.88,7.2
+S0714,None,3.49,5.4
+S0715,Sports (Low Intensity),2.64,7.7
+S0716,Volunteer Work (Low Hours),2,4.7
+S0717,Clubs (High Involvement),2.8,7.8
+S0718,Sports (Low Intensity),2.11,6.6
+S0719,None,3.77,6.5
+S0720,Sports (Low Intensity),3.21,6.4
+S0721,Sports (Low Intensity),3.5,8
+S0722,Sports (High Intensity),3.66,6.6
+S0723,Sports (High Intensity),3.43,6
+S0724,Sports (Low Intensity),3.38,4.5
+S0725,Clubs (Low Involvement),2.81,6.9
+S0726,Volunteer Work (High Hours),3.51,7.1
+S0727,None,2.42,7
+S0728,None,2.43,7.9
+S0729,Sports (High Intensity),2.77,9.6
+S0730,Clubs (Low Involvement),3.14,5.8
+S0731,Clubs (Low Involvement),4,4.7
+S0732,Volunteer Work (Low Hours),3.27,7.5
+S0733,Volunteer Work (High Hours),2.47,6.6
+S0734,Sports (Low Intensity),3.62,6.8
+S0735,Volunteer Work (Low Hours),2.86,6.9
+S0736,Volunteer Work (Low Hours),2.6,5.7
+S0737,Clubs (Low Involvement),2.95,6.2
+S0738,Clubs (Low Involvement),4,6.7
+S0739,Clubs (Low Involvement),2.68,6.1
+S0740,Sports (Low Intensity),3.45,7
+S0741,Sports (Low Intensity),2.37,8.2
+S0742,Volunteer Work (Low Hours),4,6.4
+S0743,Volunteer Work (Low Hours),3.17,8.3
+S0744,Sports (High Intensity),2.58,6.7
+S0745,None,2.69,7.1
+S0746,None,2.81,6
+S0747,None,3.07,6.7
+S0748,Sports (High Intensity),3.52,9
+S0749,None,4,4.8
+S0750,Clubs (Low Involvement),2.71,6.2
+S0751,Sports (Low Intensity),2.72,8.6
+S0752,Sports (Low Intensity),2.78,8.8
+S0753,None,3.33,7.5
+S0754,Volunteer Work (Low Hours),2.98,7
+S0755,Volunteer Work (High Hours),3.23,8.3
+S0756,Clubs (Low Involvement),3.19,5.7
+S0757,Sports (High Intensity),3.78,7.5
+S0758,Volunteer Work (High Hours),3.48,5.6
+S0759,Sports (Low Intensity),3.41,7.6
+S0760,None,3.38,7.9
+S0761,Sports (High Intensity),3.17,8.7
+S0762,Clubs (Low Involvement),2.54,6.8
+S0763,Sports (Low Intensity),3.46,3
+S0764,None,3.06,6.4
+S0765,Clubs (Low Involvement),2.64,6
+S0766,Volunteer Work (Low Hours),2.18,6.5
+S0767,Volunteer Work (High Hours),3.39,9.2
+S0768,Volunteer Work (High Hours),2,9.3
+S0769,Volunteer Work (High Hours),3.16,10
+S0770,Clubs (High Involvement),3.44,8.8
+S0771,None,2.47,5.3
+S0772,Clubs (Low Involvement),2.58,8.4
+S0773,Volunteer Work (High Hours),3.42,6.4
+S0774,None,3.62,8.1
+S0775,Volunteer Work (Low Hours),2.65,4.6
+S0776,Volunteer Work (High Hours),2.7,6.3
+S0777,Clubs (Low Involvement),2.33,8.5
+S0778,None,3.09,5.5
+S0779,Volunteer Work (High Hours),2.5,8.4
+S0780,Clubs (Low Involvement),2.64,7.1
+S0781,Sports (Low Intensity),2.85,5.1
+S0782,Volunteer Work (Low Hours),2.92,6.3
+S0783,None,3.36,6.3
+S0784,Clubs (Low Involvement),2.56,6.3
+S0785,Clubs (Low Involvement),2.95,7.1
+S0786,Clubs (High Involvement),2.67,7.4
+S0787,None,3.87,6.4
+S0788,Sports (Low Intensity),2.62,6.9
+S0789,None,3.18,8.1
+S0790,Volunteer Work (Low Hours),2.73,5.8
+S0791,Clubs (High Involvement),3.41,7.9
+S0792,None,2.26,7.4
+S0793,None,3.17,7.6
+S0794,Volunteer Work (High Hours),3.13,9.5
+S0795,Clubs (Low Involvement),3.41,6.9
+S0796,Volunteer Work (Low Hours),3.02,4.7
+S0797,Sports (Low Intensity),2.58,7.1
+S0798,Clubs (High Involvement),3.85,9.3
+S0799,Clubs (Low Involvement),3.09,6.6
+S0800,Sports (High Intensity),3.33,7.4
+S0801,Volunteer Work (Low Hours),2.23,5.5
+S0802,Clubs (High Involvement),3.82,8.9
+S0803,Sports (Low Intensity),2.89,8.3
+S0804,Clubs (High Involvement),2.11,5.7
+S0805,Clubs (High Involvement),3.5,9.3
+S0806,Clubs (High Involvement),4,8.1
+S0807,Volunteer Work (High Hours),2.2,8.2
+S0808,Sports (High Intensity),3.03,8.7
+S0809,Sports (Low Intensity),3.96,7.4
+S0810,Sports (Low Intensity),2.72,5.3
+S0811,Sports (Low Intensity),3.12,6.9
+S0812,Clubs (Low Involvement),3.84,8.1
+S0813,Volunteer Work (Low Hours),2.38,8.4
+S0814,Sports (Low Intensity),3.28,5.8
+S0815,Volunteer Work (Low Hours),2.87,6.7
+S0816,Sports (Low Intensity),3.52,6.4
+S0817,Sports (High Intensity),2.82,8.7
+S0818,Clubs (Low Involvement),2.8,5.2
+S0819,Clubs (Low Involvement),3.39,5.8
+S0820,Clubs (High Involvement),3.05,7.5
+S0821,Volunteer Work (High Hours),2.09,8.6
+S0822,Clubs (Low Involvement),2.16,7.2
+S0823,Clubs (Low Involvement),2,5.5
+S0824,Sports (High Intensity),3.27,6.5
+S0825,Sports (Low Intensity),3.58,8
+S0826,None,2,6.5
+S0827,Clubs (Low Involvement),2.34,5
+S0828,Clubs (Low Involvement),2.88,7.2
+S0829,None,2.7,7.5
+S0830,Volunteer Work (High Hours),3.48,7
+S0831,Volunteer Work (Low Hours),3.8,5.5
+S0832,Sports (High Intensity),2.69,10
+S0833,None,2.94,5.7
+S0834,None,3.46,6.1
+S0835,Volunteer Work (High Hours),3.74,8.1
+S0836,Clubs (Low Involvement),3.15,5.9
+S0837,Clubs (Low Involvement),3.9,7
+S0838,Sports (High Intensity),2.66,9.3
+S0839,Clubs (High Involvement),3.23,9.9
+S0840,Clubs (High Involvement),3.22,9.6
+S0841,None,2.74,7.2
+S0842,Clubs (Low Involvement),2.59,7.7
+S0843,None,2.84,7
+S0844,None,2.81,7.5
+S0845,Clubs (Low Involvement),3.7,8.2
+S0846,Volunteer Work (High Hours),2.74,10
+S0847,Volunteer Work (Low Hours),2.94,4.4
+S0848,Volunteer Work (Low Hours),2.66,6.5
+S0849,Volunteer Work (High Hours),3.6,8.9
+S0850,None,3.04,7.6
+S0851,Volunteer Work (High Hours),2.88,7.7
+S0852,Sports (Low Intensity),2.64,5.2
+S0853,Clubs (Low Involvement),2.68,7.6
+S0854,Sports (Low Intensity),2.96,6.8
+S0855,Clubs (High Involvement),3.31,7.4
+S0856,Clubs (Low Involvement),2.47,5.1
+S0857,Clubs (Low Involvement),2.1,5.1
+S0858,Sports (High Intensity),3.35,8.6
+S0859,Clubs (Low Involvement),3.6,6.1
+S0860,Clubs (High Involvement),3.83,6.5
+S0861,Volunteer Work (Low Hours),2.98,4.4
+S0862,Volunteer Work (Low Hours),3.01,8.1
+S0863,None,3.03,7.6
+S0864,Clubs (Low Involvement),2.81,6.4
+S0865,Volunteer Work (Low Hours),3.17,8.3
+S0866,Sports (Low Intensity),2.67,4.9
+S0867,None,2.85,9.1
+S0868,Clubs (Low Involvement),2.76,5.8
+S0869,Sports (Low Intensity),3.95,8.8
+S0870,Volunteer Work (High Hours),2.85,8.1
+S0871,Volunteer Work (High Hours),3.16,7.8
+S0872,Sports (High Intensity),2.82,7.6
+S0873,Clubs (Low Involvement),2.84,6.9
+S0874,Volunteer Work (High Hours),3.11,7.5
+S0875,Volunteer Work (High Hours),2.34,7.3
+S0876,Volunteer Work (Low Hours),2.81,5.6
+S0877,Sports (High Intensity),3.49,7.5
+S0878,Sports (High Intensity),2.88,8.1
+S0879,Volunteer Work (Low Hours),3.21,5.8
+S0880,Clubs (Low Involvement),3.23,6.6
+S0881,Sports (Low Intensity),3.31,7.7
+S0882,None,3.35,4.9
+S0883,Clubs (Low Involvement),2.8,8
+S0884,Sports (Low Intensity),2.53,7.1
+S0885,Sports (High Intensity),3.08,8.6
+S0886,Clubs (High Involvement),2.98,7.2
+S0887,Clubs (Low Involvement),2.62,6.9
+S0888,Clubs (High Involvement),3.48,7.8
+S0889,Sports (Low Intensity),2,8.2
+S0890,Clubs (Low Involvement),2.14,4.3
+S0891,Clubs (High Involvement),2.62,9.8
+S0892,Clubs (High Involvement),3.15,7.7
+S0893,None,2.52,6.8
+S0894,Clubs (Low Involvement),2.65,4.5
+S0895,Clubs (High Involvement),2.93,7.6
+S0896,None,2.76,8.4
+S0897,None,3.03,8.2
+S0898,Clubs (Low Involvement),3.73,5.8
+S0899,Clubs (High Involvement),2.59,8.9
+S0900,None,2.85,8.4
+S0901,Sports (High Intensity),2.66,9.8
+S0902,Clubs (Low Involvement),3.61,6.1
+S0903,Sports (High Intensity),2.52,7.4
+S0904,Volunteer Work (Low Hours),3.73,7.6
+S0905,Volunteer Work (High Hours),3.06,8.8
+S0906,Sports (High Intensity),2.91,6.8
+S0907,Clubs (High Involvement),2.66,6.6
+S0908,Sports (Low Intensity),3.39,8
+S0909,Volunteer Work (Low Hours),2.52,7.8
+S0910,Sports (High Intensity),3.16,10
+S0911,None,2.88,6.7
+S0912,Volunteer Work (Low Hours),3.39,6.4
+S0913,Sports (High Intensity),2.94,8.2
+S0914,None,3.77,6.2
+S0915,Sports (High Intensity),3.04,9.6
+S0916,Sports (Low Intensity),2.89,7.8
+S0917,Sports (Low Intensity),3.35,3.6
+S0918,None,3.19,8.9
+S0919,Sports (High Intensity),2.62,7.9
+S0920,Volunteer Work (High Hours),3.12,7.1
+S0921,Sports (Low Intensity),2,6
+S0922,Sports (Low Intensity),3.27,7.6
+S0923,Sports (Low Intensity),2.31,7.2
+S0924,Clubs (Low Involvement),3.21,6.2
+S0925,Volunteer Work (Low Hours),3.57,7
+S0926,Sports (High Intensity),3.54,4.4
+S0927,Volunteer Work (High Hours),2.66,10
+S0928,Sports (Low Intensity),3.47,7.4
+S0929,Clubs (Low Involvement),3.24,10
+S0930,Volunteer Work (Low Hours),2.62,5.5
+S0931,Clubs (High Involvement),3.31,7
+S0932,None,2.42,5.7
+S0933,Clubs (High Involvement),3.22,7.2
+S0934,Sports (Low Intensity),2.34,4.9
+S0935,Volunteer Work (High Hours),2.23,9
+S0936,Volunteer Work (High Hours),3.26,7.9
+S0937,Volunteer Work (Low Hours),3.08,5.7
+S0938,Volunteer Work (Low Hours),2.58,6.2
+S0939,Sports (High Intensity),2.83,9.3
+S0940,None,3.01,7.2
+S0941,None,3.12,7.5
+S0942,Sports (Low Intensity),3.91,7.9
+S0943,Clubs (High Involvement),3.77,9.9
+S0944,Sports (High Intensity),3.23,8
+S0945,Volunteer Work (High Hours),3.48,7.8
+S0946,Sports (High Intensity),3.27,8.9
+S0947,Clubs (High Involvement),2.54,7.5
+S0948,Volunteer Work (High Hours),2,6.5
+S0949,Volunteer Work (Low Hours),2.96,4.9
+S0950,Clubs (Low Involvement),2.83,6.3
+S0951,Clubs (Low Involvement),2.62,7.6
+S0952,Volunteer Work (Low Hours),3.34,5.2
+S0953,Sports (Low Intensity),3.68,7.1
+S0954,Sports (High Intensity),2.58,8.4
+S0955,Volunteer Work (High Hours),3.16,7.3
+S0956,Volunteer Work (Low Hours),2.81,8.2
+S0957,None,2.18,6.9
+S0958,Volunteer Work (Low Hours),2.72,7.3
+S0959,Sports (Low Intensity),3.3,7.2
+S0960,Sports (High Intensity),3.14,6.1
+S0961,Volunteer Work (Low Hours),3.27,4.7
+S0962,None,3.21,7
+S0963,Clubs (High Involvement),3.04,7.9
+S0964,None,2.84,8
+S0965,Volunteer Work (Low Hours),2.2,6.8
+S0966,Volunteer Work (High Hours),2.83,7.2
+S0967,None,3.68,7.9
+S0968,Sports (High Intensity),3.66,6.6
+S0969,None,3.1,4.9
+S0970,Volunteer Work (High Hours),4,8
+S0971,None,2.8,6
+S0972,Sports (High Intensity),3.11,6.6
+S0973,Clubs (High Involvement),3.3,7.6
+S0974,Volunteer Work (High Hours),2.54,9.5
+S0975,Clubs (Low Involvement),2.65,6.6
+S0976,Volunteer Work (Low Hours),3.6,5
+S0977,Clubs (High Involvement),3.49,9.4
+S0978,Sports (High Intensity),3.77,9.9
+S0979,Volunteer Work (High Hours),2.68,8.4
+S0980,Volunteer Work (Low Hours),3.26,6.1
+S0981,Clubs (High Involvement),4,8.7
+S0982,Sports (High Intensity),3.1,10
+S0983,None,2.78,4.8
+S0984,Clubs (Low Involvement),3.49,4.6
+S0985,None,2.56,6.4
+S0986,Clubs (Low Involvement),2.32,7
+S0987,Sports (High Intensity),2.55,7.6
+S0988,Clubs (Low Involvement),2.2,5.3
+S0989,Clubs (High Involvement),2.78,9
+S0990,Volunteer Work (Low Hours),2.18,6.3
+S0991,None,2.84,8.1
+S0992,Clubs (Low Involvement),3.59,6.5
+S0993,Volunteer Work (Low Hours),3.14,5.8
+S0994,Sports (Low Intensity),2.87,6.7
+S0995,Clubs (Low Involvement),2.43,3.9
+S0996,Sports (Low Intensity),3.21,6.8
+S0997,Volunteer Work (Low Hours),2,8
+S0998,Volunteer Work (High Hours),3.19,9.7
+S0999,Volunteer Work (Low Hours),3.53,6.6
+S1000,Clubs (High Involvement),4,8.1
