@@ -1,0 +1,54 @@
+{
+  "name": "urway-tracker",
+  "publisher": "urway",
+  "displayName": "UrWay Tracker",
+  "description": "Tracks coding time for Ur Way",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished",
+    "onUri"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "urway.forceLog",
+        "title": "UrWay: Force Save Log"
+      },
+      {
+        "command": "urway.logout",
+        "title": "UrWay: Logout (sign in as different user)"
+      },
+      {
+        "command": "urway.openDashboard",
+        "title": "UrWay: Open Dashboard"
+      }
+    ]
+  },
+  "scripts": {
+    "start": "code --extensionDevelopmentPath=.",
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "node ./test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "20.x",
+    "eslint": "^8.41.0",
+    "glob": "^8.1.0",
+    "mocha": "^10.2.0",
+    "typescript": "^5.1.3",
+    "@vscode/test-electron": "^2.3.2"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "node-fetch": "^2.6.7"
+  }
+}
