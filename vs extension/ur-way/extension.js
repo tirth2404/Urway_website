@@ -1,12 +1,18 @@
 const vscode = require('vscode');
 const fs = require('fs');
 const path = require('path');
-const fetch = require('node-fetch');
+let fetchFn = null;
+try {
+    fetchFn = globalThis.fetch ? globalThis.fetch.bind(globalThis) : require('node-fetch');
+} catch (e) {
+    fetchFn = null;
+}
 
 let intervalId;
 let lastActivityTime = Date.now();
 const IDLE_LIMIT = 60000; // 1 minute
 let timerIntervalId;
+let logoutCheckIntervalId;
 let statusBarItem;
 let elapsedSeconds = 0;
 let isWindowFocused = (vscode.window && vscode.window.state && vscode.window.state.focused) || false;
@@ -58,7 +64,7 @@ function getLogFilePath() {
 
     if (extensionContext && extensionContext.globalStorageUri) {
         const storageDir = extensionContext.globalStorageUri.fsPath;
-        try { fs.mkdirSync(storageDir, { recursive: true }); } catch (e) {}
+        try { fs.mkdirSync(storageDir, { recursive: true }); } catch (e) { }
         return path.join(storageDir, 'urway_logs.json');
     }
 
@@ -67,7 +73,7 @@ function getLogFilePath() {
     return path.join(fallback, 'urway_logs.json');
 }
 
-async function activate(context) {   
+async function activate(context) {
     extensionContext = context;
     // Register a URI handler so the browser can redirect to vscode://urway.urway-tracker/auth?code=...
     try {
@@ -208,7 +214,11 @@ async function activate(context) {
                 if (stored) {
                     const user = JSON.parse(stored);
                     console.log(`[Database Update] Sending sessionTimeSeconds to DB: ${elapsedSeconds} for user ${user.id}`);
-                    const response = await fetch(`http://localhost:3000/api/elapsed/${user.id}`, {
+                    if (!fetchFn) {
+                        console.error('Fetch API not available; cannot update elapsed time.');
+                        return;
+                    }
+                    const response = await fetchFn(`http://localhost:3000/api/elapsed/${user.id}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ sessionTimeSeconds: elapsedSeconds })
@@ -228,16 +238,20 @@ async function activate(context) {
     context.subscriptions.push({ dispose: () => clearInterval(dbUpdateIntervalId) });
 
     let lastWasLoggedIn = true;
-    setInterval(async () => {
+    logoutCheckIntervalId = setInterval(async () => {
         if (context && context.secrets) {
             try {
+                if (!fetchFn) {
+                    console.error('Fetch API not available; skipping logout checks. Run npm install or use Node 18+.');
+                    return;
+                }
                 const stored = await context.secrets.get('urway.user');
                 if (!stored) {
                     lastWasLoggedIn = false;
                     return;
                 }
                 const user = JSON.parse(stored);
-                const checkResp = await fetch(`http://localhost:3000/auth/check-logout/${user.id}`);
+                const checkResp = await fetchFn(`http://localhost:3000/auth/check-logout/${user.id}`);
                 const { loggedOut, reason } = await checkResp.json();
                 if (loggedOut) {
                     console.log('LOGOUT DETECTED from backend! Reason:', reason, 'Persisting timer and clearing user...');
@@ -269,7 +283,7 @@ async function activate(context) {
 
     // 2. Start the Loop
     intervalId = setInterval(checkAndLogTime, 60000);
-    
+
     // 3. Register commands
     let forceLogDisposable = vscode.commands.registerCommand('urway.forceLog', async () => {
         console.log("Forcing a log save...");
@@ -316,7 +330,11 @@ async function activate(context) {
                 // Send current elapsed time to backend before opening dashboard
                 try {
                     console.log(`[Dashboard] Sending elapsed time for user ${user.id}: ${elapsedSeconds} seconds`);
-                    const response = await fetch(`http://localhost:3000/api/elapsed/${user.id}`, {
+                    if (!fetchFn) {
+                        console.error('Fetch API not available; cannot update elapsed time.');
+                        return;
+                    }
+                    const response = await fetchFn(`http://localhost:3000/api/elapsed/${user.id}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ sessionTimeSeconds: elapsedSeconds })
@@ -324,17 +342,21 @@ async function activate(context) {
                     const result = await response.json();
                     console.log(`[Dashboard] Response from server:`, result);
                 } catch (e) { console.error('Error updating elapsed time:', e); }
-                
+
                 const dashboardUrl = `http://localhost:3000/dashboard/${user.id}?elapsed=${elapsedSeconds}`;
                 await vscode.env.openExternal(vscode.Uri.parse(dashboardUrl));
                 return;
             }
             const user = JSON.parse(stored);
-            
+
             // Send current elapsed time to backend before opening dashboard
             try {
                 console.log(`[Dashboard] Sending elapsed time for user ${user.id}: ${elapsedSeconds} seconds`);
-                const response = await fetch(`http://localhost:3000/api/elapsed/${user.id}`, {
+                if (!fetchFn) {
+                    console.error('Fetch API not available; cannot update elapsed time.');
+                    return;
+                }
+                const response = await fetchFn(`http://localhost:3000/api/elapsed/${user.id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ sessionTimeSeconds: elapsedSeconds })
@@ -342,7 +364,7 @@ async function activate(context) {
                 const result = await response.json();
                 console.log(`[Dashboard] Response from server:`, result);
             } catch (e) { console.error('Error updating elapsed time:', e); }
-            
+
             const dashboardUrl = `http://localhost:3000/dashboard/${user.id}?elapsed=${elapsedSeconds}`;
             await vscode.env.openExternal(vscode.Uri.parse(dashboardUrl));
         } catch (e) {
@@ -354,12 +376,12 @@ async function activate(context) {
 
 async function checkAndLogTime() {
     const currentTime = Date.now();
-    
+
     // Do not log if user is not signed in
     if (!isAuthenticated) {
         return;
     }
-    
+
     // Check if idle
     if (currentTime - lastActivityTime > IDLE_LIMIT) {
         return;
@@ -386,7 +408,7 @@ function formatTime(totalSeconds) {
 async function saveLogLocally(projectName, language) {
     // 1. GET CURRENT PROJECT FOLDER PATH
     const filePath = getLogFilePath();
-    try { fs.mkdirSync(path.dirname(filePath), { recursive: true }); } catch (e) {}
+    try { fs.mkdirSync(path.dirname(filePath), { recursive: true }); } catch (e) { }
 
     // attach user id if available
     let userId = null;
@@ -433,7 +455,11 @@ async function saveLogLocally(projectName, language) {
     // Try to POST the latest log to backend. On success, remove it from local file.
     try {
         const backendUrl = 'http://localhost:3000/logs';
-        const resp = await fetch(backendUrl, {
+        if (!fetchFn) {
+            console.error('Fetch API not available; cannot post logs.');
+            return;
+        }
+        const resp = await fetchFn(backendUrl, {
             method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(logEntry)
         });
         if (!resp.ok) {
@@ -481,10 +507,14 @@ async function flushLocalLogs() {
 
     if (!Array.isArray(queued) || queued.length === 0) return;
 
-    for (let i = 0; i < queued.length; ) {
+    for (let i = 0; i < queued.length;) {
         const entry = queued[i];
         try {
-            const resp = await fetch('http://localhost:3000/logs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(entry) });
+            if (!fetchFn) {
+                console.error('Fetch API not available; cannot flush logs.');
+                return;
+            }
+            const resp = await fetchFn('http://localhost:3000/logs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(entry) });
             if (resp.ok) {
                 // remove this entry and continue (do not increment i since array shrinks)
                 queued.splice(i, 1);
@@ -509,7 +539,7 @@ async function ensureSignedIn(context) {
         console.log('Sign-in already in progress, skipping...');
         return null;
     }
-    
+
     if (!context || !context.secrets) return null;
     const existing = await context.secrets.get('urway.user');
     if (existing) {
@@ -520,25 +550,25 @@ async function ensureSignedIn(context) {
     isSigningIn = true;
     console.log('Starting sign-in flow...');
     let shouldRetry = true;
-    
+
     try {
         while (shouldRetry) {
             shouldRetry = false;
             console.log('Showing sign-in dialog');
-            
+
             const choice = await vscode.window.showInformationMessage(
                 'Please sign in to UrWay. Browser window will open for Google authentication.',
                 { modal: true },
                 'Sign in with Google'
             );
-            
+
             if (choice !== 'Sign in with Google') {
                 console.log('User cancelled sign-in');
                 isAuthenticated = false;
                 isSigningIn = false;
                 return null;
             }
-            
+
             console.log('Opening Google auth URL...');
             const authUrl = 'http://localhost:3000/auth/google';
             await vscode.env.openExternal(vscode.Uri.parse(authUrl));
@@ -575,7 +605,7 @@ async function ensureSignedIn(context) {
                     });
                 }
             }
-            
+
             if (!code || code.trim() === '') {
                 console.log('No code entered');
                 const again = await vscode.window.showInformationMessage('No code entered. Try again?', 'Try again');
@@ -587,12 +617,18 @@ async function ensureSignedIn(context) {
 
             console.log('Exchanging code for user token...');
             try {
-                const resp = await fetch('http://localhost:3000/auth/exchange', {
+                if (!fetchFn) {
+                    console.error('Fetch API not available; cannot complete sign-in.');
+                    vscode.window.showErrorMessage('Fetch API not available. Run npm install or use Node 18+.');
+                    shouldRetry = false;
+                    continue;
+                }
+                const resp = await fetchFn('http://localhost:3000/auth/exchange', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ code: code.trim() })
                 });
-                
+
                 if (!resp.ok) {
                     const text = await resp.text();
                     console.error('Exchange failed:', text);
@@ -600,10 +636,10 @@ async function ensureSignedIn(context) {
                     shouldRetry = true;
                     continue;
                 }
-                
+
                 const user = await resp.json();
                 console.log('User received from backend:', user);
-                
+
                 // Store user FIRST before showing any messages
                 await context.secrets.store('urway.user', JSON.stringify(user));
                 console.log('User stored in context.secrets - SIGN IN COMPLETE');
@@ -627,7 +663,7 @@ async function ensureSignedIn(context) {
                 await new Promise(resolve => setTimeout(resolve, 500));
                 isSigningIn = false;
                 return user;
-                
+
             } catch (e) {
                 console.error('Sign-in error:', e);
                 vscode.window.showErrorMessage('Sign in error: ' + e.message);
@@ -638,7 +674,7 @@ async function ensureSignedIn(context) {
     } finally {
         isSigningIn = false;
     }
-    
+
     return null;
 }
 
@@ -669,8 +705,9 @@ async function deactivate() {
     } catch (e) { console.error('Deactivate save error:', e); }
     if (intervalId) clearInterval(intervalId);
     if (timerIntervalId) clearInterval(timerIntervalId);
+    if (logoutCheckIntervalId) clearInterval(logoutCheckIntervalId);
     if (statusBarItem) {
-        try { statusBarItem.dispose(); } catch (e) {}
+        try { statusBarItem.dispose(); } catch (e) { }
     }
 }
 
