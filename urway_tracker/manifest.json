@@ -1,0 +1,50 @@
+{
+  "manifest_version": 3,
+  "name": "U'rWay Intelligence",
+  "version": "1.0.0",
+  "description": "Professional web activity tracker with dark mode UI and MongoDB integration",
+  "permissions": [
+    "storage",
+    "alarms",
+    "tabs",
+    "scripting",
+    "identity"
+  ],
+  "host_permissions": [
+    "<all_urls>",
+    "http://localhost:5000/*"
+  ],
+  "action": {
+    "default_popup": "popup_react/dist/index.html",
+    "default_title": "U'rWay Intelligence",
+    "default_icon": "images/U'rWay Logo.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["popup_react/dist/*", "images/*", "crypto-utils.js"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "icons": {
+    "128": "images/U'rWay Logo.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["crypto-utils.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "oauth2": {
+    "client_id": "351530263168-tue4epbrpfkvc2psh48al0i94k3vnsj3.apps.googleusercontent.com",
+    "microsoft_client_id": "fb00a083-ded3-4914-8f15-ee52b4fe9a79",
+    "github_client_id": "Ov23liQ5c006P39beNcC",
+    "scopes": [
+      "email",
+      "profile"
+    ]
+  }
+}
