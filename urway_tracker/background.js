@@ -1,4 +1,10 @@
 // Initialize 30-second pulse alarm
+const BRIDGE_BASE_URL = 'http://localhost:5002';
+
+function bridgeUrl(path) {
+    return `${BRIDGE_BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
+}
+
 try {
     // Use chrome.runtime.getURL to ensure absolute extension URL (avoids DOMException when worker scope differs)
     importScripts(chrome.runtime.getURL('crypto-utils.js'));
@@ -198,7 +204,7 @@ async function syncToBridge(data, retries = 3) {
     // If we have an email but no registrationTimestamp, ask the bridge
     if (userEmail && !registrationTimestamp) {
         try {
-            const resp = await fetch('http://localhost:5000/register-or-get-user', {
+            const resp = await fetch(bridgeUrl('/register-or-get-user'), {
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: userEmail })
             });
             if (resp.ok) {
@@ -287,7 +293,7 @@ async function syncToBridge(data, retries = 3) {
         let sent = false
         for (let i = 0; i < retries; i++) {
             try {
-                const response = await fetch("http://localhost:5000/sync", {
+                const response = await fetch(bridgeUrl('/sync'), {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload),
@@ -343,7 +349,7 @@ async function flushPendingActivities() {
     // Get canonical registrationTimestamp from bridge
     let canonicalRegTs = null
     try {
-        const resp = await fetch('http://localhost:5000/register-or-get-user', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: userEmail }) })
+        const resp = await fetch(bridgeUrl('/register-or-get-user'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: userEmail }) })
         if (resp.ok) {
             const b = await resp.json()
             canonicalRegTs = b.registrationTimestamp
@@ -376,7 +382,7 @@ async function flushPendingActivities() {
                     timestamps: item.metadata.timestamps,
                     duration: item.metadata.duration
                 }
-                const r = await fetch('http://localhost:5000/sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+                const r = await fetch(bridgeUrl('/sync'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
                 if (r.ok) {
                     flushed++
                     // remove from pending
@@ -398,7 +404,7 @@ async function flushPendingActivities() {
                     timestamps: item.unencryptedData.timestamps,
                     duration: item.unencryptedData.duration
                 }
-                const r = await fetch('http://localhost:5000/sync', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
+                const r = await fetch(bridgeUrl('/sync'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
                 if (r.ok) {
                     flushed++
                     const idx = pending.indexOf(item)

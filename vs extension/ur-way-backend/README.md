@@ -4,7 +4,7 @@ Minimal backend to support Google OAuth sign-in and exchange for the VS Code ext
 
 Setup
 
-1. Copy `.env.example` to `.env` and fill values (MongoDB URI, Google client id/secret).
+1. Copy `.env.example` to `.env` and fill values (`MONGO_URI`, `DB_NAME`, Google client id/secret).
 2. Install deps:
 
 ```bash

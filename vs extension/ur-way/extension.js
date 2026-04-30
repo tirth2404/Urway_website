@@ -20,6 +20,11 @@ let extensionContext;
 let isSigningIn = false; // Flag to prevent multiple sign-in dialogs
 let isAuthenticated = false; // true when a user is signed in
 let pendingAuthCode = null; // filled by URI handler when browser redirects to vscode://
+const VS_BACKEND_BASE_URL = (process.env.URWAY_VS_BACKEND_URL || 'http://localhost:3000').replace(/\/$/, '');
+
+function vsBackendUrl(pathname) {
+    return `${VS_BACKEND_BASE_URL}${pathname.startsWith('/') ? pathname : `/${pathname}`}`;
+}
 
 // Persist elapsed seconds per-user so timers resume across sign-outs
 function _getElapsedKeyForUser(user) {
@@ -218,7 +223,7 @@ async function activate(context) {
                         console.error('Fetch API not available; cannot update elapsed time.');
                         return;
                     }
-                    const response = await fetchFn(`http://localhost:3000/api/elapsed/${user.id}`, {
+                    const response = await fetchFn(vsBackendUrl(`/api/elapsed/${user.id}`), {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ sessionTimeSeconds: elapsedSeconds })
@@ -251,7 +256,7 @@ async function activate(context) {
                     return;
                 }
                 const user = JSON.parse(stored);
-                const checkResp = await fetchFn(`http://localhost:3000/auth/check-logout/${user.id}`);
+                const checkResp = await fetchFn(vsBackendUrl(`/auth/check-logout/${user.id}`));
                 const { loggedOut, reason } = await checkResp.json();
                 if (loggedOut) {
                     console.log('LOGOUT DETECTED from backend! Reason:', reason, 'Persisting timer and clearing user...');
@@ -334,7 +339,7 @@ async function activate(context) {
                         console.error('Fetch API not available; cannot update elapsed time.');
                         return;
                     }
-                    const response = await fetchFn(`http://localhost:3000/api/elapsed/${user.id}`, {
+                    const response = await fetchFn(vsBackendUrl(`/api/elapsed/${user.id}`), {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ sessionTimeSeconds: elapsedSeconds })
@@ -343,7 +348,7 @@ async function activate(context) {
                     console.log(`[Dashboard] Response from server:`, result);
                 } catch (e) { console.error('Error updating elapsed time:', e); }
 
-                const dashboardUrl = `http://localhost:3000/dashboard/${user.id}?elapsed=${elapsedSeconds}`;
+                const dashboardUrl = `${VS_BACKEND_BASE_URL}/dashboard/${user.id}?elapsed=${elapsedSeconds}`;
                 await vscode.env.openExternal(vscode.Uri.parse(dashboardUrl));
                 return;
             }
@@ -356,7 +361,7 @@ async function activate(context) {
                     console.error('Fetch API not available; cannot update elapsed time.');
                     return;
                 }
-                const response = await fetchFn(`http://localhost:3000/api/elapsed/${user.id}`, {
+                const response = await fetchFn(vsBackendUrl(`/api/elapsed/${user.id}`), {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ sessionTimeSeconds: elapsedSeconds })
@@ -365,7 +370,7 @@ async function activate(context) {
                 console.log(`[Dashboard] Response from server:`, result);
             } catch (e) { console.error('Error updating elapsed time:', e); }
 
-            const dashboardUrl = `http://localhost:3000/dashboard/${user.id}?elapsed=${elapsedSeconds}`;
+            const dashboardUrl = `${VS_BACKEND_BASE_URL}/dashboard/${user.id}?elapsed=${elapsedSeconds}`;
             await vscode.env.openExternal(vscode.Uri.parse(dashboardUrl));
         } catch (e) {
             vscode.window.showErrorMessage('Error opening dashboard: ' + e.message);
@@ -454,7 +459,7 @@ async function saveLogLocally(projectName, language) {
 
     // Try to POST the latest log to backend. On success, remove it from local file.
     try {
-        const backendUrl = 'http://localhost:3000/logs';
+        const backendUrl = vsBackendUrl('/logs');
         if (!fetchFn) {
             console.error('Fetch API not available; cannot post logs.');
             return;
@@ -514,7 +519,7 @@ async function flushLocalLogs() {
                 console.error('Fetch API not available; cannot flush logs.');
                 return;
             }
-            const resp = await fetchFn('http://localhost:3000/logs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(entry) });
+            const resp = await fetchFn(vsBackendUrl('/logs'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(entry) });
             if (resp.ok) {
                 // remove this entry and continue (do not increment i since array shrinks)
                 queued.splice(i, 1);
@@ -570,7 +575,7 @@ async function ensureSignedIn(context) {
             }
 
             console.log('Opening Google auth URL...');
-            const authUrl = 'http://localhost:3000/auth/google';
+            const authUrl = vsBackendUrl('/auth/google');
             await vscode.env.openExternal(vscode.Uri.parse(authUrl));
 
             // First, check if a code was delivered via the URI handler (browser -> vscode://...)
@@ -623,7 +628,7 @@ async function ensureSignedIn(context) {
                     shouldRetry = false;
                     continue;
                 }
-                const resp = await fetchFn('http://localhost:3000/auth/exchange', {
+                const resp = await fetchFn(vsBackendUrl('/auth/exchange'), {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ code: code.trim() })

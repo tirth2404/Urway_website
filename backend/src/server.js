@@ -9,6 +9,7 @@ import appRouter from "./router/appRouter.js";
 const app = express();
 const port = Number(process.env.PORT || 5000);
 const mongoUri = process.env.MONGO_URI || "mongodb://localhost:27017/urway";
+const dbName = process.env.DB_NAME || "urway";
 const frontendOrigin = process.env.FRONTEND_ORIGIN || "http://127.0.0.1:5173";
 
 app.use(createCors(frontendOrigin));
@@ -28,7 +29,7 @@ app.use(errorHandler);
 
 async function bootstrap() {
   try {
-    await connectDB(mongoUri);
+    await connectDB(mongoUri, { dbName });
     console.log(`[DB] Connected to MongoDB`);
     app.listen(port, "127.0.0.1", () => {
       console.log(`[Server] U'rWay backend running on http://127.0.0.1:${port}`);

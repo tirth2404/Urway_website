@@ -11,9 +11,17 @@ import requests
 from logging.handlers import RotatingFileHandler
 from urllib.parse import urlparse
 
-# Load environment variables from a local .env file if present (simple loader, avoids extra deps)
-env_path = os.path.join(os.path.dirname(__file__), '.env')
-if os.path.exists(env_path):
+# Configure logging first so startup/env issues are visible in both console and file.
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": ["*"]}})
+
+def load_local_env():
+    env_path = os.path.join(os.path.dirname(__file__), '.env')
+    if not os.path.exists(env_path):
+        return
     try:
         with open(env_path, 'r', encoding='utf-8') as f:
             for line in f:
@@ -23,39 +31,14 @@ if os.path.exists(env_path):
                 k, v = line.split('=', 1)
                 k = k.strip()
                 v = v.strip().strip('"').strip("'")
-                if k and v and k not in os.environ:
+                if k and v and os.environ.get(k) is None:
                     os.environ[k] = v
-        logger = logging.getLogger(__name__)
         logger.info('Loaded .env variables')
     except Exception as e:
-        # If dotenv fails, continue using existing environment variables
-        logging.getLogger(__name__).warning(f'Could not load .env: {e}')
+        logger.warning('Could not load .env: %s', e)
 
-app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": ["*"]}})
 
-# Load .env file if present (simple parser, avoids extra dependencies)
-env_path = os.path.join(os.path.dirname(__file__), '.env')
-if os.path.exists(env_path):
-    try:
-        with open(env_path, 'r', encoding='utf-8') as f:
-            for line in f:
-                line = line.strip()
-                if not line or line.startswith('#'):
-                    continue
-                if '=' in line:
-                    k, v = line.split('=', 1)
-                    k = k.strip()
-                    v = v.strip().strip('"').strip("'")
-                    # Do not overwrite existing env vars
-                    if os.environ.get(k) is None:
-                        os.environ[k] = v
-    except Exception as e:
-        logger.warning('Failed to load .env file: %s', e)
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+load_local_env()
 
 # Add File Handler
 file_handler = RotatingFileHandler('bridge.log', maxBytes=1024*1024, backupCount=5)
@@ -66,7 +49,8 @@ logger.setLevel(logging.INFO)
 
 # MongoDB Setup
 try:
-    MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/")
+    MONGO_URI = os.environ.get("MONGO_URI") or os.environ.get("MONGODB_URI", "mongodb://localhost:27017/")
+    DB_NAME = os.environ.get("DB_NAME", "urway")
     client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
     # Verify connection
     client.admin.command('ping')
@@ -77,7 +61,7 @@ except Exception as e:
 
 # Initialize DB references if client connected
 if client:
-    db = client["UrWay_Intelligence"]
+    db = client[DB_NAME]
     activities_collection = db["daily_footprint"]
     master_keys_collection = db["master_keys"]  # Master key tracking
     users_collection = db["users"]  # NEW: User registration timestamps
@@ -627,11 +611,15 @@ def internal_error(error):
 
 
 if __name__ == '__main__':
+    BRIDGE_HOST = os.environ.get("BRIDGE_HOST", "127.0.0.1")
+    BRIDGE_PORT = int(os.environ.get("BRIDGE_PORT", "5002"))
+    FLASK_DEBUG = os.environ.get("FLASK_DEBUG", "0") == "1"
+
     print("\n" + "="*50)
     print("🚀 U'rWay Intelligence Bridge Starting...")
     print("="*50)
-    print(f"📍 Running on http://localhost:5000")
-    print(f"📂 Database: UrWay_Intelligence.daily_footprint")
+    print(f"📍 Running on http://{BRIDGE_HOST}:{BRIDGE_PORT}")
+    print(f"📂 Database: {DB_NAME}.daily_footprint")
     print(f"🔌 CORS: Enabled for all origins")
     print("\nEndpoints:")
     print("  POST   /sync           - Receive activity pulses")
@@ -639,4 +627,4 @@ if __name__ == '__main__':
     print("  POST   /clear-day      - Clear activities for date")
     print("  GET    /health         - Health check")
     print("="*50 + "\n")
-    app.run(host='localhost', port=5000, debug=True, use_reloader=False)
+    app.run(host=BRIDGE_HOST, port=BRIDGE_PORT, debug=FLASK_DEBUG, use_reloader=False)

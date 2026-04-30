@@ -1,10 +1,12 @@
 import mongoose from "mongoose";
 
-export async function connectDB(mongoUri, retries = 5) {
+export async function connectDB(mongoUri, options = {}) {
+  const { retries = 5, dbName } = options;
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       await mongoose.connect(mongoUri, {
         serverSelectionTimeoutMS: 5000,
+        ...(dbName ? { dbName } : {}),
       });
       return;
     } catch (err) {

@@ -4,6 +4,7 @@ import DomainDetailView from './components/DomainDetailView'
 import HistoryCalendar from './components/HistoryCalendar'
 import HistoryDayView from './components/HistoryDayView'
 import CryptoUtils from './utils/crypto-utils'
+import { bridgeUrl } from './config'
 
 export default function App() {
     const [userEmail, setUserEmail] = useState(null)
@@ -85,7 +86,7 @@ export default function App() {
             let result = { sites: [], totalBrowserDuration: 0 }
             
             try {
-                const res = await fetch(`http://localhost:5000/activities?userEmail=${encodeURIComponent(email)}&date=${encodeURIComponent(today)}`, {
+                const res = await fetch(`${bridgeUrl('/activities')}?userEmail=${encodeURIComponent(email)}&date=${encodeURIComponent(today)}`, {
                     signal: AbortSignal.timeout(3000)
                 })
                 if (res.ok) {
@@ -263,7 +264,7 @@ export default function App() {
     // Fetch history data for calendar view
     async function fetchHistory() {
         try {
-            const res = await fetch(`http://localhost:5000/history?userEmail=${encodeURIComponent(userEmail)}&registrationTimestamp=${encodeURIComponent(registrationTimestamp)}`, {
+            const res = await fetch(`${bridgeUrl('/history')}?userEmail=${encodeURIComponent(userEmail)}&registrationTimestamp=${encodeURIComponent(registrationTimestamp)}`, {
                 signal: AbortSignal.timeout(3000)
             })
             if (res.ok) {
@@ -286,7 +287,7 @@ export default function App() {
 
         // Try to register/get user from backend
         try {
-            const resp = await fetch("http://localhost:5000/register-or-get-user", {
+            const resp = await fetch(bridgeUrl('/register-or-get-user'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email }),
@@ -499,7 +500,7 @@ export default function App() {
             if (!code) throw new Error('No code returned from GitHub')
 
             // Exchange code on server
-            const resp = await fetch('http://localhost:5000/github/exchange', {
+            const resp = await fetch(bridgeUrl('/github/exchange'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ code, redirect_uri: redirectUrl })

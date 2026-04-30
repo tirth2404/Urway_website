@@ -8,18 +8,23 @@ const { v4: uuidv4 } = require('uuid');
 const cors = require('cors');
 
 const app = express();
+const PORT = Number(process.env.PORT || 3000);
+const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
+const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI;
+const DB_NAME = process.env.DB_NAME || 'urway';
+
 app.use(express.json());
 app.use(cors());
 app.use(session({ secret: process.env.SESSION_SECRET || 'dev_secret', resave: false, saveUninitialized: true }));
 app.use(passport.initialize());
 app.use(passport.session());
 
-if (!process.env.MONGODB_URI) {
-  console.error('MONGODB_URI not set in .env');
+if (!MONGO_URI) {
+  console.error('MONGO_URI not set in .env');
   process.exit(1);
 }
 
-mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
+mongoose.connect(MONGO_URI, { dbName: DB_NAME, serverSelectionTimeoutMS: 5000 }).then(() => {
   console.log('MongoDB connected');
 }).catch(err => { console.error('Mongo connect error', err); process.exit(1); });
 
@@ -35,7 +40,7 @@ const loggedOutUsers = new Set(); // track logged-out users temporarily
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: `${process.env.BASE_URL || 'http://localhost:3000'}/auth/google/callback`
+  callbackURL: `${BASE_URL}/auth/google/callback`
 }, async (accessToken, refreshToken, profile, cb) => {
   try {
     let user = await User.findOne({ googleId: profile.id });
@@ -278,7 +283,6 @@ app.get('/logs', async (req, res) => {
   } catch (e) { return res.status(500).json({ error: 'Server error' }); }
 });
 
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`urway-backend listening on ${PORT}`));
 
 

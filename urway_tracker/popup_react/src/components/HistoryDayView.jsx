@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import CryptoUtils from '../utils/crypto-utils'
+import { bridgeUrl } from '../config'
 
 function formatDuration(seconds) {
   if (!seconds && seconds !== 0) return ''
@@ -40,7 +41,7 @@ export default function HistoryDayView({ date, userEmail, registrationTimestamp,
   async function fetchDayData() {
     setLoading(true)
     try {
-      const res = await fetch(`http://localhost:5000/activities?userEmail=${encodeURIComponent(userEmail)}&date=${encodeURIComponent(date)}`)
+      const res = await fetch(`${bridgeUrl('/activities')}?userEmail=${encodeURIComponent(userEmail)}&date=${encodeURIComponent(date)}`)
       const result = await res.json()
       const rawSites = result.sites || []
 

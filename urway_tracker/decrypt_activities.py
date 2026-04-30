@@ -21,6 +21,7 @@ import json
 import base64
 import argparse
 import hashlib
+import os
 from datetime import datetime
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2
@@ -141,8 +142,9 @@ def fetch_encrypted_activities(email, login_timestamp=None, use_master_key=False
 
 def get_master_key_from_bridge():
     """Fetch master key status from bridge (admin access)"""
+    bridge_base_url = os.environ.get("BRIDGE_BASE_URL", "http://localhost:5002").rstrip("/")
     try:
-        response = requests.get("http://localhost:5000/master-key-status")
+        response = requests.get(f"{bridge_base_url}/master-key-status")
         if response.status_code == 200:
             return response.json()
         else:

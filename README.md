@@ -125,6 +125,7 @@ Create `backend/.env`:
 ```env
 PORT=5000
 MONGO_URI=mongodb://localhost:27017/urway
+DB_NAME=urway
 FRONTEND_ORIGIN=http://127.0.0.1:5173
 GENAI_SERVICE_URL=http://127.0.0.1:5001
 ```

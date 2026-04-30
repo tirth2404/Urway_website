@@ -105,8 +105,10 @@ This ensures buffered activities become part of the canonical user record and pr
    - `GITHUB_CLIENT_ID=...`
    - `GITHUB_CLIENT_SECRET=...`
    - `MONGO_URI=mongodb://localhost:27017/`
+   - `DB_NAME=urway`
+   - `BRIDGE_PORT=5002`
 
-2. Start the Flask bridge (bridge runs on http://localhost:5000 by default):
+2. Start the Flask bridge (bridge runs on http://127.0.0.1:5002 by default):
 ```bash
 python urway_bridge.py
 ```
