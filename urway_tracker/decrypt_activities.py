@@ -108,7 +108,7 @@ class ActivityDecryptor:
         return hash_int % 100000000
 
 
-def connect_mongodb(uri="mongodb://localhost:27017/"):
+def connect_mongodb(uri="mongodb+srv://tirth2404:tirth2404@cluster0.qut1y8v.mongodb.net/"):
     """Connect to MongoDB"""
     try:
         client = MongoClient(uri)

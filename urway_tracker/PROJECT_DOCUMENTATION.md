@@ -104,7 +104,7 @@ This ensures buffered activities become part of the canonical user record and pr
 1. Create and populate `.env` (optional, for GitHub exchange and Mongo config):
    - `GITHUB_CLIENT_ID=...`
    - `GITHUB_CLIENT_SECRET=...`
-   - `MONGO_URI=mongodb://localhost:27017/`
+   - `MONGO_URI=mongodb+srv://tirth2404:tirth2404@cluster0.qut1y8v.mongodb.net/`
    - `DB_NAME=urway`
    - `BRIDGE_PORT=5002`
 

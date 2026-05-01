@@ -8,7 +8,7 @@ import appRouter from "./router/appRouter.js";
 
 const app = express();
 const port = Number(process.env.PORT || 5000);
-const mongoUri = process.env.MONGO_URI || "mongodb://localhost:27017/urway";
+const mongoUri = process.env.MONGO_URI || process.env.MONGODB_URI || "mongodb+srv://tirth2404:tirth2404@cluster0.qut1y8v.mongodb.net/";
 const dbName = process.env.DB_NAME || "urway";
 const frontendOrigin = process.env.FRONTEND_ORIGIN || "http://127.0.0.1:5173";
 

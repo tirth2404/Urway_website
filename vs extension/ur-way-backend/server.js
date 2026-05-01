@@ -10,7 +10,7 @@ const cors = require('cors');
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
-const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI;
+const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI || "mongodb+srv://tirth2404:tirth2404@cluster0.qut1y8v.mongodb.net/";
 const DB_NAME = process.env.DB_NAME || 'urway';
 
 app.use(express.json());

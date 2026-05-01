@@ -49,7 +49,7 @@ logger.setLevel(logging.INFO)
 
 # MongoDB Setup
 try:
-    MONGO_URI = os.environ.get("MONGO_URI") or os.environ.get("MONGODB_URI", "mongodb://localhost:27017/")
+    MONGO_URI = os.environ.get("MONGO_URI") or os.environ.get("MONGODB_URI", "mongodb+srv://tirth2404:tirth2404@cluster0.qut1y8v.mongodb.net/")
     DB_NAME = os.environ.get("DB_NAME", "urway")
     client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=5000)
     # Verify connection
