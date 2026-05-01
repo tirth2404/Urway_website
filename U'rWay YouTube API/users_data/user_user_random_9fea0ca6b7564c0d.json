@@ -1,0 +1,39 @@
+{
+  "user_email": "user_random_9fea0ca6b7564c0d",
+  "user_id": "user_random_9fea0ca6b7564c0d",
+  "user_name": "user_random_9fea0ca6b7564c0d",
+  "category_time_breakdown": {
+    "Sports": "11 min",
+    "Science & Technology": "144 min",
+    "Education": "2807 min",
+    "Gaming": "92 min",
+    "Entertainment": "870 min",
+    "Comedy": "294 min",
+    "Film & Animation": "63 min",
+    "People & Blogs": "183 min",
+    "Autos & Vehicles": "2 min",
+    "Music": "5 min",
+    "News & Politics": "90 min",
+    "Howto & Style": "18 min",
+    "Travel & Events": "78 min",
+    "Nonprofits & Activism": "1 min"
+  },
+  "total_videos": 487,
+  "sync_date": "2026-05-01T12:27:17.028225",
+  "video_count_by_category": {
+    "Sports": 18,
+    "Science & Technology": 27,
+    "Education": 138,
+    "Gaming": 39,
+    "Entertainment": 93,
+    "Comedy": 28,
+    "Film & Animation": 13,
+    "People & Blogs": 76,
+    "Autos & Vehicles": 3,
+    "Music": 5,
+    "News & Politics": 9,
+    "Howto & Style": 25,
+    "Travel & Events": 12,
+    "Nonprofits & Activism": 1
+  }
+}

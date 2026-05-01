@@ -1,0 +1,25 @@
+{
+  "user_email": "user_random_5999a4a9fba14777",
+  "user_id": "user_random_5999a4a9fba14777",
+  "user_name": "user_random_5999a4a9fba14777",
+  "category_time_breakdown": {
+    "Music": "61 min",
+    "Entertainment": "34 min",
+    "People & Blogs": "88 min",
+    "Education": "32 min",
+    "Gaming": "21 min",
+    "Howto & Style": "23 min",
+    "Comedy": "55 min"
+  },
+  "total_videos": 55,
+  "sync_date": "2026-05-01T15:47:56.160532",
+  "video_count_by_category": {
+    "Music": 19,
+    "Entertainment": 9,
+    "People & Blogs": 23,
+    "Education": 1,
+    "Gaming": 1,
+    "Howto & Style": 1,
+    "Comedy": 1
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "user_random_9fea0ca6b7564c0d": {
+    "user_id": "user_random_9fea0ca6b7564c0d",
+    "user_name": "user_random_9fea0ca6b7564c0d",
+    "email_safe": "user_random_9fea0ca6b7564c0d",
+    "json_file": "users_data/user_user_random_9fea0ca6b7564c0d.json",
+    "csv_file": "users_data/user_user_random_9fea0ca6b7564c0d.csv",
+    "categories_csv": "users_data/user_user_random_9fea0ca6b7564c0d_categories.csv",
+    "total_videos": 487,
+    "total_time_minutes": 4658,
+    "categories_count": 14,
+    "sync_date": "2026-05-01T12:27:17.042367"
+  },
+  "user_random_9a86b02bde084d02": {
+    "user_id": "user_random_9a86b02bde084d02",
+    "user_name": "user_random_9a86b02bde084d02",
+    "email_safe": "user_random_9a86b02bde084d02",
+    "json_file": "users_data/user_user_random_9a86b02bde084d02.json",
+    "csv_file": "users_data/user_user_random_9a86b02bde084d02.csv",
+    "categories_csv": "users_data/user_user_random_9a86b02bde084d02_categories.csv",
+    "total_videos": 948,
+    "total_time_minutes": 42200,
+    "categories_count": 10,
+    "sync_date": "2026-05-01T12:28:21.837558"
+  },
+  "user_random_933ed9488e394a9d": {
+    "user_id": "user_random_933ed9488e394a9d",
+    "user_name": "user_random_933ed9488e394a9d",
+    "email_safe": "user_random_933ed9488e394a9d",
+    "json_file": "users_data/user_user_random_933ed9488e394a9d.json",
+    "csv_file": "users_data/user_user_random_933ed9488e394a9d.csv",
+    "categories_csv": "users_data/user_user_random_933ed9488e394a9d_categories.csv",
+    "total_videos": 29,
+    "total_time_minutes": 635,
+    "categories_count": 6,
+    "sync_date": "2026-05-01T15:22:34.669579"
+  },
+  "user_random_5999a4a9fba14777": {
+    "user_id": "user_random_5999a4a9fba14777",
+    "user_name": "user_random_5999a4a9fba14777",
+    "email_safe": "user_random_5999a4a9fba14777",
+    "json_file": "users_data/user_user_random_5999a4a9fba14777.json",
+    "csv_file": "users_data/user_user_random_5999a4a9fba14777.csv",
+    "categories_csv": "users_data/user_user_random_5999a4a9fba14777_categories.csv",
+    "total_videos": 55,
+    "total_time_minutes": 314,
+    "categories_count": 7,
+    "sync_date": "2026-05-01T15:47:56.169561"
+  }
+}
