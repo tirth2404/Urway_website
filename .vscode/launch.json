@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run VS Extension (ur-way)",
+            "type": "extensionHost",
+            "request": "launch",
+            "args": [
+                "--extensionDevelopmentPath=${workspaceFolder}/vs extension/ur-way"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/vs extension/ur-way/out/**/*.js",
+                "${workspaceFolder}/vs extension/ur-way/dist/**/*.js"
+            ]
+        }
+    ]
+}
