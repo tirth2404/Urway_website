@@ -12,7 +12,7 @@ export function verifyToken(req, res, next) {
   }
   const token = auth.slice(7);
   try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = jwt.verify(token, process.env.JWT_SECRET, { issuer: "urway" });
     next();
   } catch (err) {
     const message = err.name === "TokenExpiredError" ? "Token expired." : "Invalid token.";

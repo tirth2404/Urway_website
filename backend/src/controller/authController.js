@@ -39,7 +39,7 @@ export async function authSignIn(req, res) {
   const profile = await UserProfile.findOne({ userId: credential.userId }).lean();
 
   const accessToken  = signAccessToken(credential.userId, credential.email);
-  const refreshToken = signRefreshToken(credential.userId);
+  const refreshToken = signRefreshToken(credential.userId, profile?.virtualClusterTag ?? null);
   setRefreshCookie(res, refreshToken);
 
   return res.json({
@@ -73,17 +73,15 @@ export async function refreshTokens(req, res) {
     return res.status(401).json({ error: "User not found." });
   }
 
+  const clusterTag      = decoded.virtualClusterTag ?? null;
   const newAccessToken  = signAccessToken(credential.userId, credential.email);
-  const newRefreshToken = signRefreshToken(credential.userId);
+  const newRefreshToken = signRefreshToken(credential.userId, clusterTag);
   setRefreshCookie(res, newRefreshToken);
-
-  // Also return userId + virtualClusterTag so the frontend can restore user state
-  const profile = await UserProfile.findOne({ userId: decoded.userId }).lean();
 
   return res.json({
     accessToken:       newAccessToken,
     userId:            credential.userId,
-    virtualClusterTag: profile?.virtualClusterTag ?? null,
+    virtualClusterTag: clusterTag,
   });
 }
 

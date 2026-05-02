@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, ShieldCheck, ShieldX, Play, AlertTriangle } from 'lucide-react';
+import { api } from '../utils/apiClient';
 
-export default function ProctoredExam({ apiBaseUrl, userId, onBack }) {
+export default function ProctoredExam({ userId, onBack }) {
   const [sourceText, setSourceText] = useState('https://youtube.com/watch?v=example');
   const [session, setSession] = useState(null);
   const [status, setStatus] = useState('idle');
@@ -13,11 +14,11 @@ export default function ProctoredExam({ apiBaseUrl, userId, onBack }) {
 
   const terminateWithReason = async (reason, url = '') => {
     if (!session?._id) return;
-    await fetch(`${apiBaseUrl}/api/exam/flag/${session._id}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ reason, url }),
-    });
+    try {
+      await api.post(`/api/exam/flag/${session._id}`, { reason, url });
+    } catch {
+      // Keep local termination state even if the network call fails.
+    }
     setStatus(`terminated:${reason}`);
   };
 
@@ -46,11 +47,8 @@ export default function ProctoredExam({ apiBaseUrl, userId, onBack }) {
   const startExam = async () => {
     setStatus('starting');
     try {
-      const res = await fetch(`${apiBaseUrl}/api/exam/start`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, sourceMaterial }),
-      });
+      const res = await api.post('/api/exam/start', { userId, sourceMaterial });
+      if (!res) { setStatus('idle'); return; }
       const data = await res.json();
       if (!res.ok) { alert(data.error || 'Failed to start exam'); setStatus('idle'); return; }
       setSession(data);

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft, ChevronLeft, ChevronRight, Loader2, Eye, EyeOff, Wifi } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
@@ -49,8 +49,12 @@ const defaultFormData = {
   physical_activity_min: 30,
   activity_frequency: 3,
   activity_type: 'Walking',
+};
+
+const defaultCredentials = {
   email: '',
   password: '',
+  confirmPassword: '',
 };
 
 function ToggleButton({ active, onClick, children }) {
@@ -92,8 +96,10 @@ export default function OnboardingFlow({ onBackToLanding, onComplete }) {
   const [step, setStep] = useState(1);
   const [dir, setDir] = useState(1);
   const [formData, setFormData] = useState(defaultFormData);
+  const [credentials, setCredentials] = useState(defaultCredentials);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPw, setShowPw] = useState(false);
+  const [showConfirmPw, setShowConfirmPw] = useState(false);
 
   // ── FIX Bug 1: get signIn from AuthContext so we can populate user after onboarding ──
   const { signIn } = useAuth();
@@ -101,6 +107,7 @@ export default function OnboardingFlow({ onBackToLanding, onComplete }) {
   const apiBaseUrl = import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:5000';
 
   const handleChange = (key, value) => setFormData(prev => ({ ...prev, [key]: value }));
+  const handleCredentialsChange = (key, value) => setCredentials(prev => ({ ...prev, [key]: value }));
 
   const toggleSelection = (key, value) => {
     setFormData(prev => {
@@ -116,18 +123,28 @@ export default function OnboardingFlow({ onBackToLanding, onComplete }) {
   };
 
   const handleFinish = async () => {
-    if (!formData.email || !formData.password) {
+    if (!credentials.email || !credentials.password) {
       alert('Please enter your email and password to continue.'); return;
     }
-    if (formData.password.length < 8) {
+    if (credentials.password.length < 8) {
       alert('Password must be at least 8 characters.'); return;
+    }
+    if (credentials.password !== credentials.confirmPassword) {
+      alert('Password and confirm password must match.'); return;
     }
     setIsSubmitting(true);
     try {
+      const payload = {
+        ...formData,
+        email: credentials.email,
+        password: credentials.password,
+        confirmPassword: credentials.confirmPassword,
+      };
       const res = await fetch(`${apiBaseUrl}/api/onboarding`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        credentials: 'include',
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || 'Onboarding failed.');
@@ -136,7 +153,7 @@ export default function OnboardingFlow({ onBackToLanding, onComplete }) {
       // The new auth system never reads from localStorage — it uses AuthContext.
       // Call signIn() instead so AuthContext.user is populated immediately,
       // which prevents Roadmap from redirecting back to / after onboarding.
-      await signIn(formData.email, formData.password);
+      await signIn(credentials.email, credentials.password);
 
       onComplete({ userId: data.userId });
     } catch (err) {
@@ -388,7 +405,7 @@ export default function OnboardingFlow({ onBackToLanding, onComplete }) {
                 <>
                   <div>
                     <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Email Address</label>
-                    <input type="email" value={formData.email} onChange={e => handleChange('email', e.target.value)} placeholder="you@example.com" className="input-field" />
+                    <input type="email" value={credentials.email} onChange={e => handleCredentialsChange('email', e.target.value)} placeholder="you@example.com" className="input-field" />
                   </div>
 
                   <div>
@@ -396,8 +413,8 @@ export default function OnboardingFlow({ onBackToLanding, onComplete }) {
                     <div className="relative">
                       <input
                         type={showPw ? 'text' : 'password'}
-                        value={formData.password}
-                        onChange={e => handleChange('password', e.target.value)}
+                        value={credentials.password}
+                        onChange={e => handleCredentialsChange('password', e.target.value)}
                         placeholder="At least 8 characters"
                         className="input-field pr-12"
                       />
@@ -406,6 +423,22 @@ export default function OnboardingFlow({ onBackToLanding, onComplete }) {
                       </button>
                     </div>
                     <p className="mt-2 text-xs text-ink-muted">Use a mix of letters, numbers, and symbols for security.</p>
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Confirm Password</label>
+                    <div className="relative">
+                      <input
+                        type={showConfirmPw ? 'text' : 'password'}
+                        value={credentials.confirmPassword}
+                        onChange={e => handleCredentialsChange('confirmPassword', e.target.value)}
+                        placeholder="Re-enter your password"
+                        className="input-field pr-12"
+                      />
+                      <button type="button" onClick={() => setShowConfirmPw(!showConfirmPw)} className="absolute right-4 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink transition-colors">
+                        {showConfirmPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
                   </div>
 
                   <div className="p-4 rounded-2xl bg-paper-warm border-2 border-border text-sm text-ink-muted">

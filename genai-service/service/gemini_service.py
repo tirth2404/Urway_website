@@ -10,6 +10,9 @@ from model.response_models import cluster_fallback, exam_fallback, roadmap_fallb
 
 # ── Gemini client ────────────────────────────────────────────────────────────
 
+_GEMINI_CLIENT = None
+_GEMINI_CLIENT_API_KEY = None
+
 def _get_models() -> List[str]:
     configured = os.environ.get("GEMINI_MODEL", "").strip()
     candidates = [configured, "gemini-2.0-flash", "gemini-1.5-flash"]
@@ -22,13 +25,16 @@ def _get_models() -> List[str]:
 
 
 def ask_gemini(prompt: str) -> str:
+    global _GEMINI_CLIENT, _GEMINI_CLIENT_API_KEY
     api_key = os.environ.get("GEMINI_API_KEY", "")
     if not api_key:
         return ""
-    client = genai.Client(api_key=api_key)
+    if _GEMINI_CLIENT is None or _GEMINI_CLIENT_API_KEY != api_key:
+        _GEMINI_CLIENT = genai.Client(api_key=api_key)
+        _GEMINI_CLIENT_API_KEY = api_key
     for model_name in _get_models():
         try:
-            response = client.models.generate_content(model=model_name, contents=prompt)
+            response = _GEMINI_CLIENT.models.generate_content(model=model_name, contents=prompt)
             text = (response.text or "").strip()
             if text:
                 return text

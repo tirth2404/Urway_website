@@ -104,6 +104,8 @@ User signs in using email/password. Backend verifies hash and returns user ident
 
 - `GET /api/health`
 - `POST /api/auth/signin`
+- `POST /api/auth/refresh`
+- `POST /api/auth/signout`
 - `POST /api/onboarding`
 - `GET /api/dashboard/:userId`
 - `POST /api/targets/:userId`
@@ -127,6 +129,7 @@ PORT=5000
 MONGO_URI= url
 DB_NAME=urway
 FRONTEND_ORIGIN=http://127.0.0.1:5173
+CORS_ALLOWED_ORIGINS=http://127.0.0.1:5173
 GENAI_SERVICE_URL=http://127.0.0.1:5001
 ```
 

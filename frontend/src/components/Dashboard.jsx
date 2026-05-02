@@ -19,8 +19,17 @@ function StatusBadge({ status }) {
   );
 }
 
-export default function Dashboard({ data, onCreateTarget, loading, onOpenExam }) {
+export default function Dashboard({ data, errorMessage, onCreateTarget, loading, onOpenExam }) {
   const [modalOpen, setModalOpen] = useState(false);
+
+  if (errorMessage) {
+    return (
+      <div className="card-brutal p-8 text-center space-y-3">
+        <h2 className="font-display text-2xl font-bold">Dashboard unavailable</h2>
+        <p className="text-ink-muted">{errorMessage}</p>
+      </div>
+    );
+  }
 
   const targets = data?.targets || [];
   const clusterTag = data?.profile?.virtualClusterTag || 'Unclassified';

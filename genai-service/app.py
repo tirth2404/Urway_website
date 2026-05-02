@@ -35,6 +35,6 @@ def create_app() -> Flask:
 if __name__ == "__main__":
     app = create_app()
     port = int(os.environ.get("PORT", "5001"))
-    debug = os.environ.get("FLASK_DEBUG", "true").lower() == "true"
+    debug = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
     print(f"U'rWay GenAI service running on http://127.0.0.1:{port}")
     app.run(host="127.0.0.1", port=port, debug=debug)

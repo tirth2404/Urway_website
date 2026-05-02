@@ -1,12 +1,12 @@
 const genaiBaseUrl    = process.env.GENAI_SERVICE_URL || "http://127.0.0.1:5001";
-const SERVICE_SECRET  = process.env.SERVICE_SECRET   || "";
 const REQUEST_TIMEOUT = 30_000; // 30s — Gemini can be slow
 
-if (!SERVICE_SECRET) {
+if (!process.env.SERVICE_SECRET) {
   console.warn("[genaiClient] WARNING: SERVICE_SECRET is not set — calls to genai-service will be rejected.");
 }
 
 async function postJson(path, payload) {
+  const serviceSecret = process.env.SERVICE_SECRET || "";
   const controller = new AbortController();
   const timer      = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
 
@@ -15,7 +15,7 @@ async function postJson(path, payload) {
       method:  "POST",
       headers: {
         "Content-Type":     "application/json",
-        "X-Service-Secret": SERVICE_SECRET,   // ← shared secret injected here automatically
+        "X-Service-Secret": serviceSecret,   // ← shared secret injected here automatically
       },
       body:   JSON.stringify(payload),
       signal: controller.signal,

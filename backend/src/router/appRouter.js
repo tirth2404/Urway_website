@@ -1,7 +1,7 @@
 import express from "express";
 import { asyncHandler }          from "../middleware/asyncHandler.js";
 import { verifyToken, verifySelf } from "../middleware/authMiddleware.js";
-import { authSignIn, refreshTokens, authSignOut } from "../controller/authController.js";
+import authRouter from "./authRouter.js";
 import {
   createTarget,
   dashboard,
@@ -16,9 +16,7 @@ const router = express.Router();
 
 // ── Public ────────────────────────────────────────────────────────────────────
 router.get( "/health",          asyncHandler(getHealth));
-router.post("/auth/signin",     asyncHandler(authSignIn));
-router.post("/auth/refresh",    asyncHandler(refreshTokens));
-router.post("/auth/signout",    asyncHandler(authSignOut));
+router.use("/auth", authRouter);
 router.post("/onboarding",      asyncHandler(onboarding));   // creates account — public
 
 // ── Protected (JWT required) ──────────────────────────────────────────────────

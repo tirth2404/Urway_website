@@ -2,6 +2,9 @@ import mongoose from "mongoose";
 
 export async function connectDB(mongoUri, options = {}) {
   const { retries = 5, dbName } = options;
+  if (!mongoUri) {
+    throw new Error("MONGO_URI environment variable is not set.");
+  }
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       await mongoose.connect(mongoUri, {

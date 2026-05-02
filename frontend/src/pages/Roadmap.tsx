@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Dashboard     from '../components/Dashboard';
 import ProctoredExam from '../components/ProctoredExam';
@@ -30,7 +30,6 @@ export type RoadmapData = {
 };
 
 type RoadmapProps = {
-  apiBaseUrl: string;
   onBackHome: () => void;
   onLogout:   () => void;
 };
@@ -41,31 +40,42 @@ export default function Roadmap({ onBackHome, onLogout }: RoadmapProps) {
   const [roadmapData, setRoadmapData] = useState<RoadmapData | null>(null);
   const [isLoading,   setIsLoading]   = useState(true);
   const [isCreating,  setIsCreating]  = useState(false);
+  const [dashboardError, setDashboardError] = useState<string | null>(null);
   const [view, setView]               = useState<'dashboard' | 'exam'>('dashboard');
 
   // userId comes from the JWT via AuthContext — never from localStorage
   const userId = user?.userId ?? '';
 
-  useEffect(() => {
-    if (isRestoring) return;              // wait — session restore not done yet
-    if (!userId) { navigate('/signin', { replace: true }); return; }
-    loadDashboard();
-  }, [isRestoring, userId]);
-
-  const loadDashboard = async () => {
+  const loadDashboard = useCallback(async () => {
     setIsLoading(true);
+    setDashboardError(null);
     try {
       const res  = await api.get(`/api/dashboard/${userId}`);
+      if (!res) {
+        setDashboardError('Your session expired. Please sign in again.');
+        return;
+      }
+      if (res.status === 401 || res.status === 403) {
+        await signOut();
+        navigate('/signin', { replace: true });
+        return;
+      }
       const data = await res!.json();
       if (!res!.ok) throw new Error(data?.error || 'Failed to load dashboard');
       setRoadmapData(data);
     } catch (err) {
       console.error(err);
-      navigate('/signin', { replace: true });
+      setDashboardError('Could not load your dashboard right now. Please check your connection and retry.');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [navigate, signOut, userId]);
+
+  useEffect(() => {
+    if (isRestoring) return;              // wait — session restore not done yet
+    if (!userId) { navigate('/signin', { replace: true }); return; }
+    loadDashboard();
+  }, [isRestoring, userId, navigate, loadDashboard]);
 
   const handleCreateTarget = async (form: { targetName: string; timeline: string; priorKnowledge: number; description: string }) => {
     setIsCreating(true);
@@ -117,15 +127,24 @@ export default function Roadmap({ onBackHome, onLogout }: RoadmapProps) {
             <div className="skeleton h-48 w-full" />
             <div className="skeleton h-48 w-full" />
           </div>
+        ) : dashboardError ? (
+          <div className="card-brutal p-8 space-y-4 text-center">
+            <h2 className="font-display text-2xl font-bold">Unable to load dashboard</h2>
+            <p className="text-ink-muted">{dashboardError}</p>
+            <div className="flex justify-center gap-3">
+              <button onClick={loadDashboard} className="btn-pill-filled text-sm">Retry</button>
+              <button onClick={handleLogout} className="btn-pill text-sm">Back to Home</button>
+            </div>
+          </div>
         ) : view === 'exam' ? (
           <ProctoredExam
-            apiBaseUrl={import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:5000'}
             userId={userId}
             onBack={() => setView('dashboard')}
           />
         ) : (
           <Dashboard
             data={roadmapData}
+            errorMessage={dashboardError}
             loading={isCreating}
             onCreateTarget={handleCreateTarget}
             onOpenExam={() => setView('exam')}

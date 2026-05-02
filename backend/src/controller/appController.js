@@ -8,6 +8,11 @@ import { Target } from "../model/Target.js";
 import { ExamSession } from "../model/ExamSession.js";
 import { ExtensionActivity } from "../model/ExtensionActivity.js";
 import {
+  setRefreshCookie,
+  signAccessToken,
+  signRefreshToken,
+} from "../utils/tokenUtils.js";
+import {
   getGenaiBaseUrl,
   requestCluster,
   requestRoadmap,
@@ -98,36 +103,6 @@ export async function getHealth(_req, res) {
 }
 
 /**
- * POST /api/auth/signin
- * Verify email + password, return userId.
- */
-export async function authSignIn(req, res) {
-  const email = normalizeEmail(req.body?.email || "");
-  const password = String(req.body?.password || "");
-
-  if (!validateEmail(email) || password.length < 8) {
-    return res.status(400).json({ error: "Valid email and password (min 8 chars) are required." });
-  }
-
-  const credential = await UserCredential.findOne({ email }).lean();
-  if (!credential) {
-    return res.status(401).json({ error: "Invalid email or password." });
-  }
-
-  const isMatch = await bcrypt.compare(password, credential.passwordHash);
-  if (!isMatch) {
-    return res.status(401).json({ error: "Invalid email or password." });
-  }
-
-  const profile = await UserProfile.findOne({ userId: credential.userId }).lean();
-
-  return res.json({
-    userId: credential.userId,
-    virtualClusterTag: profile?.virtualClusterTag || null,
-  });
-}
-
-/**
  * POST /api/onboarding
  *
  * Full flow:
@@ -137,14 +112,14 @@ export async function authSignIn(req, res) {
  *  4. Save UserCredential (hashed password)
  *  5. Call GenAI to generate a personalized roadmap from all user inputs
  *  6. Save initial Target with that roadmap
- *  7. Return userId + cluster tag + initial target
+ *  7. Issue auth tokens (access token + refresh cookie) and return onboarding payload
  */
 export async function onboarding(req, res) {
   const inputs = req.body || {};
   const userId = inputs.userId || randomUUID();
   const email = normalizeEmail(inputs.email || "");
   const password = String(inputs.password || "");
-  const onboardingInputs = stripCredentials(inputs);
+  const confirmPassword = String(inputs.confirmPassword || "");
 
   if (!validateEmail(email)) {
     return res.status(400).json({ error: "A valid email address is required." });
@@ -152,6 +127,11 @@ export async function onboarding(req, res) {
   if (password.length < 8) {
     return res.status(400).json({ error: "Password must be at least 8 characters." });
   }
+  if (password !== confirmPassword) {
+    return res.status(400).json({ error: "Password and confirmPassword must match." });
+  }
+
+  const onboardingInputs = stripCredentials(inputs);
 
   // Check for existing email
   const existing = await UserCredential.findOne({ email }).lean();
@@ -216,7 +196,12 @@ export async function onboarding(req, res) {
     status: "in-progress",
   });
 
+  const accessToken = signAccessToken(profile.userId, email);
+  const refreshToken = signRefreshToken(profile.userId, profile.virtualClusterTag ?? null);
+  setRefreshCookie(res, refreshToken);
+
   return res.status(201).json({
+    accessToken,
     userId: profile.userId,
     virtualClusterTag: profile.virtualClusterTag,
     rationale: cluster.rationale || "",
@@ -311,10 +296,11 @@ export async function createTarget(req, res) {
  * Start a proctored exam session.
  */
 export async function startExam(req, res) {
-  const { userId, targetId = "", sourceMaterial = [] } = req.body || {};
-  if (!userId) return res.status(400).json({ error: "userId is required." });
+  const authUserId = req.user?.userId;
+  const { targetId = "", sourceMaterial = [] } = req.body || {};
+  if (!authUserId) return res.status(401).json({ error: "Unauthorized." });
 
-  const profile = await UserProfile.findOne({ userId }).lean();
+  const profile = await UserProfile.findOne({ userId: authUserId }).lean();
   if (!profile) return res.status(404).json({ error: "User profile not found." });
 
   let questionSet = fallbackExamQuestions();
@@ -325,7 +311,7 @@ export async function startExam(req, res) {
   }
 
   const session = await ExamSession.create({
-    userId,
+    userId: authUserId,
     targetId,
     sourceMaterial,
     generatedQuestions: questionSet.questions || [],
@@ -341,6 +327,14 @@ export async function startExam(req, res) {
 export async function flagExam(req, res) {
   const { sessionId } = req.params;
   const { reason = "Policy violation", url = "" } = req.body || {};
+  const authUserId = req.user?.userId;
+  if (!authUserId) return res.status(401).json({ error: "Unauthorized." });
+
+  const existingSession = await ExamSession.findById(sessionId).lean();
+  if (!existingSession) return res.status(404).json({ error: "Exam session not found." });
+  if (existingSession.userId !== authUserId) {
+    return res.status(403).json({ error: "Forbidden: cannot flag another user's exam session." });
+  }
 
   const session = await ExamSession.findByIdAndUpdate(
     sessionId,

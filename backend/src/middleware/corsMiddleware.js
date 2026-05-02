@@ -1,11 +1,9 @@
 import cors from "cors";
 
-export function createCors(frontendOrigin) {
+export function createCors(frontendOrigin, additionalOrigins = []) {
   const origins = [
     frontendOrigin,
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://localhost:3000",
+    ...additionalOrigins,
   ].filter(Boolean);
 
   return cors({

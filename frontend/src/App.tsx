@@ -1,11 +1,11 @@
-import { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight, Compass, Zap, BarChart2, ChevronRight } from 'lucide-react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import ProtectedRoute from './components/ProtectedRoute';
 import OnboardingFlow from './OnboardingFlow';
 import Roadmap        from './pages/Roadmap';
 import SignIn         from './pages/SignIn';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
 
 type OnboardingResponse = { userId?: string };
 
@@ -130,14 +130,6 @@ function Landing() {
 function AppRoutes() {
   const loc      = useLocation();
   const navigate = useNavigate();
-  const { user, isRestoring } = useAuth();
-
-  // While restoring session from cookie, don't redirect — wait for the check to complete
-  useEffect(() => {
-    if (!isRestoring && !user && loc.pathname === '/roadmap') {
-      navigate('/signin', { replace: true });
-    }
-  }, [isRestoring, user, loc.pathname, navigate]);
 
   const handleLogout = () => navigate('/');
 
@@ -172,11 +164,12 @@ function AppRoutes() {
         <Route
           path="/roadmap"
           element={
-            <Roadmap
-              apiBaseUrl={import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:5000'}
-              onBackHome={() => navigate('/')}
-              onLogout={handleLogout}
-            />
+            <ProtectedRoute>
+              <Roadmap
+                onBackHome={() => navigate('/')}
+                onLogout={handleLogout}
+              />
+            </ProtectedRoute>
           }
         />
         <Route path="*" element={<Navigate to="/" replace />} />
