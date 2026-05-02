@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft, ChevronLeft, ChevronRight, Loader2, Eye, EyeOff, Wifi } from 'lucide-react';
+import { useAuth } from './context/AuthContext';
 
 const TOTAL_STEPS = 5;
 
@@ -94,6 +95,9 @@ export default function OnboardingFlow({ onBackToLanding, onComplete }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPw, setShowPw] = useState(false);
 
+  // ── FIX Bug 1: get signIn from AuthContext so we can populate user after onboarding ──
+  const { signIn } = useAuth();
+
   const apiBaseUrl = import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:5000';
 
   const handleChange = (key, value) => setFormData(prev => ({ ...prev, [key]: value }));
@@ -127,7 +131,13 @@ export default function OnboardingFlow({ onBackToLanding, onComplete }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || 'Onboarding failed.');
-      if (data.userId) localStorage.setItem('urway_user_id', data.userId);
+
+      // ── FIX Bug 1: removed localStorage.setItem('urway_user_id', data.userId)
+      // The new auth system never reads from localStorage — it uses AuthContext.
+      // Call signIn() instead so AuthContext.user is populated immediately,
+      // which prevents Roadmap from redirecting back to / after onboarding.
+      await signIn(formData.email, formData.password);
+
       onComplete({ userId: data.userId });
     } catch (err) {
       alert((err).message || 'Something went wrong. Please try again.');

@@ -1,0 +1,27 @@
+--- a/frontend/src/OnboardingFlow.jsx
++++ b/frontend/src/OnboardingFlow.jsx
+@@ -1,5 +1,6 @@
+ import React, { useMemo, useState } from 'react';
+ import { AnimatePresence, motion } from 'framer-motion';
+ import { ArrowLeft, ChevronLeft, ChevronRight, Loader2, Eye, EyeOff, Wifi } from 'lucide-react';
++import { useAuth } from './context/AuthContext';
+
+ // ... (rest of file unchanged until the component body)
+
+@@ -223,6 +224,7 @@ export default function OnboardingFlow({ onBackToLanding, onComplete }) {
+   const [isSubmitting, setIsSubmitting] = useState(false);
+   const [showPw, setShowPw] = useState(false);
+
++  const { signIn } = useAuth();
+   const apiBaseUrl = import.meta.env.VITE_BACKEND_URL || 'http://127.0.0.1:5000';
+
+@@ -247,8 +249,11 @@ export default function OnboardingFlow({ onBackToLanding, onComplete }) {
+       const data = await res.json();
+       if (!res.ok) throw new Error(data?.error || 'Onboarding failed.');
+-      if (data.userId) localStorage.setItem('urway_user_id', data.userId);  // ← REMOVED
+-      onComplete({ userId: data.userId });
++      // Onboarding succeeded — immediately sign the user in so AuthContext.user
++      // is populated and Roadmap doesn't redirect back to /.
++      await signIn(formData.email, formData.password);
++      onComplete({ userId: data.userId });
+     } catch (err) {

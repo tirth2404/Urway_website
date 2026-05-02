@@ -1,0 +1,43 @@
+--- a/backend/src/controller/appController.js
++++ b/backend/src/controller/appController.js
+@@ -594,26 +594,9 @@ export async function getHealth(_req, res) {
+   });
+ }
+
+-/**
+- * POST /api/auth/signin
+- * Verify email + password, return userId.
+- *
+- * DEAD CODE — Remove this function entirely.
+- * The router (appRouter.js) already imports authSignIn from authController.js
+- * which issues JWTs and sets the HttpOnly refresh cookie.
+- * This version has no JWT logic and is never called.
+- */
+-export async function authSignIn(req, res) {       // ← DELETE lines 597–621
+-  const email = normalizeEmail(req.body?.email || "");
+-  const password = String(req.body?.password || "");
+-
+-  if (!validateEmail(email) || password.length < 8) {
+-    return res.status(400).json({ error: "Valid email and password (min 8 chars) are required." });
+-  }
+-
+-  const credential = await UserCredential.findOne({ email }).lean();
+-  if (!credential) {
+-    return res.status(401).json({ error: "Invalid email or password." });
+-  }
+-
+-  const isMatch = await bcrypt.compare(password, credential.passwordHash);
+-  if (!isMatch) {
+-    return res.status(401).json({ error: "Invalid email or password." });
+-  }
+-
+-  const profile = await UserProfile.findOne({ userId: credential.userId }).lean();
+-
+-  return res.json({
+-    userId: credential.userId,
+-    virtualClusterTag: profile?.virtualClusterTag || null,
+-  });
+-}
+-
+ /**
+  * POST /api/onboarding
