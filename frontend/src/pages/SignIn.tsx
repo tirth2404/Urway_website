@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 type SignInPayload = { userId: string };
 type SignInProps = {
@@ -9,12 +10,13 @@ type SignInProps = {
   apiBaseUrl: string;
 };
 
-export default function SignIn({ onBack, onSuccess, apiBaseUrl }: SignInProps) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPw, setShowPw] = useState(false);
+export default function SignIn({ onBack, onSuccess }: SignInProps) {
+  const { signIn } = useAuth();
+  const [email,       setEmail]       = useState('');
+  const [password,    setPassword]    = useState('');
+  const [showPw,      setShowPw]      = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
-  const [error, setError] = useState('');
+  const [error,       setError]       = useState('');
 
   const handleSignIn = async () => {
     setError('');
@@ -30,14 +32,9 @@ export default function SignIn({ onBack, onSuccess, apiBaseUrl }: SignInProps) {
 
     setIsSigningIn(true);
     try {
-      const response = await fetch(`${apiBaseUrl}/api/auth/signin`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: normalizedEmail, password }),
-      });
-      const payload = await response.json();
-      if (!response.ok) throw new Error(payload?.error || payload?.detail || 'Sign in failed');
-      localStorage.setItem('urway_user_id', payload.userId);
+      // signIn() stores access token in memory, refresh token stays in HttpOnly cookie.
+      // No localStorage involved at all.
+      const payload = await signIn(normalizedEmail, password);
       onSuccess({ userId: payload.userId });
     } catch (err) {
       setError((err as Error)?.message || 'Unable to sign in. Please try again.');
