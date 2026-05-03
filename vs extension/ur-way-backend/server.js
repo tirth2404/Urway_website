@@ -32,7 +32,8 @@ const userSchema = new mongoose.Schema({ googleId: String, email: String, name: 
 const User = mongoose.model('User', userSchema);
 
 const logSchema = new mongoose.Schema({ userId: String, project: String, language: String, duration: Number, sessionTimeSeconds: Number, time: Date }, { timestamps: true });
-const Log = mongoose.model('Log', logSchema);
+const Log = mongoose.model('Log', logSchema, 'vscode_activity');
+
 
 const codeMap = new Map(); // one-time code -> userId
 const loggedOutUsers = new Set(); // track logged-out users temporarily

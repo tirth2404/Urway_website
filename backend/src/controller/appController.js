@@ -2,11 +2,12 @@ import mongoose from "mongoose";
 import { randomUUID } from "node:crypto";
 import bcrypt from "bcryptjs";
 
-import { UserProfile } from "../model/UserProfile.js";
+import { UserProfile }    from "../model/UserProfile.js";
 import { UserCredential } from "../model/UserCredential.js";
-import { Target } from "../model/Target.js";
-import { ExamSession } from "../model/ExamSession.js";
-import { ExtensionActivity } from "../model/ExtensionActivity.js";
+import { Target }         from "../model/Target.js";
+import { ExamSession }    from "../model/ExamSession.js";
+import { ChromeActivity }  from "../model/ChromeActivity.js";
+import { VscodeActivity }  from "../model/VscodeActivity.js";
 import {
   setRefreshCookie,
   signAccessToken,
@@ -116,7 +117,9 @@ export async function getHealth(_req, res) {
  */
 export async function onboarding(req, res) {
   const inputs = req.body || {};
-  const userId = inputs.userId || randomUUID();
+  // SECURITY: always generate userId server-side — never trust it from the client body.
+  // A malicious client could send an existing user's UUID and overwrite their profile.
+  const userId = randomUUID();
   const email = normalizeEmail(inputs.email || "");
   const password = String(inputs.password || "");
   const confirmPassword = String(inputs.confirmPassword || "");
@@ -246,9 +249,9 @@ export async function createTarget(req, res) {
     return res.status(404).json({ error: "User profile not found. Complete onboarding first." });
   }
 
-  // Get recent extension data for context
-  const recentActivity = await ExtensionActivity.find({ userId })
-    .sort({ createdAt: -1 })
+  // Get recent Chrome extension data for context
+  const recentActivity = await ChromeActivity.find({ userId })
+    .sort({ capturedAt: -1 })
     .limit(30)
     .lean();
 
@@ -352,10 +355,10 @@ export async function flagExam(req, res) {
 }
 
 /**
- * POST /api/extension/sync/:userId
- * Record a browser activity event and update the user's extension insight.
+ * POST /api/chrome/sync/:userId  (alias: /api/extension/sync/:userId)
+ * Record a Chrome browser activity event and update the user's extension insight.
  */
-export async function syncExtension(req, res) {
+export async function syncChromeExtension(req, res) {
   const { userId } = req.params;
   const { url = "", title = "", secondsSpent = 0 } = req.body || {};
 
@@ -363,7 +366,8 @@ export async function syncExtension(req, res) {
 
   const category = classifyActivity(url);
 
-  const event = await ExtensionActivity.create({
+  // Write to the chrome_activity collection
+  const event = await ChromeActivity.create({
     userId,
     url,
     title,
@@ -374,8 +378,8 @@ export async function syncExtension(req, res) {
 
   let insight = "Browsing looks on track.";
   if (category === "distracting") insight = "Off-track browsing detected — try to refocus on your roadmap.";
-  if (category === "ai-site") insight = "AI site detected — exam sessions will be flagged if active.";
-  if (category === "learning") insight = "Great — learning content detected in your recent browsing.";
+  if (category === "ai-site")     insight = "AI site detected — exam sessions will be flagged if active.";
+  if (category === "learning")    insight = "Great — learning content detected in your recent browsing.";
 
   await UserProfile.findOneAndUpdate(
     { userId },
@@ -385,3 +389,34 @@ export async function syncExtension(req, res) {
 
   return res.json({ event, insight, category, aiDomainDetected: isAiDomain(url) });
 }
+
+// Keep the old export name so any code that still imports syncExtension doesn't break
+export const syncExtension = syncChromeExtension;
+
+/**
+ * POST /api/vscode/sync/:userId
+ * Record a VS Code coding activity event from the U'rWay VS Code extension.
+ * Writes to the 'logs' collection (where the extension writes directly).
+ */
+export async function syncVscodeExtension(req, res) {
+  const { userId } = req.params;
+  const {
+    project            = "",
+    language           = "",
+    duration           = 0,
+    sessionTimeSeconds = 0,
+    time               = new Date(),
+  } = req.body || {};
+
+  const event = await VscodeActivity.create({
+    userId,
+    project,
+    language,
+    duration:           Math.max(0, Number(duration)           || 0),
+    sessionTimeSeconds: Math.max(0, Number(sessionTimeSeconds) || 0),
+    time:               time ? new Date(time) : new Date(),
+  });
+
+  return res.status(201).json({ event });
+}
+

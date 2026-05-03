@@ -62,7 +62,7 @@ except Exception as e:
 # Initialize DB references if client connected
 if client:
     db = client[DB_NAME]
-    activities_collection = db["daily_footprint"]
+    activities_collection = db["chrome_activity"]   # Chrome extension browser activity
     master_keys_collection = db["master_keys"]  # Master key tracking
     users_collection = db["users"]  # NEW: User registration timestamps
     
@@ -619,7 +619,8 @@ if __name__ == '__main__':
     print("🚀 U'rWay Intelligence Bridge Starting...")
     print("="*50)
     print(f"📍 Running on http://{BRIDGE_HOST}:{BRIDGE_PORT}")
-    print(f"📂 Database: {DB_NAME}.daily_footprint")
+    print(f"📂 Database: {DB_NAME}.chrome_activity")
+
     print(f"🔌 CORS: Enabled for all origins")
     print("\nEndpoints:")
     print("  POST   /sync           - Receive activity pulses")
