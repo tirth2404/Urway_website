@@ -1,11 +1,13 @@
 require('dotenv').config();
-const express = require('express');
-const session = require('express-session');
+const express  = require('express');
+const session  = require('express-session');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
-const cors = require('cors');
+const cors  = require('cors');
+const https = require('https');   // built-in: used to call main backend without needing node-fetch
+const http  = require('http');    // built-in: fallback for localhost calls
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
@@ -105,24 +107,38 @@ app.post('/auth/exchange', async (req, res) => {
     const user = await User.findById(userId).lean();
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    // Resolve Google email → main U'rWay backend userId (the canonical UUID)
-    // This links VS Code extension data to the same userId as the website.
+    // Resolve Google email → canonical userId (UUID) from the main U'rWay backend.
+    // Uses built-in http/https so it works on ALL Node.js versions (no node-fetch needed).
     let urwayUserId = null;
     try {
-      const resp = await fetch(`${URWAY_BACKEND}/api/auth/resolve/${encodeURIComponent(user.email)}`);
-      if (resp.ok) {
-        const data = await resp.json();
-        if (data.found) urwayUserId = data.userId;
-      }
+      urwayUserId = await new Promise((resolve) => {
+        const url = `${URWAY_BACKEND}/api/auth/resolve/${encodeURIComponent(user.email)}`;
+        const mod  = url.startsWith('https') ? https : http;
+        const reqObj = mod.get(url, { timeout: 3000 }, (response) => {
+          let body = '';
+          response.on('data', chunk => { body += chunk; });
+          response.on('end', () => {
+            try {
+              const data = JSON.parse(body);
+              resolve(data.found ? data.userId : null);
+            } catch { resolve(null); }
+          });
+        });
+        reqObj.on('error', (e) => {
+          console.warn('[resolve] Main backend unreachable:', e.message);
+          resolve(null);
+        });
+        reqObj.on('timeout', () => { reqObj.destroy(); resolve(null); });
+      });
     } catch (e) {
-      console.warn('[resolve] Main backend unreachable — urwayUserId will be null:', e.message);
+      console.warn('[resolve] Unexpected error:', e.message);
     }
 
     return res.json({
-      id:           user._id,
-      name:         user.name,
-      email:        user.email,
-      urwayUserId,  // ← canonical userId from the website (null if not signed up yet)
+      id:          user._id,
+      name:        user.name,
+      email:       user.email,
+      urwayUserId, // ← canonical userId from website (null if not signed up yet)
     });
   } catch (e) {
     console.error(e);

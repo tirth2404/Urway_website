@@ -340,25 +340,7 @@ def get_activities():
         date_filter = request.args.get('date')
         if date_filter:
             query['date'] = date_filter
-        
-        # Check for master key request
-        master_key_requested = request.args.get('masterKey') == 'true'
-        
-        if master_key_requested:
-            # Verify master key access (would be restricted in production)
-            logger.warning("Master key access requested - ensure this is authorized")
-            master_key = get_or_create_master_key()
-            if master_key:
-                decrement_master_key_use(master_key['keyId'])
-                activities = list(activities_collection.find(query).sort("date", -1))
-                return jsonify({
-                    "status": "success",
-                    "decryptionMethod": "master_key",
-                    "masterKeyTimestamp": master_key['keyTimestamp'],
-                    "usesRemaining": master_key['usesRemaining'] - 1,
-                    "activities": activities
-                }), 200
-        
+
         # Regular user-specific retrieval (per-site documents with segments)
         docs = list(activities_collection.find(query, {'_id': 0, 'segments': 1, 'domain': 1, 'title':1, 'url':1, 'date':1, 'totalDuration':1}).sort("date", -1))
         sites = []
