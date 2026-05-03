@@ -1,22 +1,24 @@
 import mongoose from "mongoose";
 
 /**
- * Collection: logs
+ * Collection: vscode_activity
  *
  * Stores coding activity events from the U'rWay VS Code extension.
  * Schema matches the exact fields the extension sends.
  *
- * Relationships:
- *  - userId → user_profiles.userId
+ * userId is the canonical UUID from the main backend auth collection.
+ * It is resolved by the VS Code extension server after Google login
+ * via GET /api/auth/resolve/:email on the main backend.
  *
- * Note: The VS Code extension writes directly to the 'logs' collection.
- * This model points to that same collection so the backend can query it.
+ * Relationships:
+ *  - userId → auth.userId (canonical, nullable before user registers on website)
  */
 const vscodeActivitySchema = new mongoose.Schema(
   {
     userId: {
       type: String,
-      required: true,
+      required: false,   // null if user hasn't linked website account yet
+      default: null,
       index: true,
     },
 
@@ -40,6 +42,5 @@ vscodeActivitySchema.index({ userId: 1, time: -1 });
 export const VscodeActivity = mongoose.model(
   "VscodeActivity",
   vscodeActivitySchema,
-  "vscode_activity"    // ← VS Code extension server now writes here too
+  "vscode_activity"    // ← explicit collection name
 );
-

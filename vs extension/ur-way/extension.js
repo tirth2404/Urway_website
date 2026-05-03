@@ -417,18 +417,21 @@ async function saveLogLocally(projectName, language) {
 
     // attach user id if available
     let userId = null;
+    let urwayUserId = null;   // canonical UUID from the main U'rWay website
     let userName = null;
     try {
         const stored = extensionContext && extensionContext.secrets ? await extensionContext.secrets.get('urway.user') : null;
         if (stored) {
             const u = JSON.parse(stored);
-            userId = u.id || u._id || null;
-            userName = u.name || u.email || null;
+            userId      = u.id || u._id || null;         // MongoDB ObjectId (Google auth)
+            urwayUserId = u.urwayUserId    || null;      // canonical UUID from website
+            userName    = u.name || u.email || null;
         }
     } catch (e) { console.error('Error reading user secret', e); }
 
     const logEntry = {
         userId,
+        urwayUserId,   // ← sent to backend; server will prefer this as the canonical userId
         userName,
         project: projectName,
         language: language,

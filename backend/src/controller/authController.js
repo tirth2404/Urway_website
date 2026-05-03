@@ -92,3 +92,50 @@ export function authSignOut(_req, res) {
   clearRefreshCookie(res);
   return res.json({ ok: true });
 }
+
+/* ─────────────────────────────────────────────────────────────────
+   GET /api/auth/resolve/:email
+   
+   Called by the Chrome and VS Code extensions AFTER Google login.
+   They send the user's Google email → we return the website userId.
+   
+   This is the bridge that links Google identity (extensions) to
+   the email/password identity (website) — one userId for everything.
+   
+   Security note: This endpoint reveals whether an email is registered.
+   That is acceptable here because:
+   1. The extensions are our own trusted clients
+   2. No password or token data is returned — only userId
+   3. Rate limiting should be added before going to production
+──────────────────────────────────────────────────────────────────── */
+export async function resolveEmail(req, res) {
+  const email = normalizeEmail(req.params?.email || "");
+
+  if (!validateEmail(email)) {
+    return res.status(400).json({ error: "Valid email is required." });
+  }
+
+  const credential = await UserCredential.findOne({ email }).lean();
+
+  if (!credential) {
+    // User has not signed up on the website yet with this Google email.
+    // Extensions should prompt the user to create an account on urway.
+    return res.status(404).json({
+      found:   false,
+      userId:  null,
+      message: "No U'rWay account found for this email. Please sign up at the website first.",
+    });
+  }
+
+  const profile = await UserProfile.findOne({ userId: credential.userId })
+    .select("virtualClusterTag name")
+    .lean();
+
+  return res.json({
+    found:             true,
+    userId:            credential.userId,
+    virtualClusterTag: profile?.virtualClusterTag || null,
+    name:              profile?.name              || null,
+  });
+}
+

@@ -1,8 +1,9 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from pymongo import MongoClient, errors
-from pymongo import ReturnDocument
-from datetime import datetime, timedelta
+
+from datetime import datetime
+
 import logging
 import os
 import hashlib
@@ -40,6 +41,9 @@ def load_local_env():
 
 load_local_env()
 
+# Read after load_local_env() so the .env value is picked up correctly
+URWAY_BACKEND_URL = os.environ.get("URWAY_BACKEND_URL", "http://localhost:5000")
+
 # Add File Handler
 file_handler = RotatingFileHandler('bridge.log', maxBytes=1024*1024, backupCount=5)
 file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
@@ -63,113 +67,72 @@ except Exception as e:
 if client:
     db = client[DB_NAME]
     activities_collection = db["chrome_activity"]   # Chrome extension browser activity
-    master_keys_collection = db["master_keys"]  # Master key tracking
-    users_collection = db["users"]  # NEW: User registration timestamps
-    
+
     # Ensure indexes for efficient queries
     try:
         activities_collection.create_index([('date', 1)])
         activities_collection.create_index([('registrationTimestamp', 1), ('date', 1)])
         activities_collection.create_index([('userEmail', 1)])
         activities_collection.create_index([('siteKey', 1)])
-        master_keys_collection.create_index([('createdAt', 1)])
-        master_keys_collection.create_index([('expiresAt', 1)])
-        users_collection.create_index([('email', 1)], unique=True)
-        logger.info("Indexes ensured on collections")
+        logger.info("Indexes ensured on chrome_activity collection")
     except Exception as e:
         logger.warning(f"Could not create indexes: {e}")
 else:
     db = None
     activities_collection = None
-    master_keys_collection = None
-    users_collection = None
+
+
+def resolve_user_id(email: str) -> str | None:
+    """
+    Resolve a Google email to the canonical userId (UUID) from the main backend.
+    Returns the UUID string if found, None if the user hasn't signed up on the website.
+    """
+    try:
+        import urllib.request
+        import urllib.parse
+        encoded = urllib.parse.quote(email, safe='')
+        url = f"{URWAY_BACKEND_URL}/api/auth/resolve/{encoded}"
+        req = urllib.request.Request(url, method='GET')
+        req.add_header('Content-Type', 'application/json')
+        with urllib.request.urlopen(req, timeout=3) as resp:
+            if resp.status == 200:
+                import json as _json
+                data = _json.loads(resp.read().decode())
+                if data.get('found'):
+                    return data.get('userId')
+    except Exception as e:
+        logger.warning(f"[resolve_user_id] Could not resolve email '{email}': {e}")
+    return None
 
 
 def get_or_create_registration_timestamp(email):
-    """Get user's registration timestamp or create it on first login across any browser"""
-    if users_collection is None:
-        return int(datetime.utcnow().timestamp() * 1000)
+    """
+    Get user's canonical registration timestamp.
     
-    try:
-        # Use an atomic upsert to ensure dedupe by email across concurrent calls
-        registration_timestamp = int(datetime.utcnow().timestamp() * 1000)
-        update = {
-            "$setOnInsert": {
-                "email": email,
-                "registrationTimestamp": registration_timestamp,
-                "createdAt": datetime.utcnow(),
-                "browsers": []
-            }
-        }
-
-        user = users_collection.find_one_and_update(
-            {"email": email},
-            update,
-            upsert=True,
-            return_document=ReturnDocument.AFTER
-        )
-
-        if user and 'registrationTimestamp' in user:
-            logger.info(f"Cross-browser user record present/created for {email}")
-            return user['registrationTimestamp']
-        # Fallback
-        return registration_timestamp
-        
-    except Exception as e:
-        logger.error(f"Failed to get/create registration timestamp: {e}")
+    Looks up from the earliest chrome_activity document for this email.
+    If no activity exists yet (first-ever sync), generates a fresh timestamp.
+    This means NO separate users collection is needed — the timestamp lives
+    inside chrome_activity itself.
+    """
+    if activities_collection is None:
         return int(datetime.utcnow().timestamp() * 1000)
 
-
-def get_or_create_master_key():
-    """Get current master key or create new one if needed"""
-    if master_keys_collection is None:
-        return None
-        
     try:
-        now = datetime.utcnow()
-        
-        # Find active master key (not expired, still has uses)
-        active_key = master_keys_collection.find_one({
-            "expiresAt": {"$gt": now},
-            "usesRemaining": {"$gt": 0}
-        })
-        
-        if active_key:
-            return active_key
-        
-        # Create new master key (valid for 3 days, 10 uses)
-        new_key = {
-            "keyId": os.urandom(16).hex(),
-            "keyTimestamp": int(now.timestamp() * 1000),  # Unix timestamp in ms
-            "createdAt": now,
-            "expiresAt": now + timedelta(days=3),
-            "usesRemaining": 10,
-            "usedCount": 0
-        }
-        
-        master_keys_collection.insert_one(new_key)
-        logger.info(f"Created new master key: {new_key['keyId']}")
-        return new_key
-        
-    except Exception as e:
-        logger.error(f"Failed to get/create master key: {e}")
-        return None
-
-
-def decrement_master_key_use(key_id):
-    """Decrement master key usage counter"""
-    if master_keys_collection is None:
-        return False
-        
-    try:
-        result = master_keys_collection.update_one(
-            {"keyId": key_id},
-            {"$inc": {"usesRemaining": -1, "usedCount": 1}}
+        # Find the very first chrome_activity doc for this email (canonical timestamp)
+        existing = activities_collection.find_one(
+            {"userEmail": email, "registrationTimestamp": {"$exists": True, "$ne": None}},
+            sort=[("createdAt", 1)]  # earliest doc = original registration
         )
-        return result.modified_count > 0
+        if existing and existing.get("registrationTimestamp"):
+            return existing["registrationTimestamp"]
     except Exception as e:
-        logger.error(f"❌ Failed to decrement master key: {e}")
-        return False
+        logger.warning(f"[get_or_create_registration_timestamp] Lookup failed for '{email}': {e}")
+
+    # First-time user — generate a fresh timestamp
+    # This will be stored in the first chrome_activity document we create.
+    return int(datetime.utcnow().timestamp() * 1000)
+
+
 
 
 @app.route('/register-or-get-user', methods=['POST'])
@@ -204,13 +167,10 @@ def health_check():
     if client:
         try:
             client.admin.command('ping')
-            master_key = get_or_create_master_key()
             return jsonify({
                 "status": "healthy",
                 "database": "connected",
-                "encryption": "enabled (time-based + master key)",
-                "masterKeyActive": master_key is not None,
-                "masterKeyTimestamp": master_key['keyTimestamp'] if master_key else None
+                "encryption": "enabled (time-based)",
             }), 200
         except Exception as e:
             return jsonify({"status": "unhealthy", "error": str(e)}), 503
@@ -244,12 +204,12 @@ def sync_data():
 
         logger.info(f"📥 Received sync segment for: {user_email} domain={domain} title={title} date={date} duration={duration}")
 
-        # Get or create registration timestamp (cross-browser keying)
+        # Get or create registration timestamp (cross-browser keying for encryption)
         registration_timestamp = get_or_create_registration_timestamp(user_email)
 
-        # Compute deterministic user ID from email
-        digest = hashlib.sha256(user_email.encode('utf-8')).hexdigest()
-        user_id = int(digest, 16) % 100000000
+        # Resolve Google email → canonical userId (UUID) from the main U'rWay backend.
+        # Falls back to None if user hasn't signed up on the website yet.
+        canonical_user_id = resolve_user_id(user_email)
 
         # Build a canonical site key to store one document per site per date
         site_identifier = (domain or '') + "|" + (title or url or '')
@@ -287,12 +247,16 @@ def sync_data():
                 last_duration = last.get('duration') or 0
                 delta = segment.get('duration', 0) - last_duration
                 # Use arrayFilters to update the matching last segment
+                set_fields = {
+                    "segments.$[last].endTimestamp": segment.get('endTimestamp'),
+                    "segments.$[last].duration": segment.get('duration'),
+                    "lastUpdated": datetime.utcnow()
+                }
+                # Backfill userId if it was null when document was first created
+                if canonical_user_id and not existing_doc.get('userId'):
+                    set_fields["userId"] = canonical_user_id
                 activities_collection.update_one(query, {
-                    "$set": {
-                        "segments.$[last].endTimestamp": segment.get('endTimestamp'),
-                        "segments.$[last].duration": segment.get('duration'),
-                        "lastUpdated": datetime.utcnow()
-                    },
+                    "$set": set_fields,
                     "$inc": {"totalDuration": delta}
                 }, array_filters=[{"last.startTimestamp": last.get('startTimestamp')}])
                 message = "Extended last segment for ongoing site visit"
@@ -300,13 +264,17 @@ def sync_data():
                 activities_collection.update_one(query, {
                     "$push": {"segments": segment},
                     "$inc": {"totalDuration": duration},
-                    "$set": {"lastUpdated": datetime.utcnow()}
+                    "$set": {
+                        "lastUpdated": datetime.utcnow(),
+                        # Backfill userId if the document was created before the user registered on the website
+                        **({"userId": canonical_user_id} if canonical_user_id and not existing_doc.get("userId") else {})
+                    }
                 })
                 message = "Appended new segment to existing site document"
         else:
             doc = {
                 "userEmail": user_email,
-                "userId": user_id,
+                "userId": canonical_user_id,   # canonical UUID from website (None if not registered)
                 "registrationTimestamp": registration_timestamp,
                 "date": date,
                 "domain": domain,
@@ -539,33 +507,6 @@ def github_exchange():
         return jsonify({'error': 'Server error', 'details': str(e)}), 500
 
 
-@app.route('/master-key-status', methods=['GET'])
-def get_master_key_status():
-    """Get current master key status (admin endpoint)"""
-    
-    if master_keys_collection is None:
-        return jsonify({"error": "Master key system not available"}), 503
-    
-    try:
-        master_key = get_or_create_master_key()
-        
-        if not master_key:
-            return jsonify({"status": "error", "message": "No active master key"}), 500
-        
-        return jsonify({
-            "status": "success",
-            "keyId": master_key['keyId'],
-            "keyTimestamp": master_key['keyTimestamp'],
-            "createdAt": master_key['createdAt'].isoformat(),
-            "expiresAt": master_key['expiresAt'].isoformat(),
-            "usesRemaining": master_key['usesRemaining'],
-            "usedCount": master_key['usedCount'],
-            "totalUses": 10
-        }), 200
-        
-    except Exception as e:
-        logger.error(f"❌ Failed to get master key status: {e}")
-        return jsonify({"status": "error", "error": str(e)}), 500
 
 
 @app.route('/clear-day', methods=['POST'])

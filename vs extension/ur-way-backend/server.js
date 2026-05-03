@@ -10,8 +10,11 @@ const cors = require('cors');
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
-const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI || "mongodb+srv://tirth2404:tirth2404@cluster0.qut1y8v.mongodb.net/";
+const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI || "mongodb+srv://tirth2404:tirth2404@cluster0.qut1y8v.mongodb.net/urway";
 const DB_NAME = process.env.DB_NAME || 'urway';
+// Main U'rWay backend — used to resolve Google email → canonical userId
+const URWAY_BACKEND = process.env.URWAY_BACKEND_URL || 'http://localhost:5000';
+
 
 app.use(express.json());
 app.use(cors());
@@ -29,7 +32,8 @@ mongoose.connect(MONGO_URI, { dbName: DB_NAME, serverSelectionTimeoutMS: 5000 })
 }).catch(err => { console.error('Mongo connect error', err); process.exit(1); });
 
 const userSchema = new mongoose.Schema({ googleId: String, email: String, name: String, sessionTimeSeconds: { type: Number, default: 0 } }, { timestamps: true });
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema, 'vscode_users');
+
 
 const logSchema = new mongoose.Schema({ userId: String, project: String, language: String, duration: Number, sessionTimeSeconds: Number, time: Date }, { timestamps: true });
 const Log = mongoose.model('Log', logSchema, 'vscode_activity');
@@ -100,20 +104,52 @@ app.post('/auth/exchange', async (req, res) => {
     codeMap.delete(code);
     const user = await User.findById(userId).lean();
     if (!user) return res.status(404).json({ error: 'User not found' });
-    return res.json({ id: user._id, name: user.name, email: user.email });
+
+    // Resolve Google email → main U'rWay backend userId (the canonical UUID)
+    // This links VS Code extension data to the same userId as the website.
+    let urwayUserId = null;
+    try {
+      const resp = await fetch(`${URWAY_BACKEND}/api/auth/resolve/${encodeURIComponent(user.email)}`);
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data.found) urwayUserId = data.userId;
+      }
+    } catch (e) {
+      console.warn('[resolve] Main backend unreachable — urwayUserId will be null:', e.message);
+    }
+
+    return res.json({
+      id:           user._id,
+      name:         user.name,
+      email:        user.email,
+      urwayUserId,  // ← canonical userId from the website (null if not signed up yet)
+    });
   } catch (e) {
     console.error(e);
     return res.status(500).json({ error: 'Server error' });
   }
 });
 
+
 app.post('/logs', async (req, res) => {
   try {
-    const { userId, project, language, duration, sessionTimeSeconds, time } = req.body || {};
+    const { userId, urwayUserId, project, language, duration, sessionTimeSeconds, time } = req.body || {};
     if (!project || !language || !duration) return res.status(400).json({ error: 'Missing fields' });
-    const entry = await Log.create({ userId: userId || null, project, language, duration, sessionTimeSeconds: sessionTimeSeconds || 0, time: time ? new Date(time) : new Date() });
-    
-    // Update user's sessionTimeSeconds
+
+    // Prefer urwayUserId (canonical UUID from website) over the Google-auth userId (MongoDB ObjectId)
+    // This ensures all vscode_activity records are linked to the same userId as the website.
+    const canonicalUserId = urwayUserId || userId || null;
+
+    const entry = await Log.create({
+      userId: canonicalUserId,
+      project,
+      language,
+      duration,
+      sessionTimeSeconds: sessionTimeSeconds || 0,
+      time: time ? new Date(time) : new Date(),
+    });
+
+    // Update user's sessionTimeSeconds (by Google-auth userId, which is the MongoDB ObjectId)
     if (userId) {
       try {
         await User.findByIdAndUpdate(userId, { sessionTimeSeconds: sessionTimeSeconds || 0 });
@@ -121,13 +157,14 @@ app.post('/logs', async (req, res) => {
         console.error('Error updating user sessionTimeSeconds:', e);
       }
     }
-    
+
     return res.json({ ok: true, id: entry._id });
   } catch (e) {
     console.error('Error saving log', e);
     return res.status(500).json({ error: 'Server error' });
   }
 });
+
 
 app.put('/api/elapsed/:userId', async (req, res) => {
   try {
