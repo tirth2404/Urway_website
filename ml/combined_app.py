@@ -260,6 +260,23 @@ sp_cluster_names = sp_bundle.get("cluster_names", {})
 sp_bin_cols = list(sp_bundle.get("bin_cols", []))
 sp_num_cols = list(sp_bundle.get("num_cols", []))
 
+# Some historical bundles have feature_cols missing "failures" while the scaler
+# was fit on 10 columns including failures. Prefer scaler feature names when present.
+sp_expected_feature_cols = list(getattr(sp_scaler, "feature_names_in_", [])) or sp_feature_cols
+
+SP_DEFAULTS = {
+    "traveltime": 1,
+    "studytime": 2,
+    "failures": 0,
+    "schoolsup": "no",
+    "famsup": "no",
+    "paid": "no",
+    "activities": "no",
+    "internet": "yes",
+    "freetime": 3,
+    "goout": 3,
+}
+
 def encode_binary(value, encoder, field_name):
     raw = str(value).strip().lower()
     if raw in {"yes", "y", "true", "1"}:
@@ -274,17 +291,16 @@ def encode_binary(value, encoder, field_name):
 
 def build_sp_feature_row(payload):
     row = {}
-    for col in sp_feature_cols:
-        if col not in payload:
-            raise ValueError(f"{col} is required")
+    for col in sp_expected_feature_cols:
+        raw_value = payload.get(col, SP_DEFAULTS.get(col))
 
         if col in sp_bin_cols:
-            row[col] = encode_binary(payload[col], sp_label_encoders[col], col)
+            row[col] = encode_binary(raw_value, sp_label_encoders[col], col)
         elif col in sp_num_cols:
-            row[col] = parse_float(payload[col], col)
+            row[col] = parse_float(raw_value, col)
         else:
-            row[col] = parse_float(payload[col], col)
-    return pd.DataFrame([row], columns=sp_feature_cols)
+            row[col] = parse_float(raw_value, col)
+    return pd.DataFrame([row], columns=sp_expected_feature_cols)
 
 @app.route("/api/student_performance/predict", methods=["POST"])
 def predict_student_performance():

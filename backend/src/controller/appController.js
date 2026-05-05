@@ -95,6 +95,121 @@ function stripCredentials(inputs = {}) {
   return copy;
 }
 
+function toNumber(value, fallback = 0) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+function toBoolean(value, fallback = false) {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "string") {
+    const v = value.trim().toLowerCase();
+    if (["yes", "y", "true", "1"].includes(v)) return true;
+    if (["no", "n", "false", "0"].includes(v)) return false;
+  }
+  if (typeof value === "number") return value !== 0;
+  return fallback;
+}
+
+function toStringArray(value) {
+  if (Array.isArray(value)) {
+    return value.map((v) => String(v).trim().toLowerCase()).filter(Boolean);
+  }
+  if (typeof value === "string") {
+    return value
+      .split(/[;,]/)
+      .map((v) => v.trim().toLowerCase())
+      .filter(Boolean);
+  }
+  return [];
+}
+
+async function runMlPredictions(onboardingInputs = {}) {
+  // Career ML prediction
+  let careerPrediction = null;
+  try {
+    const spec = onboardingInputs.ug_specialization === "__other__"
+      ? (onboardingInputs.ug_specialization_other || "other")
+      : (onboardingInputs.ug_specialization || "unknown");
+    const normalizedSkills = toStringArray(onboardingInputs.skills);
+    const normalizedInterests = toStringArray(onboardingInputs.interests);
+    const mlPayload = {
+      ug_course: onboardingInputs.ug_course || "Other",
+      ug_specialization: spec,
+      skills: normalizedSkills.join(";"),
+      interests: normalizedInterests.join(";"),
+      ug_score: onboardingInputs.ug_score || "70-80",
+    };
+    careerPrediction = await requestCareerPrediction(mlPayload);
+  } catch {
+    careerPrediction = { cluster: -1, confidence: 0 };
+  }
+
+  // Wellness ML prediction
+  let wellnessPrediction = null;
+  try {
+    const wellnessPayload = {
+      Sleep_Hours: toNumber(onboardingInputs.sleep_hours, 7),
+      Sleep_Quality: onboardingInputs.sleep_quality || "Good",
+      Physical_Activity_Min: toNumber(onboardingInputs.physical_activity_min, 30),
+      Diet_Quality: onboardingInputs.diet_quality || "Average",
+      Stress_Level: toNumber(onboardingInputs.stress_level, 5),
+    };
+    wellnessPrediction = await requestWellnessPrediction(wellnessPayload);
+  } catch (err) {
+    console.error("Wellness prediction failed:", err.message);
+    wellnessPrediction = { health_score: 0, health_floor: "Unknown", floor_num: -1 };
+  }
+
+  // Career Path ML prediction
+  let careerPathPrediction = null;
+  try {
+    const careerPathPayload = {
+      Internships: toNumber(onboardingInputs.internships, 0),
+      Projects: toNumber(onboardingInputs.projects, 0),
+      Leadership_Positions: toNumber(onboardingInputs.leadership_positions, 0),
+      Communication_Skills: toNumber(onboardingInputs.communication_skills, 0),
+      Problem_Solving_Skills: toNumber(onboardingInputs.problem_solving_skills, 0),
+      Teamwork_Skills: toNumber(onboardingInputs.teamwork_skills, 0),
+      Analytical_Skills: toNumber(onboardingInputs.analytical_skills, 0),
+      Presentation_Skills: toNumber(onboardingInputs.presentation_skills, 0),
+      Networking_Skills: toNumber(onboardingInputs.networking_skills, 0),
+    };
+    careerPathPrediction = await requestCareerPathPrediction(careerPathPayload);
+  } catch (err) {
+    console.error("Career Path prediction failed:", err.message);
+    careerPathPrediction = { cluster_id: -1, cluster_name: "Unknown" };
+  }
+
+  // Student Performance ML prediction
+  let studentPerformancePrediction = null;
+  try {
+    const studentPerformancePayload = {
+      traveltime: toNumber(onboardingInputs.traveltime, 1),
+      studytime: toNumber(onboardingInputs.studytime, 2),
+      failures: toNumber(onboardingInputs.failures, 0),
+      schoolsup: toBoolean(onboardingInputs.schoolsup, false) ? "yes" : "no",
+      famsup: toBoolean(onboardingInputs.famsup, false) ? "yes" : "no",
+      paid: toBoolean(onboardingInputs.paid, false) ? "yes" : "no",
+      activities: toBoolean(onboardingInputs.activities, false) ? "yes" : "no",
+      internet: toBoolean(onboardingInputs.internet, true) ? "yes" : "no",
+      freetime: toNumber(onboardingInputs.freetime, 3),
+      goout: toNumber(onboardingInputs.goout, 3),
+    };
+    studentPerformancePrediction = await requestStudentPerformancePrediction(studentPerformancePayload);
+  } catch (err) {
+    console.error("Student Performance prediction failed:", err.message);
+    studentPerformancePrediction = { cluster_id: -1, cluster_name: "Unknown" };
+  }
+
+  return {
+    careerPrediction,
+    wellnessPrediction,
+    careerPathPrediction,
+    studentPerformancePrediction,
+  };
+}
+
 // ── Controllers ───────────────────────────────────────────────────────────
 
 export async function getHealth(_req, res) {
@@ -146,80 +261,12 @@ export async function onboarding(req, res) {
     return res.status(409).json({ error: "This email is already registered. Please sign in." });
   }
 
-  // 0. Career ML prediction (Flask service)
-  let careerPrediction = null;
-  try {
-    const spec = onboardingInputs.ug_specialization === "__other__"
-      ? (onboardingInputs.ug_specialization_other || "other")
-      : (onboardingInputs.ug_specialization || "unknown");
-    const mlPayload = {
-      ug_course:        onboardingInputs.ug_course || "Other",
-      ug_specialization: spec,
-      skills:           (onboardingInputs.skills || []).join(";"),
-      interests:        (onboardingInputs.interests || []).join(";"),
-      ug_score:         onboardingInputs.ug_score || "70-80",
-    };
-    careerPrediction = await requestCareerPrediction(mlPayload);
-  } catch {
-    careerPrediction = { cluster: -1, confidence: 0 };
-  }
-
-  // 0.1 Wellness ML prediction (Flask service)
-  let wellnessPrediction = null;
-  try {
-    const wellnessPayload = {
-      Sleep_Hours:           parseFloat(onboardingInputs.sleep_hours),
-      Sleep_Quality:         onboardingInputs.sleep_quality,
-      Physical_Activity_Min: parseFloat(onboardingInputs.physical_activity_min),
-      Diet_Quality:          onboardingInputs.diet_quality,
-      Stress_Level:          parseFloat(onboardingInputs.stress_level),
-    };
-    wellnessPrediction = await requestWellnessPrediction(wellnessPayload);
-  } catch (err) {
-    console.error("Wellness prediction failed:", err.message);
-    wellnessPrediction = { health_score: 0, health_floor: "Unknown", floor_num: -1 };
-  }
-
-  // 0.2 Career Path ML prediction (Flask service)
-  let careerPathPrediction = null;
-  try {
-    const careerPathPayload = {
-      Internships:            parseFloat(onboardingInputs.internships || 0),
-      Projects:               parseFloat(onboardingInputs.projects || 0),
-      Leadership_Positions:   parseFloat(onboardingInputs.leadership_positions || 0),
-      Communication_Skills:   parseFloat(onboardingInputs.communication_skills || 0),
-      Problem_Solving_Skills: parseFloat(onboardingInputs.problem_solving_skills || 0),
-      Teamwork_Skills:        parseFloat(onboardingInputs.teamwork_skills || 0),
-      Analytical_Skills:      parseFloat(onboardingInputs.analytical_skills || 0),
-      Presentation_Skills:    parseFloat(onboardingInputs.presentation_skills || 0),
-      Networking_Skills:      parseFloat(onboardingInputs.networking_skills || 0),
-    };
-    careerPathPrediction = await requestCareerPathPrediction(careerPathPayload);
-  } catch (err) {
-    console.error("Career Path prediction failed:", err.message);
-    careerPathPrediction = { cluster_id: -1, cluster_name: "Unknown" };
-  }
-
-  // 0.3 Student Performance ML prediction (Flask service)
-  let studentPerformancePrediction = null;
-  try {
-    const studentPerformancePayload = {
-      traveltime: onboardingInputs.traveltime || 1,
-      studytime:  onboardingInputs.studytime || 1,
-      failures:   onboardingInputs.failures || 0,
-      schoolsup:  onboardingInputs.schoolsup ? "yes" : "no",
-      famsup:     onboardingInputs.famsup ? "yes" : "no",
-      paid:       onboardingInputs.paid ? "yes" : "no",
-      activities: onboardingInputs.activities ? "yes" : "no",
-      internet:   onboardingInputs.internet ? "yes" : "no",
-      freetime:   onboardingInputs.freetime || 3,
-      goout:      onboardingInputs.goout || 3,
-    };
-    studentPerformancePrediction = await requestStudentPerformancePrediction(studentPerformancePayload);
-  } catch (err) {
-    console.error("Student Performance prediction failed:", err.message);
-    studentPerformancePrediction = { cluster_id: -1, cluster_name: "Unknown" };
-  }
+  const {
+    careerPrediction,
+    wellnessPrediction,
+    careerPathPrediction,
+    studentPerformancePrediction,
+  } = await runMlPredictions(onboardingInputs);
 
   // 1. Classify cluster (non-blocking fallback)
   let cluster = fallbackCluster();
@@ -234,7 +281,10 @@ export async function onboarding(req, res) {
     { userId },
     {
       userId,
+      name: String(onboardingInputs.name || "").trim(),
+      age: Number.isFinite(Number(onboardingInputs.age)) ? Number(onboardingInputs.age) : null,
       virtualClusterTag: cluster.clusterTag || "The Steady Explorer",
+      clusterRationale: cluster.rationale || "",
       onboardingInputs: { 
         ...onboardingInputs, 
         careerPrediction, 
@@ -297,6 +347,97 @@ export async function onboarding(req, res) {
     virtualClusterTag: profile.virtualClusterTag,
     rationale: cluster.rationale || "",
     initialTarget: target,
+  });
+}
+
+/**
+ * POST /api/predictions/recompute/:userId
+ * Recompute all ML predictions for a single existing user profile.
+ */
+export async function recomputePredictions(req, res) {
+  const { userId } = req.params;
+  if (!userId) return res.status(400).json({ error: "userId is required." });
+
+  const profile = await UserProfile.findOne({ userId });
+  if (!profile) return res.status(404).json({ error: "User profile not found." });
+
+  const onboardingInputs = profile.onboardingInputs || {};
+  if (!Object.keys(onboardingInputs).length) {
+    return res.status(400).json({ error: "No onboarding inputs available for this user." });
+  }
+
+  const predictions = await runMlPredictions(onboardingInputs);
+
+  profile.onboardingInputs = {
+    ...onboardingInputs,
+    ...predictions,
+  };
+
+  await profile.save();
+
+  return res.json({
+    userId,
+    updated: true,
+    predictions,
+  });
+}
+
+/**
+ * POST /api/admin/predictions/recompute-fallbacks
+ * Bulk-recompute ML predictions for profiles that still hold fallback values.
+ * Requires header: X-Admin-Secret: <ADMIN_MIGRATION_SECRET>
+ */
+export async function recomputeFallbackPredictions(req, res) {
+  const adminSecret = process.env.ADMIN_MIGRATION_SECRET || "";
+  if (!adminSecret) {
+    return res.status(503).json({ error: "ADMIN_MIGRATION_SECRET is not configured." });
+  }
+
+  const providedSecret = req.get("X-Admin-Secret") || "";
+  if (providedSecret !== adminSecret) {
+    return res.status(401).json({ error: "Invalid admin secret." });
+  }
+
+  const requestedLimit = Number(req.body?.limit);
+  const limit = Number.isFinite(requestedLimit) ? Math.min(Math.max(requestedLimit, 1), 500) : 100;
+
+  const fallbackQuery = {
+    $or: [
+      { "onboardingInputs.careerPrediction.cluster": -1 },
+      { "onboardingInputs.wellnessPrediction.floor_num": -1 },
+      { "onboardingInputs.careerPathPrediction.cluster_id": -1 },
+      { "onboardingInputs.studentPerformancePrediction.cluster_id": -1 },
+      { "onboardingInputs.careerPrediction": { $exists: false } },
+      { "onboardingInputs.wellnessPrediction": { $exists: false } },
+      { "onboardingInputs.careerPathPrediction": { $exists: false } },
+      { "onboardingInputs.studentPerformancePrediction": { $exists: false } },
+    ],
+  };
+
+  const profiles = await UserProfile.find(fallbackQuery).limit(limit);
+
+  let updatedCount = 0;
+  let failedCount = 0;
+  const failures = [];
+
+  for (const profile of profiles) {
+    try {
+      const onboardingInputs = profile.onboardingInputs || {};
+      const predictions = await runMlPredictions(onboardingInputs);
+      profile.onboardingInputs = { ...onboardingInputs, ...predictions };
+      await profile.save();
+      updatedCount += 1;
+    } catch (err) {
+      failedCount += 1;
+      failures.push({ userId: profile.userId, error: err?.message || "Prediction recompute failed" });
+    }
+  }
+
+  return res.json({
+    scanned: profiles.length,
+    updated: updatedCount,
+    failed: failedCount,
+    failures,
   });
 }
 

@@ -8,6 +8,8 @@ import {
   flagExam,
   getHealth,
   onboarding,
+  recomputeFallbackPredictions,
+  recomputePredictions,
   startExam,
   syncChromeExtension,
   syncVscodeExtension,
@@ -25,6 +27,7 @@ router.get(  "/dashboard/:userId",              verifyToken, verifySelf, asyncHa
 router.post( "/targets/:userId",               verifyToken, verifySelf, asyncHandler(createTarget));
 router.post( "/exam/start",                    verifyToken,             asyncHandler(startExam));
 router.post( "/exam/flag/:sessionId",          verifyToken,             asyncHandler(flagExam));
+router.post( "/predictions/recompute/:userId", verifyToken, verifySelf, asyncHandler(recomputePredictions));
 
 // ── Extension sync endpoints ───────────────────────────────────────────────────
 // Renamed: /extension/sync → /chrome/sync  (chrome_activity collection)
@@ -34,5 +37,8 @@ router.post("/vscode/sync/:userId",            verifyToken, verifySelf, asyncHan
 
 // ── Backward-compat alias — old extension clients still work ──────────────────
 router.post("/extension/sync/:userId",         verifyToken, verifySelf, asyncHandler(syncChromeExtension));
+
+// ── Admin maintenance endpoint (header protected) ─────────────────────────────
+router.post("/admin/predictions/recompute-fallbacks", asyncHandler(recomputeFallbackPredictions));
 
 export default router;

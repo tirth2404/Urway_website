@@ -112,6 +112,8 @@ User signs in using email/password. Backend verifies hash and returns user ident
 - `POST /api/exam/start`
 - `POST /api/exam/flag/:sessionId`
 - `POST /api/extension/sync/:userId`
+- `POST /api/predictions/recompute/:userId`
+- `POST /api/admin/predictions/recompute-fallbacks`
 
 ### GenAI Service
 
@@ -131,6 +133,11 @@ DB_NAME=urway
 FRONTEND_ORIGIN=http://127.0.0.1:5173
 CORS_ALLOWED_ORIGINS=http://127.0.0.1:5173
 GENAI_SERVICE_URL=http://127.0.0.1:5001
+CAREER_ML_URL=http://127.0.0.1:5006/api/career
+WELLNESS_ML_URL=http://127.0.0.1:5006/api/wellness
+CAREER_PATH_ML_URL=http://127.0.0.1:5006/api/career_path
+STUDENT_PERFORMANCE_ML_URL=http://127.0.0.1:5006/api/student_performance
+ADMIN_MIGRATION_SECRET=change-this-for-bulk-recompute
 ```
 
 Create `genai-service/.env`:
@@ -180,14 +187,50 @@ npm install
 npm run dev
 ```
 
-## 9. Security Notes
+### Start ML inference service (combined)
+
+```powershell
+cd ml
+python combined_app.py
+```
+
+## 9. Prediction Repair APIs
+
+Use these endpoints if older users have fallback predictions like `-1` or `Unknown`.
+
+### Recompute for one user (authenticated)
+
+- Endpoint: `POST /api/predictions/recompute/:userId`
+- Auth: Bearer token + matching `:userId`
+
+```powershell
+curl -X POST "http://127.0.0.1:5000/api/predictions/recompute/<userId>" ^
+	-H "Authorization: Bearer <access_token>"
+```
+
+### Recompute fallback users in bulk (admin secret)
+
+- Endpoint: `POST /api/admin/predictions/recompute-fallbacks`
+- Header: `X-Admin-Secret: <ADMIN_MIGRATION_SECRET>`
+- Body: optional `{ "limit": 100 }` (1 to 500)
+
+```powershell
+curl -X POST "http://127.0.0.1:5000/api/admin/predictions/recompute-fallbacks" ^
+	-H "Content-Type: application/json" ^
+	-H "X-Admin-Secret: <ADMIN_MIGRATION_SECRET>" ^
+	-d "{\"limit\":100}"
+```
+
+Response includes `scanned`, `updated`, and `failed` counts.
+
+## 10. Security Notes
 
 - Never commit `.env` files with real secrets.
 - Rotate API keys immediately if exposed.
 - Store only hashed passwords (already implemented via bcrypt).
 - Keep AI/GenAI secrets on server-side services only.
 
-## 10. Future Roadmap
+## 11. Future Roadmap
 
 ### Phase 1 (MVP)
 - core onboarding, auth, roadmap generation, dashboard
