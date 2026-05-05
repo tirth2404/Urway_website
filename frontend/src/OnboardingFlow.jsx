@@ -7,48 +7,90 @@ const TOTAL_STEPS = 5;
 
 const stepMeta = [
   { id: 1, title: 'Identity', desc: 'Tell us who you are and where you want to go.', accent: 'card-accent' },
-  { id: 2, title: 'Habits', desc: 'How you study and show up every week.', accent: 'card-gold' },
+  { id: 2, title: 'Wellness', desc: 'Physical and mental health signals.', accent: 'card-brutal' },
   { id: 3, title: 'Profile', desc: 'Your experience and community footprint.', accent: 'card-teal' },
-  { id: 4, title: 'Wellness', desc: 'Physical and mental health signals.', accent: 'card-brutal' },
+  { id: 4, title: 'Habits', desc: 'How you study and show up every week.', accent: 'card-gold' },
   { id: 5, title: 'Account', desc: 'Secure your U\'rWay account.', accent: 'card-brutal' },
 ];
 
-const techSkillOptions = ['Python', 'JavaScript', 'Java', 'C/C++', 'SQL', 'React', 'Node.js', 'HTML/CSS', 'TypeScript', 'Rust', 'Go', 'Swift', 'Kotlin', 'Docker', 'AWS', 'Git'];
-const interestOptions = ['Machine Learning', 'Web Dev', 'Mobile Dev', 'Cybersecurity', 'Data Science', 'DevOps', 'UI/UX', 'Game Dev', 'Blockchain', 'Cloud'];
+// ── Career Recommender Data ──────────────────────────────
+const UG_COURSES = ['BE BTech','BCA','BSc','BCom','BA','BBA','LLB','MBBS','BPharm','BArch','BDes','BEd','BHM','Other'];
+
+const COURSE_SPEC_MAP = {
+  'BE BTech': ['computer science engineering','mechanical engineering','electrical and electronics engineering','electronics and communication engineering','civil engineering','automobile engineering','biotechnology','electronics and telecommunication engineering','electrical engineering'],
+  'BCA': ['computer applications','computer science engineering'],
+  'BSc': ['mathematics','physics','statistics','biotechnology','computer science engineering'],
+  'BCom': ['accounting and finance','commerce','finance'],
+  'BA': ['political science','mathematics','statistics'],
+  'BBA': ['marketing','business administration','finance','accounting and finance'],
+  'LLB': ['law','political science'],
+  'MBBS': [],
+  'BPharm': ['biotechnology'],
+  'BArch': ['civil engineering'],
+  'BDes': [],
+  'BEd': [],
+  'BHM': ['marketing','business administration'],
+  'Other': ['computer science engineering','mechanical engineering','electrical and electronics engineering','electronics and communication engineering','civil engineering','automobile engineering','accounting and finance','mathematics','commerce','computer applications','marketing','physics','statistics','business administration','biotechnology','electronics and telecommunication engineering','political science','law','finance','electrical engineering'],
+};
+
+const ALL_SKILLS = ['communication','python','problem solving','sql','analytical thinking','leadership','active listening','critical thinking','machine learning','writing','people management','java','presentation','c','team work','gathering information','data visualization','accounting','product knowledge','editing','excel','negotiation'];
+
+const ALL_INTERESTS = ['data analytics','research','financial analysis','data science','teaching','sales and marketing','human behavior','trading','government job','entrepreneurship','web design','web development','social justice','human biology','journalism','digital marketing','content writing','gaming','supply chain','market research','social media marketing'];
+
+const SCORE_BANDS = ['<50','50-60','60-70','70-80','80-90','90+'];
+
 const clubOptions = ['Coding Club', 'Robotics', 'Debate', 'Sports', 'Music', 'Drama', 'Research', 'Entrepreneurship'];
-const softSkillsList = [
-  { key: 'communication_score', label: 'Communication' },
-  { key: 'teamwork_score', label: 'Teamwork' },
-  { key: 'leadership_score', label: 'Leadership' },
-  { key: 'time_management_score', label: 'Time Management' },
+const careerPathFeaturesList = [
+  { key: 'internships', label: 'Internships' },
+  { key: 'projects', label: 'Projects' },
+  { key: 'leadership_positions', label: 'Leadership' },
+  { key: 'communication_skills', label: 'Communication' },
+  { key: 'problem_solving_skills', label: 'Problem Solving' },
+  { key: 'teamwork_skills', label: 'Teamwork' },
+  { key: 'analytical_skills', label: 'Analytical Skills' },
+  { key: 'presentation_skills', label: 'Presentation' },
+  { key: 'networking_skills', label: 'Networking' },
 ];
-const goalOptions = ['Software Engineer', 'Data Scientist', 'Product Manager', 'UI/UX Designer', 'DevOps Engineer', 'Cybersecurity Analyst', 'Machine Learning Engineer', 'Entrepreneur'];
 const studyTimeOptions = ['< 1 hour', '1–2 hours', '2–4 hours', '4–6 hours', '6+ hours'];
 
 const defaultFormData = {
   name: '',
   age: '',
-  target_goal: '',
-  cgpa: '',
-  study_hours_per_day: '2–4 hours',
-  preferred_study_time: 'Morning',
-  learning_style: 'Visual',
-  weak_areas: [],
-  internet_access: true,
-  internship_count: 0,
-  project_count: 0,
-  tech_skills: [],
+  // Career recommender fields
+  ug_course: '',
+  ug_specialization: '',
+  ug_specialization_other: '',
+  skills: [],
   interests: [],
+  ug_score: '',
+  // Habits (Student Performance ML model)
+  traveltime: 1,
+  studytime: 2,
+  failures: 0,
+  schoolsup: false,
+  famsup: false,
+  paid: false,
+  activities: false,
+  internet: true,
+  freetime: 3,
+  goout: 3,
+  // Profile (Career Path ML model)
+  internships: 0,
+  projects: 0,
+  leadership_positions: 0,
+  communication_skills: 0,
+  problem_solving_skills: 0,
+  teamwork_skills: 0,
+  analytical_skills: 0,
+  presentation_skills: 0,
+  networking_skills: 0,
   club_memberships: [],
-  communication_score: 3,
-  teamwork_score: 3,
-  leadership_score: 3,
-  time_management_score: 3,
+  // Wellness (Mental Wellness ML model)
   sleep_hours: 7,
-  stress_level: 3,
+  sleep_quality: 'Good',
   physical_activity_min: 30,
-  activity_frequency: 3,
-  activity_type: 'Walking',
+  diet_quality: 'Average',
+  stress_level: 5,
 };
 
 const defaultCredentials = {
@@ -88,6 +130,55 @@ function SliderField({ label, keyName, min, max, value, onChange, unit = '' }) {
         <span>{min}{unit}</span>
         <span>{max}{unit}</span>
       </div>
+    </div>
+  );
+}
+
+function SearchableChipInput({ label, allOptions, selected, onToggle, maxItems = 5, placeholder = 'Search...' }) {
+  const [query, setQuery] = useState('');
+  const [open, setOpen] = useState(false);
+  const filtered = allOptions.filter(
+    o => !selected.includes(o) && o.toLowerCase().includes(query.toLowerCase())
+  );
+  return (
+    <div>
+      <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">{label}</label>
+      {/* Selected chips */}
+      {selected.length > 0 && (
+        <div className="chip-container mb-3">
+          {selected.map(s => (
+            <span key={s} className="chip">
+              {s}
+              <button type="button" className="chip-remove" onClick={() => onToggle(s)}>✕</button>
+            </span>
+          ))}
+        </div>
+      )}
+      {/* Search input */}
+      {selected.length < maxItems && (
+        <div className="chip-search-wrap">
+          <input
+            className="chip-search-input"
+            placeholder={placeholder}
+            value={query}
+            onChange={e => { setQuery(e.target.value); setOpen(true); }}
+            onFocus={() => setOpen(true)}
+            onBlur={() => setTimeout(() => setOpen(false), 200)}
+          />
+          {open && filtered.length > 0 && (
+            <div className="chip-dropdown">
+              {filtered.slice(0, 8).map(opt => (
+                <div key={opt} className="chip-dropdown-item" onMouseDown={() => { onToggle(opt); setQuery(''); }}>
+                  {opt}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+      {selected.length >= maxItems && (
+        <p className="text-xs text-ink-muted mt-1">Maximum {maxItems} items selected.</p>
+      )}
     </div>
   );
 }
@@ -246,7 +337,7 @@ export default function OnboardingFlow({ onBackToLanding, onComplete }) {
               className="space-y-6"
             >
 
-              {/* ── STEP 1: Identity ──────────────────────── */}
+              {/* ── STEP 1: Identity + Career Profile ─────── */}
               {step === 1 && (
                 <>
                   <div className="grid md:grid-cols-2 gap-4">
@@ -260,143 +351,212 @@ export default function OnboardingFlow({ onBackToLanding, onComplete }) {
                     </div>
                   </div>
 
+                  {/* UG Course — master filter */}
                   <div>
-                    <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Target Career Goal</label>
-                    <div className="flex flex-wrap gap-2">
-                      {goalOptions.map(g => (
-                        <ToggleButton key={g} active={formData.target_goal === g} onClick={() => handleChange('target_goal', g)}>{g}</ToggleButton>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Academic Score / GPA</label>
-                    <input type="number" min="0" max="100" value={formData.cgpa} onChange={e => handleChange('cgpa', e.target.value)} placeholder="e.g. 75 (out of 100)" className="input-field" />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Weak Areas (optional)</label>
-                    <input value={formData.weak_areas?.join(', ') || ''} onChange={e => handleChange('weak_areas', e.target.value.split(',').map(s => s.trim()).filter(Boolean))} placeholder="e.g. Algorithms, DSA, System Design" className="input-field" />
-                  </div>
-                </>
-              )}
-
-              {/* ── STEP 2: Habits ────────────────────────── */}
-              {step === 2 && (
-                <>
-                  <div>
-                    <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Study Hours Per Day</label>
-                    <div className="flex flex-wrap gap-2">
-                      {studyTimeOptions.map(opt => (
-                        <ToggleButton key={opt} active={formData.study_hours_per_day === opt} onClick={() => handleChange('study_hours_per_day', opt)}>{opt}</ToggleButton>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Preferred Study Time</label>
-                    <div className="flex flex-wrap gap-2">
-                      {['Morning', 'Afternoon', 'Evening', 'Night'].map(t => (
-                        <ToggleButton key={t} active={formData.preferred_study_time === t} onClick={() => handleChange('preferred_study_time', t)}>{t}</ToggleButton>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Learning Style</label>
-                    <div className="flex flex-wrap gap-2">
-                      {['Visual', 'Auditory', 'Reading/Writing', 'Kinesthetic'].map(s => (
-                        <ToggleButton key={s} active={formData.learning_style === s} onClick={() => handleChange('learning_style', s)}>{s}</ToggleButton>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 rounded-2xl border-2 border-ink bg-paper-warm">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-2xl border-2 border-ink flex items-center justify-center bg-white">
-                        <Wifi size={18} />
-                      </div>
-                      <div>
-                        <div className="font-semibold text-sm">Internet Access</div>
-                        <div className="text-xs text-ink-muted">Regular connectivity</div>
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleChange('internet_access', !formData.internet_access)}
-                      className={`btn-pill text-sm ${formData.internet_access ? 'btn-pill-filled' : ''}`}
+                    <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">UG Course</label>
+                    <select
+                      value={formData.ug_course}
+                      onChange={e => {
+                        handleChange('ug_course', e.target.value);
+                        handleChange('ug_specialization', '');
+                        handleChange('ug_specialization_other', '');
+                      }}
+                      className="select-field"
                     >
-                      {formData.internet_access ? 'Yes' : 'No'}
-                    </button>
+                      <option value="">— Select your course —</option>
+                      {UG_COURSES.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
                   </div>
+
+                  {/* UG Specialization — conditional on course */}
+                  {formData.ug_course && (
+                    <div>
+                      <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Specialization</label>
+                      <select
+                        value={formData.ug_specialization}
+                        onChange={e => {
+                          handleChange('ug_specialization', e.target.value);
+                          if (e.target.value !== '__other__') handleChange('ug_specialization_other', '');
+                        }}
+                        className="select-field"
+                      >
+                        <option value="">— Select specialization —</option>
+                        {(COURSE_SPEC_MAP[formData.ug_course] || []).map(s => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                        <option value="__other__">Others (type below)</option>
+                      </select>
+                      {formData.ug_specialization === '__other__' && (
+                        <input
+                          value={formData.ug_specialization_other}
+                          onChange={e => handleChange('ug_specialization_other', e.target.value)}
+                          placeholder="Type your specialization"
+                          className="input-field mt-3"
+                        />
+                      )}
+                    </div>
+                  )}
+
+                  {/* UG Score — grade bands */}
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">UG Score Band</label>
+                    <select value={formData.ug_score} onChange={e => handleChange('ug_score', e.target.value)} className="select-field">
+                      <option value="">— Select grade band —</option>
+                      {SCORE_BANDS.map(b => <option key={b} value={b}>{b}</option>)}
+                    </select>
+                  </div>
+
+                  {/* Skills — searchable chips */}
+                  <SearchableChipInput
+                    label="Skills (select up to 5)"
+                    allOptions={ALL_SKILLS}
+                    selected={formData.skills}
+                    onToggle={val => toggleSelection('skills', val)}
+                    maxItems={5}
+                    placeholder="Search skills..."
+                  />
+
+                  {/* Interests — searchable chips */}
+                  <SearchableChipInput
+                    label="Interests (select up to 5)"
+                    allOptions={ALL_INTERESTS}
+                    selected={formData.interests}
+                    onToggle={val => toggleSelection('interests', val)}
+                    maxItems={5}
+                    placeholder="Search interests..."
+                  />
                 </>
               )}
 
-              {/* ── STEP 3: Profile ────────────────────────── */}
-              {step === 3 && (
+              {/* ── STEP 4: Habits (Student Performance Model) ── */}
+              {step === 4 && (
                 <>
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Internships</label>
-                      <input type="number" min="0" value={formData.internship_count} onChange={e => handleChange('internship_count', Number(e.target.value))} className="input-field" />
+                      <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Travel Time to School/College</label>
+                      <select value={formData.traveltime} onChange={e => handleChange('traveltime', Number(e.target.value))} className="select-field">
+                        <option value={1}>&lt; 15 min</option>
+                        <option value={2}>15 to 30 min</option>
+                        <option value={3}>30 min to 1 hour</option>
+                        <option value={4}>&gt; 1 hour</option>
+                      </select>
                     </div>
                     <div>
-                      <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Projects</label>
-                      <input type="number" min="0" value={formData.project_count} onChange={e => handleChange('project_count', Number(e.target.value))} className="input-field" />
+                      <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Study Time Per Week</label>
+                      <select value={formData.studytime} onChange={e => handleChange('studytime', Number(e.target.value))} className="select-field">
+                        <option value={1}>&lt; 2 hours</option>
+                        <option value={2}>2 to 5 hours</option>
+                        <option value={3}>5 to 10 hours</option>
+                        <option value={4}>&gt; 10 hours</option>
+                      </select>
                     </div>
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Tech Skills</label>
-                    <div className="flex flex-wrap gap-2">
-                      {techSkillOptions.map(s => (
-                        <ToggleButton key={s} active={formData.tech_skills.includes(s)} onClick={() => toggleSelection('tech_skills', s)}>{s}</ToggleButton>
-                      ))}
+                    <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Past Class Failures</label>
+                    <input type="number" min="0" max="4" value={formData.failures} onChange={e => handleChange('failures', Number(e.target.value))} className="input-field" placeholder="0 to 4" />
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-4 mt-2">
+                    <div className="p-4 rounded-2xl border-2 border-ink bg-paper-warm">
+                      <div className="font-semibold text-sm mb-2">Extra Educational Support</div>
+                      <div className="flex gap-2">
+                        <ToggleButton active={formData.schoolsup} onClick={() => handleChange('schoolsup', true)}>Yes</ToggleButton>
+                        <ToggleButton active={!formData.schoolsup} onClick={() => handleChange('schoolsup', false)}>No</ToggleButton>
+                      </div>
+                    </div>
+                    
+                    <div className="p-4 rounded-2xl border-2 border-ink bg-paper-warm">
+                      <div className="font-semibold text-sm mb-2">Family Educational Support</div>
+                      <div className="flex gap-2">
+                        <ToggleButton active={formData.famsup} onClick={() => handleChange('famsup', true)}>Yes</ToggleButton>
+                        <ToggleButton active={!formData.famsup} onClick={() => handleChange('famsup', false)}>No</ToggleButton>
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-2xl border-2 border-ink bg-paper-warm">
+                      <div className="font-semibold text-sm mb-2">Extra Paid Classes</div>
+                      <div className="flex gap-2">
+                        <ToggleButton active={formData.paid} onClick={() => handleChange('paid', true)}>Yes</ToggleButton>
+                        <ToggleButton active={!formData.paid} onClick={() => handleChange('paid', false)}>No</ToggleButton>
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-2xl border-2 border-ink bg-paper-warm">
+                      <div className="font-semibold text-sm mb-2">Extracurricular Activities</div>
+                      <div className="flex gap-2">
+                        <ToggleButton active={formData.activities} onClick={() => handleChange('activities', true)}>Yes</ToggleButton>
+                        <ToggleButton active={!formData.activities} onClick={() => handleChange('activities', false)}>No</ToggleButton>
+                      </div>
+                    </div>
+                    
+                    <div className="p-4 rounded-2xl border-2 border-ink bg-paper-warm md:col-span-2">
+                      <div className="font-semibold text-sm mb-2">Internet Access at Home</div>
+                      <div className="flex gap-2">
+                        <ToggleButton active={formData.internet} onClick={() => handleChange('internet', true)}>Yes</ToggleButton>
+                        <ToggleButton active={!formData.internet} onClick={() => handleChange('internet', false)}>No</ToggleButton>
+                      </div>
                     </div>
                   </div>
 
-                  <div>
-                    <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Interests</label>
-                    <div className="flex flex-wrap gap-2">
-                      {interestOptions.map(s => (
-                        <ToggleButton key={s} active={formData.interests.includes(s)} onClick={() => toggleSelection('interests', s)}>{s}</ToggleButton>
-                      ))}
-                    </div>
+                  <div className="grid md:grid-cols-2 gap-6 mt-4">
+                    <SliderField label="Free Time (1-5)" keyName="freetime" min={1} max={5} value={formData.freetime} onChange={handleChange} />
+                    <SliderField label="Going Out with Friends (1-5)" keyName="goout" min={1} max={5} value={formData.goout} onChange={handleChange} />
+                  </div>
+                </>
+              )}
+
+              {/* ── STEP 3: Profile (Career Path Model) ──────── */}
+              {step === 3 && (
+                <>
+                  <div className="mb-4 text-sm text-ink-muted bg-paper-warm p-3 rounded-lg border border-ink/10">
+                    Rate your experience and skills on a scale of <strong>0 (Beginner/None)</strong> to <strong>4 (Expert/Many)</strong>.
+                  </div>
+                  
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {careerPathFeaturesList.map(feature => (
+                      <SliderField key={feature.key} label={feature.label} keyName={feature.key} min={0} max={4} value={formData[feature.key]} onChange={handleChange} />
+                    ))}
                   </div>
 
-                  <div>
-                    <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Club Memberships</label>
+                  <div className="mt-6">
+                    <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Club Memberships (Optional)</label>
                     <div className="flex flex-wrap gap-2">
                       {clubOptions.map(s => (
                         <ToggleButton key={s} active={formData.club_memberships.includes(s)} onClick={() => toggleSelection('club_memberships', s)}>{s}</ToggleButton>
                       ))}
                     </div>
                   </div>
-
-                  <div className="grid md:grid-cols-2 gap-6">
-                    {softSkillsList.map(skill => (
-                      <SliderField key={skill.key} label={skill.label} keyName={skill.key} min={1} max={5} value={formData[skill.key]} onChange={handleChange} />
-                    ))}
-                  </div>
                 </>
               )}
 
-              {/* ── STEP 4: Wellness ──────────────────────── */}
-              {step === 4 && (
+              {/* ── STEP 2: Wellness (ML Model) ──────────── */}
+              {step === 2 && (
                 <>
-                  <SliderField label="Sleep Hours" keyName="sleep_hours" min={0} max={12} value={formData.sleep_hours} onChange={handleChange} unit="h" />
-                  <SliderField label="Stress Level" keyName="stress_level" min={1} max={10} value={formData.stress_level} onChange={handleChange} />
-                  <SliderField label="Physical Activity" keyName="physical_activity_min" min={0} max={180} value={formData.physical_activity_min} onChange={handleChange} unit="min" />
-                  <SliderField label="Activity Frequency" keyName="activity_frequency" min={0} max={7} value={formData.activity_frequency} onChange={handleChange} unit=" days/wk" />
+                  {/* Sleep Hours — 3.0 to 10.0 */}
+                  <SliderField label="Sleep Hours" keyName="sleep_hours" min={3} max={10} value={formData.sleep_hours} onChange={handleChange} unit="h" />
 
+                  {/* Sleep Quality — dropdown */}
                   <div>
-                    <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Activity Type</label>
-                    <div className="flex flex-wrap gap-2">
-                      {['Walking', 'Running', 'Gym', 'Yoga', 'Sports', 'Dance', 'None'].map(t => (
-                        <ToggleButton key={t} active={formData.activity_type === t} onClick={() => handleChange('activity_type', t)}>{t}</ToggleButton>
-                      ))}
-                    </div>
+                    <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Sleep Quality</label>
+                    <select value={formData.sleep_quality} onChange={e => handleChange('sleep_quality', e.target.value)} className="select-field">
+                      {['Excellent','Good','Fair','Poor'].map(o => <option key={o} value={o}>{o}</option>)}
+                    </select>
                   </div>
+
+                  {/* Physical Activity — 0 to 80 min */}
+                  <SliderField label="Physical Activity" keyName="physical_activity_min" min={0} max={80} value={formData.physical_activity_min} onChange={handleChange} unit=" min" />
+
+                  {/* Diet Quality — dropdown */}
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-widest font-display block mb-2">Diet Quality</label>
+                    <select value={formData.diet_quality} onChange={e => handleChange('diet_quality', e.target.value)} className="select-field">
+                      {['Good','Average','Poor'].map(o => <option key={o} value={o}>{o}</option>)}
+                    </select>
+                  </div>
+
+                  {/* Stress Level — 1 to 10 */}
+                  <SliderField label="Stress Level" keyName="stress_level" min={1} max={10} value={formData.stress_level} onChange={handleChange} />
                 </>
               )}
 

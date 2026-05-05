@@ -40,3 +40,107 @@ export function getGenaiBaseUrl()                      { return genaiBaseUrl; }
 export async function requestCluster(inputs)           { return postJson("/api/cluster",        inputs); }
 export async function requestRoadmap(payload)          { return postJson("/api/roadmap",         payload); }
 export async function requestExamQuestions(sm, profile){ return postJson("/api/exam-questions",  { sourceMaterial: sm, profile }); }
+
+// ── Career Recommender ML service (Flask on port 5002) ──────────────────────
+const careerMlUrl = process.env.CAREER_ML_URL || "http://127.0.0.1:5002";
+
+export async function requestCareerPrediction(payload) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+  try {
+    const response = await fetch(`${careerMlUrl}/predict`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data.error || `Career ML service error (${response.status})`);
+    }
+    return data;
+  } catch (err) {
+    if (err.name === "AbortError") throw new Error("Career ML service timed out");
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// ── Mental Wellness ML service (Flask on port 5003) ─────────────────────────
+const wellnessMlUrl = process.env.WELLNESS_ML_URL || "http://127.0.0.1:5003";
+
+export async function requestWellnessPrediction(payload) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+  try {
+    const response = await fetch(`${wellnessMlUrl}/predict`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data.error || `Wellness ML service error (${response.status})`);
+    }
+    return data;
+  } catch (err) {
+    if (err.name === "AbortError") throw new Error("Wellness ML service timed out");
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// ── Career Path ML service (Flask on port 5004) ─────────────────────────────
+const careerPathMlUrl = process.env.CAREER_PATH_ML_URL || "http://127.0.0.1:5004";
+
+export async function requestCareerPathPrediction(payload) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+  try {
+    const response = await fetch(`${careerPathMlUrl}/predict`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data.error || `Career Path ML service error (${response.status})`);
+    }
+    return data;
+  } catch (err) {
+    if (err.name === "AbortError") throw new Error("Career Path ML service timed out");
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// ── Student Performance ML service (Flask on port 5005) ──────────────────────
+const studentPerformanceMlUrl = process.env.STUDENT_PERFORMANCE_ML_URL || "http://127.0.0.1:5005";
+
+export async function requestStudentPerformancePrediction(payload) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+  try {
+    const response = await fetch(`${studentPerformanceMlUrl}/predict`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data.error || `Student Performance ML service error (${response.status})`);
+    }
+    return data;
+  } catch (err) {
+    if (err.name === "AbortError") throw new Error("Student Performance ML service timed out");
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}

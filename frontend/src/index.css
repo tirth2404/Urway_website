@@ -250,6 +250,55 @@ body::before {
   clip-path: polygon(0 0, 100% 6%, 100% 100%, 0 94%);
 }
 
+/* ── Select dropdown ──────────────────────────────────────── */
+.select-field {
+  @apply w-full rounded-2xl border-2 border-[--ink] bg-white px-4 py-3 text-sm font-medium outline-none transition-all duration-150;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%230a0a0f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 40px;
+}
+.select-field:focus {
+  border-color: var(--accent);
+  box-shadow: 3px 3px 0 var(--accent);
+}
+
+/* ── Chip search container ───────────────────────────────── */
+.chip-search-wrap {
+  @apply relative w-full;
+}
+.chip-search-input {
+  @apply w-full rounded-2xl border-2 border-[--ink] bg-white px-4 py-3 text-sm font-medium outline-none transition-all duration-150;
+}
+.chip-search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 3px 3px 0 var(--accent);
+}
+.chip-dropdown {
+  @apply absolute left-0 right-0 mt-1 max-h-48 overflow-y-auto rounded-2xl border-2 border-[--ink] bg-white shadow-lg z-50;
+}
+.chip-dropdown-item {
+  @apply px-4 py-2.5 text-sm cursor-pointer transition-colors duration-100;
+}
+.chip-dropdown-item:hover {
+  background-color: var(--accent-light);
+}
+.chip-container {
+  @apply flex flex-wrap gap-2 mt-3;
+}
+.chip {
+  @apply inline-flex items-center gap-1.5 rounded-full border-2 border-[--ink] bg-[--ink] text-[--paper] px-3 py-1 text-xs font-semibold;
+  font-family: 'Syne', sans-serif;
+}
+.chip-remove {
+  @apply w-4 h-4 rounded-full flex items-center justify-center text-[10px] leading-none cursor-pointer transition-colors duration-100;
+  background: rgba(255,255,255,0.2);
+}
+.chip-remove:hover {
+  background: rgba(255,255,255,0.5);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, .rise, .logo-float { animation: none !important; transition: none !important; }
 }

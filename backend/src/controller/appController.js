@@ -18,6 +18,10 @@ import {
   requestCluster,
   requestRoadmap,
   requestExamQuestions,
+  requestCareerPrediction,
+  requestWellnessPrediction,
+  requestCareerPathPrediction,
+  requestStudentPerformancePrediction,
 } from "./genaiClientController.js";
 
 // ── Fallbacks ─────────────────────────────────────────────────────────────
@@ -142,6 +146,81 @@ export async function onboarding(req, res) {
     return res.status(409).json({ error: "This email is already registered. Please sign in." });
   }
 
+  // 0. Career ML prediction (Flask service)
+  let careerPrediction = null;
+  try {
+    const spec = onboardingInputs.ug_specialization === "__other__"
+      ? (onboardingInputs.ug_specialization_other || "other")
+      : (onboardingInputs.ug_specialization || "unknown");
+    const mlPayload = {
+      ug_course:        onboardingInputs.ug_course || "Other",
+      ug_specialization: spec,
+      skills:           (onboardingInputs.skills || []).join(";"),
+      interests:        (onboardingInputs.interests || []).join(";"),
+      ug_score:         onboardingInputs.ug_score || "70-80",
+    };
+    careerPrediction = await requestCareerPrediction(mlPayload);
+  } catch {
+    careerPrediction = { cluster: -1, confidence: 0 };
+  }
+
+  // 0.1 Wellness ML prediction (Flask service)
+  let wellnessPrediction = null;
+  try {
+    const wellnessPayload = {
+      Sleep_Hours:           parseFloat(onboardingInputs.sleep_hours),
+      Sleep_Quality:         onboardingInputs.sleep_quality,
+      Physical_Activity_Min: parseFloat(onboardingInputs.physical_activity_min),
+      Diet_Quality:          onboardingInputs.diet_quality,
+      Stress_Level:          parseFloat(onboardingInputs.stress_level),
+    };
+    wellnessPrediction = await requestWellnessPrediction(wellnessPayload);
+  } catch (err) {
+    console.error("Wellness prediction failed:", err.message);
+    wellnessPrediction = { health_score: 0, health_floor: "Unknown", floor_num: -1 };
+  }
+
+  // 0.2 Career Path ML prediction (Flask service)
+  let careerPathPrediction = null;
+  try {
+    const careerPathPayload = {
+      Internships:            parseFloat(onboardingInputs.internships || 0),
+      Projects:               parseFloat(onboardingInputs.projects || 0),
+      Leadership_Positions:   parseFloat(onboardingInputs.leadership_positions || 0),
+      Communication_Skills:   parseFloat(onboardingInputs.communication_skills || 0),
+      Problem_Solving_Skills: parseFloat(onboardingInputs.problem_solving_skills || 0),
+      Teamwork_Skills:        parseFloat(onboardingInputs.teamwork_skills || 0),
+      Analytical_Skills:      parseFloat(onboardingInputs.analytical_skills || 0),
+      Presentation_Skills:    parseFloat(onboardingInputs.presentation_skills || 0),
+      Networking_Skills:      parseFloat(onboardingInputs.networking_skills || 0),
+    };
+    careerPathPrediction = await requestCareerPathPrediction(careerPathPayload);
+  } catch (err) {
+    console.error("Career Path prediction failed:", err.message);
+    careerPathPrediction = { cluster_id: -1, cluster_name: "Unknown" };
+  }
+
+  // 0.3 Student Performance ML prediction (Flask service)
+  let studentPerformancePrediction = null;
+  try {
+    const studentPerformancePayload = {
+      traveltime: onboardingInputs.traveltime || 1,
+      studytime:  onboardingInputs.studytime || 1,
+      failures:   onboardingInputs.failures || 0,
+      schoolsup:  onboardingInputs.schoolsup ? "yes" : "no",
+      famsup:     onboardingInputs.famsup ? "yes" : "no",
+      paid:       onboardingInputs.paid ? "yes" : "no",
+      activities: onboardingInputs.activities ? "yes" : "no",
+      internet:   onboardingInputs.internet ? "yes" : "no",
+      freetime:   onboardingInputs.freetime || 3,
+      goout:      onboardingInputs.goout || 3,
+    };
+    studentPerformancePrediction = await requestStudentPerformancePrediction(studentPerformancePayload);
+  } catch (err) {
+    console.error("Student Performance prediction failed:", err.message);
+    studentPerformancePrediction = { cluster_id: -1, cluster_name: "Unknown" };
+  }
+
   // 1. Classify cluster (non-blocking fallback)
   let cluster = fallbackCluster();
   try {
@@ -150,13 +229,19 @@ export async function onboarding(req, res) {
     cluster = fallbackCluster();
   }
 
-  // 2. Save profile
+  // 2. Save profile (with all ML predictions)
   const profile = await UserProfile.findOneAndUpdate(
     { userId },
     {
       userId,
       virtualClusterTag: cluster.clusterTag || "The Steady Explorer",
-      onboardingInputs,
+      onboardingInputs: { 
+        ...onboardingInputs, 
+        careerPrediction, 
+        wellnessPrediction, 
+        careerPathPrediction,
+        studentPerformancePrediction 
+      },
     },
     { upsert: true, new: true }
   );
@@ -170,9 +255,12 @@ export async function onboarding(req, res) {
   );
 
   // 4. Generate personalized roadmap from ALL onboarding inputs
-  const targetName = onboardingInputs.target_goal
-    ? `${onboardingInputs.target_goal} Roadmap`
-    : "Personal Growth Roadmap";
+  const spec = onboardingInputs.ug_specialization === "__other__"
+    ? (onboardingInputs.ug_specialization_other || "")
+    : (onboardingInputs.ug_specialization || "");
+  const targetName = spec
+    ? `${onboardingInputs.ug_course || "Career"} — ${spec} Roadmap`
+    : (onboardingInputs.ug_course ? `${onboardingInputs.ug_course} Roadmap` : "Personal Growth Roadmap");
 
   let roadmapResult = fallbackRoadmap();
   try {
@@ -193,7 +281,7 @@ export async function onboarding(req, res) {
     userId,
     targetName,
     timeline: "8 weeks",
-    priorKnowledge: Math.max(1, Math.min(10, Math.round((Number(onboardingInputs.cgpa) || 50) / 10))),
+    priorKnowledge: ({ "<50": 3, "50-60": 5, "60-70": 6, "70-80": 7, "80-90": 8, "90+": 9 }[onboardingInputs.ug_score] || 5),
     description: `Auto-generated roadmap for ${cluster.clusterTag || "your learner profile"}.`,
     roadmap: roadmapResult.steps || [],
     status: "in-progress",
