@@ -41,8 +41,9 @@ export async function requestCluster(inputs)           { return postJson("/api/c
 export async function requestRoadmap(payload)          { return postJson("/api/roadmap",         payload); }
 export async function requestExamQuestions(sm, profile){ return postJson("/api/exam-questions",  { sourceMaterial: sm, profile }); }
 
-// ── Career Recommender ML service (Flask on port 5002) ──────────────────────
-const careerMlUrl = process.env.CAREER_ML_URL || "http://127.0.0.1:5002";
+// ── Career Recommender ML service (Combined Flask on port 5006) ──────────────────────
+const careerMlUrl = process.env.CAREER_ML_URL || "http://127.0.0.1:5006/api/career";
+
 
 export async function requestCareerPrediction(payload) {
   const controller = new AbortController();
@@ -67,8 +68,8 @@ export async function requestCareerPrediction(payload) {
   }
 }
 
-// ── Mental Wellness ML service (Flask on port 5003) ─────────────────────────
-const wellnessMlUrl = process.env.WELLNESS_ML_URL || "http://127.0.0.1:5003";
+// ── Mental Wellness ML service (Combined Flask on port 5006) ─────────────────────────
+const wellnessMlUrl = process.env.WELLNESS_ML_URL || "http://127.0.0.1:5006/api/wellness";
 
 export async function requestWellnessPrediction(payload) {
   const controller = new AbortController();
@@ -93,8 +94,8 @@ export async function requestWellnessPrediction(payload) {
   }
 }
 
-// ── Career Path ML service (Flask on port 5004) ─────────────────────────────
-const careerPathMlUrl = process.env.CAREER_PATH_ML_URL || "http://127.0.0.1:5004";
+// ── Career Path ML service (Combined Flask on port 5006) ─────────────────────────────
+const careerPathMlUrl = process.env.CAREER_PATH_ML_URL || "http://127.0.0.1:5006/api/career_path";
 
 export async function requestCareerPathPrediction(payload) {
   const controller = new AbortController();
@@ -119,8 +120,8 @@ export async function requestCareerPathPrediction(payload) {
   }
 }
 
-// ── Student Performance ML service (Flask on port 5005) ──────────────────────
-const studentPerformanceMlUrl = process.env.STUDENT_PERFORMANCE_ML_URL || "http://127.0.0.1:5005";
+// ── Student Performance ML service (Combined Flask on port 5006) ──────────────────────
+const studentPerformanceMlUrl = process.env.STUDENT_PERFORMANCE_ML_URL || "http://127.0.0.1:5006/api/student_performance";
 
 export async function requestStudentPerformancePrediction(payload) {
   const controller = new AbortController();
