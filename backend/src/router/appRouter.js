@@ -6,6 +6,7 @@ import {
   createTarget,
   dashboard,
   flagExam,
+  getFinalRoadmaps,
   getHealth,
   onboarding,
   recomputeFallbackPredictions,
@@ -24,6 +25,7 @@ router.post("/onboarding",   asyncHandler(onboarding));   // creates account —
 
 // ── Protected (JWT required) ──────────────────────────────────────────────────
 router.get(  "/dashboard/:userId",              verifyToken, verifySelf, asyncHandler(dashboard));
+router.get(  "/final-roadmaps/:userId",          verifyToken, verifySelf, asyncHandler(getFinalRoadmaps));
 router.post( "/targets/:userId",               verifyToken, verifySelf, asyncHandler(createTarget));
 router.post( "/exam/start",                    verifyToken,             asyncHandler(startExam));
 router.post( "/exam/flag/:sessionId",          verifyToken,             asyncHandler(flagExam));

@@ -23,10 +23,16 @@ Endpoint:
 
 import os
 import pickle
+import re
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+
+try:
+    from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+except ImportError:
+    AutoTokenizer = None
+    AutoModelForSeq2SeqLM = None
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
 BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
@@ -41,6 +47,7 @@ BASE_MODEL_NAME = "google/flan-t5-small"
 PROMPT_PREFIX   = "extract important technology keywords: "
 MAX_INPUT_LEN   = 512
 MAX_TARGET_LEN  = 64
+FORCE_HF_MODEL  = os.environ.get("FORCE_HF_MODEL", "false").strip().lower() == "true"
 
 # ── Load bundle metadata (if available) ────────────────────────────────────────
 if os.path.isfile(PICKLE_PATH):
@@ -69,20 +76,34 @@ _has_model_files = os.path.isdir(saved_model_dir) and any(
     if os.path.isfile(os.path.join(saved_model_dir, f))
 )
 
-if _has_model_files:
+if _has_model_files and AutoTokenizer is not None and AutoModelForSeq2SeqLM is not None:
     model_source = saved_model_dir
     print(f"[KeywordService] Loading fine-tuned model from: {model_source}")
 else:
-    model_source = BASE_MODEL_NAME
-    print(f"[KeywordService] Fine-tuned model not found locally — downloading base model: {model_source}")
+    model_source = None
+    if AutoTokenizer is None or AutoModelForSeq2SeqLM is None:
+        print("[KeywordService] transformers is not installed — using lightweight fallback keyword extraction.")
+    elif FORCE_HF_MODEL:
+        model_source = BASE_MODEL_NAME
+        print(f"[KeywordService] Loading base model because FORCE_HF_MODEL=true: {model_source}")
+    else:
+        print("[KeywordService] Fine-tuned model not found locally — using lightweight fallback keyword extraction.")
 
 # ── Load model + tokenizer ─────────────────────────────────────────────────────
-print(f"[KeywordService] Loading tokenizer …")
-TOKENIZER = AutoTokenizer.from_pretrained(model_source, use_fast=True)
+TOKENIZER = None
+MODEL = None
+if model_source:
+    try:
+        print(f"[KeywordService] Loading tokenizer …")
+        TOKENIZER = AutoTokenizer.from_pretrained(model_source, use_fast=True)
 
-print(f"[KeywordService] Loading PyTorch model …")
-MODEL = AutoModelForSeq2SeqLM.from_pretrained(model_source)
-print("[KeywordService] Model ready.")
+        print(f"[KeywordService] Loading PyTorch model …")
+        MODEL = AutoModelForSeq2SeqLM.from_pretrained(model_source)
+        print("[KeywordService] Model ready.")
+    except (OSError, RuntimeError) as exc:
+        print(f"[KeywordService] Model load failed, falling back to lightweight extractor: {exc}")
+        TOKENIZER = None
+        MODEL = None
 
 # ── Flask app ──────────────────────────────────────────────────────────────────
 app = Flask(__name__)
@@ -91,6 +112,22 @@ CORS(app)
 
 def predict_keywords(description: str) -> str:
     """Run the Flan-T5 model and return a comma-separated keyword string."""
+    if TOKENIZER is None or MODEL is None:
+        text = str(description).lower()
+        vocab = [
+            "react", "node js", "node.js", "javascript", "typescript", "html", "css",
+            "python", "machine learning", "deep learning", "data science", "sql",
+            "mongodb", "flask", "express", "api", "websocket", "git", "github",
+            "docker", "tailwind", "vite"
+        ]
+        matched = []
+        for term in vocab:
+            if term in text and term not in matched:
+                matched.append(term)
+        if not matched:
+            matched = [token for token in re.split(r"[^a-z0-9+.#-]+", text) if len(token) > 3][:7]
+        return ", ".join(matched[:7])
+
     prompt = PROMPT_PREFIX + str(description).strip()
     encoded = TOKENIZER(
         [prompt],

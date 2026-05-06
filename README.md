@@ -42,6 +42,7 @@ U'rWay currently spans these core modules:
 - onboarding with academic, habit, profile, wellness, and account steps
 - target creation and roadmap tracking
 - account-based sign-in and session continuity
+- final roadmap persistence in a dedicated `final_roadmaps` collection
 
 3. Analytics and Progress Surface
 - roadmap status visibility (complete, in-progress, remaining, overdue)
@@ -91,8 +92,12 @@ User completes multi-step onboarding, provides account credentials, and submits 
 
 1. Backend sends structured profile/target payload to genai-service.
 2. GenAI service extracts user signals (goal, timeline, skills, habits, weak areas, extension summary).
-3. Gemini produces strict JSON roadmap steps.
-4. Service normalizes output and returns stable, render-ready roadmap data.
+3. Prompt includes cluster definitions and cluster-specific guidance.
+4. Gemini produces strict JSON roadmap steps.
+5. Backend stores generated steps in both `roadmap_targets` and `final_roadmaps`.
+6. Service normalizes output and returns stable, render-ready roadmap data.
+
+If Gemini is unavailable or returns invalid JSON, the service still builds a contextual roadmap from the user cluster, target, keywords, and timeline so the steps are not the same static template for every target.
 
 ### C. Sign In and Dashboard Retrieval
 
@@ -108,6 +113,7 @@ User signs in using email/password. Backend verifies hash and returns user ident
 - `POST /api/auth/signout`
 - `POST /api/onboarding`
 - `GET /api/dashboard/:userId`
+- `GET /api/final-roadmaps/:userId`
 - `POST /api/targets/:userId`
 - `POST /api/exam/start`
 - `POST /api/exam/flag/:sessionId`
@@ -144,10 +150,28 @@ Create `genai-service/.env`:
 
 ```env
 PORT=5001
+SERVICE_SECRET=match-backend-service-secret
 GEMINI_API_KEY=your_gemini_api_key_here
 GEMINI_MODEL=gemini-2.0-flash
 BACKEND_ORIGIN=http://127.0.0.1:5000
 ```
+
+If you keep the numbered Gemini variables instead of `GEMINI_API_KEY`, the service also accepts `GEMINI_API_KEY_1` and `GEMINI_API_KEY_2`.
+
+Create `text-summarization-service/requirements.txt` before running the keyword extractor:
+
+```txt
+flask>=3.0.0
+flask-cors>=4.0.0
+python-dotenv>=1.0.0
+transformers>=4.41.0
+torch>=2.2.0
+sentencepiece>=0.2.0
+```
+
+The keyword service is optional for roadmap generation. If it is not running, target creation still works and only keyword extraction is skipped.
+
+By default the keyword service now uses a lightweight local keyword extractor if no fine-tuned model is available. This avoids Windows memory/page-file failures during startup. If you later want to force Hugging Face model loading, set `FORCE_HF_MODEL=true` in `text-summarization-service/.env`.
 
 Create `frontend/.env`:
 
@@ -177,6 +201,21 @@ npm run dev
 cd genai-service
 python -m pip install -r requirements.txt
 python app.py
+```
+
+### Start keyword extraction service (optional)
+
+```powershell
+cd text-summarization-service
+python -m pip install -r requirements.txt
+python app.py
+```
+
+Optional `text-summarization-service/.env`:
+
+```env
+PORT=5007
+FORCE_HF_MODEL=false
 ```
 
 ### Start frontend

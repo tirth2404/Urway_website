@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import { UserProfile }    from "../model/UserProfile.js";
 import { UserCredential } from "../model/UserCredential.js";
 import { Target }         from "../model/Target.js";
+import { FinalRoadmap }   from "../model/FinalRoadmap.js";
 import { ExamSession }    from "../model/ExamSession.js";
 import { ChromeActivity }  from "../model/ChromeActivity.js";
 import { VscodeActivity }  from "../model/VscodeActivity.js";
@@ -123,6 +124,63 @@ function toStringArray(value) {
       .filter(Boolean);
   }
   return [];
+}
+
+const TECH_KEYWORDS = [
+  "deep learning",
+  "machine learning",
+  "data science",
+  "artificial intelligence",
+  "react",
+  "node js",
+  "node.js",
+  "javascript",
+  "java script",
+  "typescript",
+  "html",
+  "css",
+  "python",
+  "sql",
+  "mongodb",
+  "flask",
+  "express",
+  "mongoose",
+  "rest api",
+  "websocket",
+  "git",
+  "github",
+  "docker",
+  "tailwind",
+  "vite",
+];
+
+function deriveKeywordHints(text = "") {
+  const sourceText = String(text || "").toLowerCase();
+  const matched = [];
+  for (const keyword of TECH_KEYWORDS) {
+    if (sourceText.includes(keyword) && !matched.includes(keyword)) {
+      matched.push(keyword);
+    }
+  }
+
+  if (!matched.length) {
+    const tokens = sourceText
+      .split(/[^a-z0-9+.#-]+/)
+      .map((token) => token.trim())
+      .filter((token) => token.length > 3)
+      .filter((token) => !["this", "that", "with", "from", "your", "into", "have", "will", "need", "know", "basic"].includes(token));
+
+    for (const token of tokens) {
+      if (!matched.includes(token)) matched.push(token);
+      if (matched.length >= 7) break;
+    }
+  }
+
+  const normalized = matched.slice(0, 7);
+  return {
+    keywordsRaw: normalized.join(", "),
+    keywordsList: normalized,
+  };
 }
 
 async function runMlPredictions(onboardingInputs = {}) {
@@ -431,6 +489,18 @@ export async function dashboard(req, res) {
 }
 
 /**
+ * GET /api/final-roadmaps/:userId
+ * Return final roadmap documents generated from target creation.
+ */
+export async function getFinalRoadmaps(req, res) {
+  const { userId } = req.params;
+  if (!userId) return res.status(400).json({ error: "userId is required." });
+
+  const roadmaps = await FinalRoadmap.find({ userId }).sort({ createdAt: -1 }).lean();
+  return res.json({ userId, count: roadmaps.length, roadmaps });
+}
+
+/**
  * POST /api/targets/:userId
  * Create a new target with a GenAI-generated roadmap.
  */
@@ -470,10 +540,27 @@ export async function createTarget(req, res) {
   let roadmapResult = fallbackRoadmap();
   try {
     roadmapResult = await requestRoadmap({
-      target: payload,
+      target: {
+        ...payload,
+        keywordsRaw,
+        keywordsList,
+      },
       profile,
       clusterTag: profile.virtualClusterTag,
+      clusterRationale: profile.clusterRationale,
       extensionSummary,
+      userProfile: {
+        userId,
+        name: profile.name || "",
+        age: profile.age ?? null,
+        preferences: profile.preferences || {},
+      },
+      targetSummary: {
+        targetName: payload.targetName,
+        timeline: payload.timeline,
+        priorKnowledge: Number(payload.priorKnowledge) || 5,
+        description: payload.description,
+      },
     });
   } catch {
     roadmapResult = fallbackRoadmap();
@@ -488,6 +575,9 @@ export async function createTarget(req, res) {
     keywordsList = kwResult.keywords_list || [];
   } catch (err) {
     console.warn("[createTarget] Keyword extraction failed (non-fatal):", err.message);
+    const derived = deriveKeywordHints(`${payload.targetName || ""} ${payload.description || ""}`);
+    keywordsRaw = derived.keywordsRaw;
+    keywordsList = derived.keywordsList;
   }
 
   const target = await Target.create({
@@ -502,7 +592,29 @@ export async function createTarget(req, res) {
     status: "in-progress",
   });
 
-  return res.status(201).json(target);
+  const generatedSteps = roadmapResult.steps || [];
+  const roadmapSource = roadmapResult.source || "genai";
+
+  const finalRoadmap = await FinalRoadmap.create({
+    userId,
+    targetId: String(target._id),
+    targetName: payload.targetName,
+    timeline: payload.timeline,
+    description: payload.description,
+    priorKnowledge: Number(payload.priorKnowledge) || 5,
+    clusterTag: profile.virtualClusterTag || "Unclassified",
+    clusterRationale: profile.clusterRationale || "",
+    extensionSummary,
+    keywordsRaw,
+    keywordsList,
+    steps: generatedSteps,
+    source: roadmapSource,
+  });
+
+  return res.status(201).json({
+    target,
+    finalRoadmapId: String(finalRoadmap._id),
+  });
 }
 
 /**
