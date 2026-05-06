@@ -305,53 +305,7 @@ export async function onboarding(req, res) {
     { upsert: true, new: true, setDefaultsOnInsert: true }
   );
 
-  // 4. Generate personalized roadmap from ALL onboarding inputs
-  const spec = onboardingInputs.ug_specialization === "__other__"
-    ? (onboardingInputs.ug_specialization_other || "")
-    : (onboardingInputs.ug_specialization || "");
-  const targetName = spec
-    ? `${onboardingInputs.ug_course || "Career"} — ${spec} Roadmap`
-    : (onboardingInputs.ug_course ? `${onboardingInputs.ug_course} Roadmap` : "Personal Growth Roadmap");
-
-  let roadmapResult = fallbackRoadmap();
-  try {
-    roadmapResult = await requestRoadmap({
-      // Pass everything so the GenAI service can use all signals
-      ...onboardingInputs,
-      targetName,
-      timeline: "8 weeks",
-      clusterTag: profile.virtualClusterTag,
-      extensionSummary: "No extension data yet — first session.",
-    });
-  } catch {
-    roadmapResult = fallbackRoadmap();
-  }
-
-  const description = `Auto-generated roadmap for ${cluster.clusterTag || "your learner profile"}.`;
-  
-  // Extract technology keywords from the initial target description
-  let keywordsRaw  = "";
-  let keywordsList = [];
-  try {
-    const kwResult = await requestKeywordPrediction(description);
-    keywordsRaw  = kwResult.keywords_raw  || "";
-    keywordsList = kwResult.keywords_list || [];
-  } catch (err) {
-    console.warn("[onboarding] Keyword extraction failed (non-fatal):", err.message);
-  }
-
-  // 5. Create initial target
-  const target = await Target.create({
-    userId,
-    targetName,
-    timeline: "8 weeks",
-    priorKnowledge: ({ "<50": 3, "50-60": 5, "60-70": 6, "70-80": 7, "80-90": 8, "90+": 9 }[onboardingInputs.ug_score] || 5),
-    description,
-    keywordsRaw,
-    keywordsList,
-    roadmap: roadmapResult.steps || [],
-    status: "in-progress",
-  });
+  // Default roadmap creation has been removed per user request.
 
   const accessToken = signAccessToken(profile.userId, email);
   const refreshToken = signRefreshToken(profile.userId, profile.virtualClusterTag ?? null);
@@ -362,7 +316,6 @@ export async function onboarding(req, res) {
     userId: profile.userId,
     virtualClusterTag: profile.virtualClusterTag,
     rationale: cluster.rationale || "",
-    initialTarget: target,
   });
 }
 
