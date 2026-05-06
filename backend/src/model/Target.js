@@ -43,6 +43,9 @@ const targetSchema = new mongoose.Schema(
       required: true,
     },
     description: { type: String, required: true },
+    // ML-extracted technology keywords from the description
+    keywordsRaw:  { type: String, default: "" },
+    keywordsList: { type: [String], default: [] },
     roadmap: {
       type: [roadmapStepSchema],
       default: [],

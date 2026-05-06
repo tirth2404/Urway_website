@@ -145,3 +145,34 @@ export async function requestStudentPerformancePrediction(payload) {
     clearTimeout(timer);
   }
 }
+
+// ── Keyword Extraction service (Text Summarization Flask on port 5007) ────────────────
+const keywordServiceUrl = process.env.KEYWORD_SERVICE_URL || "http://127.0.0.1:5007";
+
+/**
+ * POST /api/keywords/predict
+ * Sends a target description to the fine-tuned Flan-T5 keyword extractor.
+ * Returns: { description, keywords_raw, keywords_list, keyword_count }
+ */
+export async function requestKeywordPrediction(description) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+  try {
+    const response = await fetch(`${keywordServiceUrl}/api/keywords/predict`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ description }),
+      signal: controller.signal,
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data.error || `Keyword service error (${response.status})`);
+    }
+    return data;
+  } catch (err) {
+    if (err.name === "AbortError") throw new Error("Keyword service timed out");
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}

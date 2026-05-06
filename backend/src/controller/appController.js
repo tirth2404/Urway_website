@@ -22,6 +22,7 @@ import {
   requestWellnessPrediction,
   requestCareerPathPrediction,
   requestStudentPerformancePrediction,
+  requestKeywordPrediction,
 } from "./genaiClientController.js";
 
 // ── Fallbacks ─────────────────────────────────────────────────────────────
@@ -326,13 +327,28 @@ export async function onboarding(req, res) {
     roadmapResult = fallbackRoadmap();
   }
 
+  const description = `Auto-generated roadmap for ${cluster.clusterTag || "your learner profile"}.`;
+  
+  // Extract technology keywords from the initial target description
+  let keywordsRaw  = "";
+  let keywordsList = [];
+  try {
+    const kwResult = await requestKeywordPrediction(description);
+    keywordsRaw  = kwResult.keywords_raw  || "";
+    keywordsList = kwResult.keywords_list || [];
+  } catch (err) {
+    console.warn("[onboarding] Keyword extraction failed (non-fatal):", err.message);
+  }
+
   // 5. Create initial target
   const target = await Target.create({
     userId,
     targetName,
     timeline: "8 weeks",
     priorKnowledge: ({ "<50": 3, "50-60": 5, "60-70": 6, "70-80": 7, "80-90": 8, "90+": 9 }[onboardingInputs.ug_score] || 5),
-    description: `Auto-generated roadmap for ${cluster.clusterTag || "your learner profile"}.`,
+    description,
+    keywordsRaw,
+    keywordsList,
     roadmap: roadmapResult.steps || [],
     status: "in-progress",
   });
@@ -510,12 +526,25 @@ export async function createTarget(req, res) {
     roadmapResult = fallbackRoadmap();
   }
 
+  // Extract technology keywords from the target description via the Flan-T5 service
+  let keywordsRaw  = "";
+  let keywordsList = [];
+  try {
+    const kwResult = await requestKeywordPrediction(payload.description);
+    keywordsRaw  = kwResult.keywords_raw  || "";
+    keywordsList = kwResult.keywords_list || [];
+  } catch (err) {
+    console.warn("[createTarget] Keyword extraction failed (non-fatal):", err.message);
+  }
+
   const target = await Target.create({
     userId,
     targetName: payload.targetName,
     timeline: payload.timeline,
     priorKnowledge: Number(payload.priorKnowledge) || 5,
     description: payload.description,
+    keywordsRaw,
+    keywordsList,
     roadmap: roadmapResult.steps || [],
     status: "in-progress",
   });
