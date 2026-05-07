@@ -44,7 +44,7 @@ async function postJson(path, payload) {
 export function getGenaiBaseUrl()                      { return genaiBaseUrl; }
 export async function requestCluster(inputs)           { return postJson("/api/cluster",        inputs); }
 export async function requestRoadmap(payload)          { return postJson("/api/roadmap",         payload); }
-export async function requestExamQuestions(sm, profile){ return postJson("/api/exam-questions",  { sourceMaterial: sm, profile }); }
+export async function requestExamQuestions(sm, profile, targetInfo){ return postJson("/api/exam-questions",  { sourceMaterial: sm, profile, targetInfo }); }
 
 // ── Career Recommender ML service (Combined Flask on port 5006) ──────────────────────
 const careerMlUrl = process.env.CAREER_ML_URL || "http://127.0.0.1:5006/api/career";

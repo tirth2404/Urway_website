@@ -14,18 +14,6 @@ _GEMINI_CLIENT = None
 _GEMINI_CLIENT_API_KEY = None
 
 
-def _get_gemini_api_key() -> str:
-    direct_key = os.environ.get("GEMINI_API_KEY", "").strip()
-    if direct_key:
-        return direct_key
-
-    for env_name in ("GEMINI_API_KEY_1", "GEMINI_API_KEY_2"):
-        candidate = os.environ.get(env_name, "").strip()
-        if candidate:
-            return candidate
-
-    return ""
-
 def _get_models() -> List[str]:
     configured = os.environ.get("GEMINI_MODEL", "").strip()
     candidates = [configured, "gemini-2.0-flash", "gemini-1.5-flash"]
@@ -36,29 +24,70 @@ def _get_models() -> List[str]:
             ordered.append(m)
     return ordered
 
+def ask_openai_compatible(api_url: str, model: str, api_key: str, prompt: str) -> str:
+    import urllib.request
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_key}",
+        "User-Agent": "Urway-Backend/1.0"
+    }
+    data = {
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.7
+    }
+    req = urllib.request.Request(api_url, data=json.dumps(data).encode('utf-8'), headers=headers, method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=15) as response:
+            result = json.loads(response.read().decode('utf-8'))
+            return result.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
+    except Exception as e:
+        error_body = ""
+        if hasattr(e, 'read'):
+            error_body = e.read().decode('utf-8')
+        print(f"Error calling {api_url} with {model}: {e} - {error_body}")
+        return ""
 
 def ask_gemini(prompt: str) -> str:
     global _GEMINI_CLIENT, _GEMINI_CLIENT_API_KEY
-    api_key = _get_gemini_api_key()
-    if not api_key:
-        print("[gemini_service] ERROR: No Gemini API key found in environment")
-        return ""
-    if _GEMINI_CLIENT is None or _GEMINI_CLIENT_API_KEY != api_key:
-        _GEMINI_CLIENT = genai.Client(api_key=api_key)
-        _GEMINI_CLIENT_API_KEY = api_key
-    for model_name in _get_models():
-        try:
-            print(f"[gemini_service] Calling Gemini model: {model_name}")
-            response = _GEMINI_CLIENT.models.generate_content(model=model_name, contents=prompt)
-            text = (response.text or "").strip()
-            if text:
-                print(f"[gemini_service] Gemini {model_name} returned {len(text)} characters")
-                return text
-            print(f"[gemini_service] Gemini {model_name} returned empty text")
-        except Exception as e:
-            print(f"[gemini_service] Gemini {model_name} failed: {str(e)}")
-            continue
-    print("[gemini_service] All Gemini models failed")
+    
+    # 1. Try Gemini
+    gemini_keys = ("GEMINI_API_KEY_1", "GEMINI_API_KEY_2", "GEMINI_API_KEY_3", "GEMINI_API_KEY_4", "GEMINI_API_KEY_5", "GEMINI_API_KEY")
+    for env_name in gemini_keys:
+        api_key = os.environ.get(env_name, "").strip()
+        if not api_key: continue
+        
+        if _GEMINI_CLIENT is None or _GEMINI_CLIENT_API_KEY != api_key:
+            _GEMINI_CLIENT = genai.Client(api_key=api_key)
+            _GEMINI_CLIENT_API_KEY = api_key
+            
+        for model_name in _get_models():
+            try:
+                response = _GEMINI_CLIENT.models.generate_content(model=model_name, contents=prompt)
+                text = (response.text or "").strip()
+                if text: return text
+            except Exception as e:
+                print(f"Gemini error with {model_name}: {e}")
+                continue
+
+    # 2. Try Groq (User called it Grok, but keys are gsk_)
+    groq_keys = ("GROK_API_KEY_1", "GROK_API_KEY_2", "GROK_API_KEY_3", "GROK_API_KEY_4", "GROK_API_KEY")
+    for env_name in groq_keys:
+        api_key = os.environ.get(env_name, "").strip()
+        if not api_key: continue
+        for model_name in ("llama-3.3-70b-versatile", "llama-3.1-8b-instant", "mixtral-8x7b-32768"):
+            text = ask_openai_compatible("https://api.groq.com/openai/v1/chat/completions", model_name, api_key, prompt)
+            if text: return text
+
+    # 3. Try Cerebras
+    cerebras_keys = ("CEREBRAS_API_KEY_1", "CEREBRAS_API_KEY_2", "CEREBRAS_API_KEY")
+    for env_name in cerebras_keys:
+        api_key = os.environ.get(env_name, "").strip()
+        if not api_key: continue
+        for model_name in ("llama3.3-70b", "llama3.1-8b"):
+            text = ask_openai_compatible("https://api.cerebras.ai/v1/chat/completions", model_name, api_key, prompt)
+            if text: return text
+
     return ""
 
 
@@ -538,31 +567,49 @@ Keep the roadmap concrete, varied, and aligned with the student's current level.
     return {"source": "genai", "steps": steps}
 
 
-def generate_exam_questions(source_material: Any, profile: Dict[str, Any]) -> Dict[str, Any]:
+def generate_exam_questions(source_material: Any, profile: Dict[str, Any], target_info: Dict[str, Any] = None) -> Dict[str, Any]:
     """Generate proctored exam questions from source material."""
     fallback = exam_fallback()
+    target_info = target_info or {}
     profile_inputs = profile.get("onboardingInputs") or {}
-    goal = profile_inputs.get("target_goal") or profile.get("virtualClusterTag") or "general learning"
+    target_name = target_info.get("targetName", "")
+    prior_knowledge = target_info.get("priorKnowledge", 5)
+    goal = target_name or profile_inputs.get("target_goal") or profile.get("virtualClusterTag") or "general learning"
 
     prompt = f"""You are U'rWay's exam composer.
 
-Generate 5 challenging but fair exam questions based on the source material and the student's goal.
+Generate 5 challenging but fair MULTIPLE CHOICE exam questions based on the source material and the student's domain goal.
+The student has a prior knowledge level of {prior_knowledge} out of 10 in this domain. Adjust the difficulty accordingly.
 Questions should test genuine understanding, not just recall.
-Mix question types: conceptual, practical application, and scenario-based.
 
-Return STRICT JSON only (no markdown):
-{{"questions": ["question 1", "question 2", "question 3", "question 4", "question 5"]}}
+Return STRICT JSON only (no markdown). The format must be an array of objects under the "questions" key:
+{{
+  "questions": [
+    {{
+      "question": "The question text goes here?",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "correctAnswer": 0
+    }}
+  ]
+}}
+Note: 'correctAnswer' must be the integer index (0-3) of the correct option in the options array.
 
 ---
-STUDENT GOAL: {goal}
+STUDENT GOAL DOMAIN: {goal}
+PRIOR KNOWLEDGE: {prior_knowledge}/10
 SOURCE MATERIAL: {json.dumps(source_material, indent=2)}
 ---"""
 
     text = ask_gemini(prompt)
     if not text:
+        print("[gemini_service] ask_gemini returned empty string for exam questions")
         return fallback
 
+    print(f"[gemini_service] text from ask_gemini: {text[:200]}...")
+
     parsed = extract_json(text, fallback)
+    print(f"[gemini_service] parsed JSON: {parsed}")
+
     if not isinstance(parsed.get("questions"), list) or len(parsed["questions"]) == 0:
         return fallback
     return {"questions": parsed["questions"][:5]}

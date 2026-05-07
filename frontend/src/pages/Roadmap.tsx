@@ -42,6 +42,7 @@ export default function Roadmap({ onBackHome, onLogout }: RoadmapProps) {
   const [isCreating,  setIsCreating]  = useState(false);
   const [dashboardError, setDashboardError] = useState<string | null>(null);
   const [view, setView]               = useState<'dashboard' | 'exam'>('dashboard');
+  const [examTargetId, setExamTargetId] = useState<string | null>(null);
 
   // userId comes from the JWT via AuthContext — never from localStorage
   const userId = user?.userId ?? '';
@@ -139,6 +140,7 @@ export default function Roadmap({ onBackHome, onLogout }: RoadmapProps) {
         ) : view === 'exam' ? (
           <ProctoredExam
             userId={userId}
+            targetId={examTargetId}
             onBack={() => setView('dashboard')}
           />
         ) : (
@@ -147,7 +149,10 @@ export default function Roadmap({ onBackHome, onLogout }: RoadmapProps) {
             errorMessage={dashboardError}
             loading={isCreating}
             onCreateTarget={handleCreateTarget}
-            onOpenExam={() => setView('exam')}
+            onOpenExam={(id) => {
+              setExamTargetId(id || null);
+              setView('exam');
+            }}
           />
         )}
       </main>

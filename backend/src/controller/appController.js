@@ -51,11 +51,31 @@ function fallbackRoadmap() {
 function fallbackExamQuestions() {
   return {
     questions: [
-      "Explain the core concept from your study material in your own words.",
-      "Describe a real-world scenario where this skill or concept would be applied.",
-      "What are three common mistakes beginners make in this area, and how would you avoid them?",
-      "How would you explain this topic to someone with no prior background?",
-      "What is the single most important thing you learned from your source material today?",
+      {
+        question: "What is the primary objective of your study material?",
+        options: ["To understand core concepts", "To memorize facts", "To take a test", "To build a project"],
+        correctAnswer: 0
+      },
+      {
+        question: "Which approach yields the best long-term retention?",
+        options: ["Cramming before an exam", "Active recall and spaced repetition", "Passive reading", "Highlighting text"],
+        correctAnswer: 1
+      },
+      {
+        question: "How should you apply theoretical concepts?",
+        options: ["Write them down repeatedly", "Never apply them", "Implement them in a practical scenario", "Only read about them"],
+        correctAnswer: 2
+      },
+      {
+        question: "What is a common mistake beginners make?",
+        options: ["Starting with a project", "Focusing on fundamentals", "Ignoring documentation and best practices", "Asking for help"],
+        correctAnswer: 2
+      },
+      {
+        question: "How would you explain complex topics to someone with no background?",
+        options: ["Use industry jargon", "Use simple analogies and plain language", "Show them advanced source code", "Tell them to read a textbook"],
+        correctAnswer: 1
+      }
     ],
   };
 }
@@ -710,9 +730,22 @@ export async function startExam(req, res) {
   const profile = await UserProfile.findOne({ userId: authUserId }).lean();
   if (!profile) return res.status(404).json({ error: "User profile not found." });
 
+  let targetInfo = {};
+  if (targetId) {
+    const target = await Target.findById(targetId).lean();
+    if (target) {
+      targetInfo = {
+        targetName: target.targetName,
+        priorKnowledge: target.priorKnowledge,
+        description: target.description,
+        keywordsList: target.keywordsList
+      };
+    }
+  }
+
   let questionSet = fallbackExamQuestions();
   try {
-    questionSet = await requestExamQuestions(sourceMaterial, profile);
+    questionSet = await requestExamQuestions(sourceMaterial, profile, targetInfo);
   } catch {
     questionSet = fallbackExamQuestions();
   }

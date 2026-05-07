@@ -25,7 +25,7 @@ const examSessionSchema = new mongoose.Schema(
     sourceMaterial: { type: [String], default: [] },
 
     // AI-generated questions for this session
-    generatedQuestions: { type: [String], default: [] },
+    generatedQuestions: { type: [mongoose.Schema.Types.Mixed], default: [] },
 
     // ── Lifecycle ────────────────────────────────────────────
     startedAt: { type: Date, default: Date.now },

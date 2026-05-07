@@ -59,7 +59,7 @@ export default function Dashboard({ data, errorMessage, onCreateTarget, loading,
 
         <div className="flex gap-3 shrink-0">
           <button
-            onClick={onOpenExam}
+            onClick={() => onOpenExam(null)}
             className="btn-pill text-sm gap-2"
           >
             <FlaskConical size={15} /> Proctored Exam
@@ -135,6 +135,13 @@ export default function Dashboard({ data, errorMessage, onCreateTarget, loading,
               )}
 
               <RoadmapSteps steps={target.roadmap || []} />
+              
+              <button
+                onClick={() => onOpenExam(target._id)}
+                className="btn-pill-accent text-sm gap-2 w-full justify-center mt-4 py-2.5"
+              >
+                <FlaskConical size={14} /> Take Exam for this Target
+              </button>
             </article>
           ))}
         </div>

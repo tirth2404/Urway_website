@@ -44,8 +44,9 @@ def exam_questions():
     payload        = request.get_json(force=True, silent=True) or {}
     source_material = payload.get("sourceMaterial", [])
     profile        = payload.get("profile", {})
+    target_info    = payload.get("targetInfo", {})
     try:
-        result = generate_exam_questions(source_material, profile)
+        result = generate_exam_questions(source_material, profile, target_info)
         return jsonify(result)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
