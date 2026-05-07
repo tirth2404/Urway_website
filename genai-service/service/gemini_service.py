@@ -41,18 +41,24 @@ def ask_gemini(prompt: str) -> str:
     global _GEMINI_CLIENT, _GEMINI_CLIENT_API_KEY
     api_key = _get_gemini_api_key()
     if not api_key:
+        print("[gemini_service] ERROR: No Gemini API key found in environment")
         return ""
     if _GEMINI_CLIENT is None or _GEMINI_CLIENT_API_KEY != api_key:
         _GEMINI_CLIENT = genai.Client(api_key=api_key)
         _GEMINI_CLIENT_API_KEY = api_key
     for model_name in _get_models():
         try:
+            print(f"[gemini_service] Calling Gemini model: {model_name}")
             response = _GEMINI_CLIENT.models.generate_content(model=model_name, contents=prompt)
             text = (response.text or "").strip()
             if text:
+                print(f"[gemini_service] Gemini {model_name} returned {len(text)} characters")
                 return text
-        except Exception:
+            print(f"[gemini_service] Gemini {model_name} returned empty text")
+        except Exception as e:
+            print(f"[gemini_service] Gemini {model_name} failed: {str(e)}")
             continue
+    print("[gemini_service] All Gemini models failed")
     return ""
 
 
@@ -149,63 +155,145 @@ def _contextual_roadmap_steps(
     description_snippet = description_text[:180].rstrip()
     keyword_focus = keywords[:3] if keywords else [goal]
 
-    if any(term in goal_key for term in ["machine learning", "ml", "ai"]):
+    if any(term in goal_key for term in ["machine learning", "ml", "ai", "deep learning", "nlp", "computer vision"]):
         core_topic = keyword_focus[0] if keyword_focus else goal
         titles = [
             f"Define the {core_topic} learning path",
-            "Review the deep learning foundations",
-            "Set up your first notebook and dataset",
-            "Build a simple neural network baseline",
-            "Improve the model with tuning and evaluation",
-            "Ship a mini project around your target",
-            "Document results and plan the next upgrade",
+            "Master the mathematical foundations",
+            f"Set up your {core_topic} development environment",
+            f"Build your first {core_topic} model from scratch",
+            "Evaluate and optimize your model",
+            "Develop a real-world project",
+            "Document and prepare for deployment",
         ]
         notes = [
-            f"Write a one-page objective for {goal}. Choose one notebook, one dataset, and one metric. Start from the exact gap in your description: {description_snippet}.",
-            f"Review the minimum math, Python, and neural-network ideas needed for {goal}. Focus on {keyword_text} and the concepts that connect directly to {description_snippet}.",
-            f"Set up a reproducible notebook, load a dataset, and do cleaning plus feature inspection. Address gaps like {', '.join(gaps) if gaps else 'none'} while keeping the scope small.",
-            "Train one simple baseline neural model first, then compare it to a slightly better version so the learning curve is visible.",
-            "Tune the model, check performance, and write a short explanation of what improved and what still feels unclear.",
-            f"Build a mini project that proves you can apply {goal} to a real use case. Tie it back to {description_snippet} and the cluster style {cluster_tag}.",
-            "Wrap up with a concise README, key learnings, and one next-step idea so the target becomes a portfolio-ready milestone.",
+            f"Write a learning objective for {goal}. Identify prerequisites, choose a dataset, pick a success metric. Ground this in: {description_snippet}.",
+            f"Study the core math ({keyword_text}), Python fundamentals, and libraries (NumPy, Pandas). Address gaps: {', '.join(gaps) if gaps else 'foundational knowledge'}.",
+            f"Install Jupyter, set up GPU if available, load your first dataset, and do exploratory analysis. Test your environment with a simple model.",
+            f"Implement a baseline {keyword_text} model. Document assumptions, hyperparameters, and what each part does. Compare 2-3 variants.",
+            "Run cross-validation, check metrics, plot learning curves, and identify where the model struggles. Tune the most impactful parameters.",
+            f"Build a mini-project that solves a real problem using {goal}. Include data preprocessing, model training, evaluation, and basic visualization.",
+            f"Write a detailed README, save your model, create a simple demo script. Plan next steps: scaling, production, or exploring a related {keyword_focus[0] if keyword_focus else 'technique'}.",
         ]
-    elif any(term in goal_key for term in ["react", "frontend", "web", "node", "full stack", "full-stack"]):
+    elif any(term in goal_key for term in ["node", "backend", "express", "nestjs", "api", "server", "rest api", "restapi"]):
+        core_tech = keyword_focus[0] if keyword_focus else goal
         titles = [
-            f"Set up the {goal} project foundation",
-            "Review the core UI and state concepts",
-            "Connect pages, routing, and forms",
-            "Build the first feature slice",
-            "Add API integration and validation",
-            "Polish UX and test the flow",
-            "Ship a portfolio-ready version",
+            f"Map the {goal} backend architecture",
+            "Set up the server foundation",
+            "Design routes and request flow",
+            "Implement core API endpoints",
+            "Connect data models and validation",
+            "Add testing and error handling",
+            "Prepare deployment and docs",
         ]
         notes = [
-            f"Create the folder structure and map the screens for {goal}. Keep the scope aligned to {cluster_tag} and the target description: {description_snippet}.",
-            f"Review components, props, state, forms, and one styling approach. Anchor the study around {keyword_text} rather than generic React notes.",
-            "Wire up navigation and form state before adding complexity so the app flow stays easy to debug.",
-            "Build one real user feature as small reusable pieces and keep each piece testable.",
-            "Connect the frontend to the backend API, handle loading and error states, and keep the data contract explicit.",
-            f"Use browser insights and your strengths ({', '.join(strengths) if strengths else 'building step by step'}) to refine the final build.",
-            "Finish with a README, screenshots, and deployment notes so the target can be shown to others.",
+            f"Clarify what the {goal} backend should do, define the folder structure, and identify the main routes. Ground it in {description_snippet}.",
+            f"Set up the backend stack: Express, Node.js, environment variables, and project structure. Focus on {keyword_text} as your core stack.",
+            "Sketch the request-response flow, middleware, and how APIs should be organized. Keep the architecture simple and maintainable.",
+            "Implement the first set of endpoints or services that directly support the target. Test each route with sample requests.",
+            f"Connect validation, database access, and any needed business logic. Use {core_tech} where it directly helps the target outcome.",
+            "Add logging, error handling, and unit tests. Make sure failures are visible and recoverable.",
+            f"Write deployment notes, API examples, and a README. Make the {goal} backend easy to run, explain, and extend.",
+        ]
+    elif any(term in goal_key for term in ["react", "frontend", "web", "javascript", "full stack", "full-stack", "typescript"]):
+        core_tech = keyword_focus[0] if keyword_focus else goal
+        titles = [
+            f"Map the {core_tech} project architecture",
+            "Study core concepts and best practices",
+            "Build a static prototype",
+            "Add interactivity and state management",
+            "Integrate backend APIs",
+            "Test and optimize performance",
+            "Deploy and polish",
+        ]
+        notes = [
+            f"Design the folder structure, pick your stack ({core_tech}), sketch the UI/UX. Align with {description_snippet}.",
+            f"Deep dive into {keyword_text}: components, hooks, routing, state patterns. Study code examples aligned to your cluster ({cluster_tag}).",
+            "Build a static version with all pages/screens. Focus on layout, styling, and navigation. No API calls yet.",
+            "Add form handling, client-side state, local storage if needed. Make interactions feel smooth and responsive.",
+            "Wire up API endpoints, handle loading/error states, implement authentication if applicable. Keep data flow clear and testable.",
+            "Run performance audits, optimize bundle size, add unit/integration tests. Refactor any code smells.",
+            f"Deploy to a platform (Vercel, Netlify, etc.), set up CI/CD, write deployment notes. Create a portfolio-ready README with screenshots and the {goal} demo link.",
+        ]
+    elif any(term in goal_key for term in ["architecture", "design", "autocad", "revit", "3d", "sketching", "drawing", "cad", "bim"]):
+        core_skill = keyword_focus[0] if keyword_focus else goal
+        titles = [
+            f"Understand {goal} fundamentals and principles",
+            f"Master hand sketching and visualization",
+            f"Learn {core_skill} software basics",
+            "Apply principles through case studies",
+            f"Create your first complete {goal} project",
+            "Review, critique, and iterate",
+            "Build a portfolio piece",
+        ]
+        notes = [
+            f"Study design principles, composition, and spatial concepts for {goal}. Review projects in your niche ({keyword_text}). Read: {description_snippet}.",
+            f"Practice hand sketching: quick ideation, perspective drawing, proportions. Spend 30 mins daily on sketching exercises.",
+            f"Get hands-on with {core_skill}: interface tour, basic drawing tools, templates. Follow 2-3 beginner tutorials for {goal}.",
+            "Analyze 5–10 professional projects in {goal}. Annotate what works, identify design decisions, understand the process.",
+            f"Design a small but complete {goal} solution: concept, sketches, drawings, renderings. Use {keyword_text} tools. Connect to {description_snippet}.",
+            "Share your work for peer/mentor feedback. Revise based on critique. Refine details and fix any issues.",
+            f"Polish your project, create high-quality renders or presentations, write a case study. This becomes your signature {goal} portfolio piece.",
+        ]
+    elif any(term in goal_key for term in ["data science", "analytics", "python", "sql", "statistics"]):
+        core_tech = keyword_focus[0] if keyword_focus else goal
+        titles = [
+            f"Build your {goal} foundations",
+            "Master data manipulation and analysis",
+            "Learn visualization and storytelling",
+            "Explore statistical concepts",
+            "Build your first data project",
+            "Communicate insights effectively",
+            "Specialize and scale",
+        ]
+        notes = [
+            f"Learn Python/SQL/R basics, git, and Jupyter. Set up your environment. Ground yourself in {description_snippet}.",
+            f"Study {keyword_text}: loading, cleaning, transforming, aggregating data. Use real datasets from Kaggle or your field.",
+            "Master visualization tools (matplotlib, Plotly, Tableau). Create plots that tell a story. Practice on 5+ datasets.",
+            "Study distributions, hypothesis testing, correlation, regression. Understand *why* before memorizing formulas.",
+            f"Develop a 3–5 step data project: question → data → analysis → visualization → insight. Use {core_tech} in every step.",
+            "Write a blog post or presentation that explains one key finding. Practice explaining data insights to non-technical audiences.",
+            f"Explore a specialization: A/B testing, time-series, NLP, geospatial. Build a mini-capstone in {goal}.",
+        ]
+    elif any(term in goal_key for term in ["interview", "system design", "competitive programming", "algorithms", "data structures", "coding", "leetcode"]):
+        core_topic = keyword_focus[0] if keyword_focus else goal
+        titles = [
+            f"Assess your {goal} baseline",
+            "Master core fundamentals",
+            "Practice problem-solving strategies",
+            f"Solve {goal} problems systematically",
+            "Optimize and refactor",
+            "Do mock interviews",
+            "Final preparation and confidence",
+        ]
+        notes = [
+            f"Take a baseline assessment: solve 5 easy problems, identify weak areas. Note your pace and confidence level in {description_snippet}.",
+            f"Review data structures, algorithms, and complexity analysis. Use {keyword_text} resources. Solve 1 problem daily.",
+            "Learn pattern-based approaches: two pointers, sliding window, recursion, etc. Label each problem with its pattern.",
+            f"Solve 50–100 medium-level {goal} problems. Aim for clean, efficient code. Time yourself; target 20–30 mins per problem.",
+            "Refactor old solutions for clarity and efficiency. Optimize space/time. Practice explaining your approach out loud.",
+            "Do 5–10 mock interviews with peers or platforms. Simulate pressure, time limits, and explaining your logic.",
+            f"Review your weak areas one more time. Build confidence. Go into interviews calm, prepared, and ready to communicate your {goal} skills.",
         ]
     else:
+        # Improved generic fallback
         titles = [
-            f"Clarify the {goal} target",
-            "Build the core foundation",
-            "Practice with guided exercises",
-            "Create a first project or case study",
-            "Strengthen weak areas",
-            "Polish and review",
-            "Deliver the final version",
+            f"Define your {goal} learning objectives",
+            f"Build foundational knowledge in {goal}",
+            f"Practice and apply {goal} concepts",
+            f"Build a meaningful project with {goal}",
+            "Review and strengthen weak areas",
+            f"Polish your {goal} output",
+            f"Share and get feedback on {goal}",
         ]
         notes = [
-            f"Break {goal} into weekly milestones that fit {weeks} weeks. Start from the exact description: {description_snippet}.",
-            f"Study the basics that match this cluster: {cluster_tag}. Use {keyword_text} as anchor topics instead of generic reading.",
-            f"Do active practice every day so learning turns into skill. Narrow the target into one concrete outcome tied to {description_snippet}.",
-            f"Build something visible from the new knowledge and make it shareable.",
-            f"Review weak areas and use the roadmap to fix gaps like {', '.join(gaps) if gaps else 'none identified'}.",
-            "Check quality, consistency, and whether the work matches your timeline.",
-            "Finish by shipping the work, documenting the result, and deciding the next target.",
+            f"Write a clear objective for {goal}. Identify prerequisites and success metrics. Connect to: {description_snippet}.",
+            f"Study core concepts and fundamentals of {keyword_text}. Use varied resources: courses, books, tutorials. Aim for 1–2 hours daily.",
+            f"Apply what you've learned: solve problems, complete exercises, build small prototypes. Address gaps: {', '.join(gaps) if gaps else 'as you discover them'}.",
+            f"Build a project that demonstrates {goal} skills. Keep it scoped and achievable in {weeks} weeks. Make it tangible and shareable.",
+            f"Revisit weak areas. Fill knowledge gaps. Refine your project. Use your strengths ({', '.join(strengths) if strengths else 'your abilities'}) to elevate quality.",
+            f"Improve presentation: documentation, code quality, visuals. Make your {goal} output portfolio-ready.",
+            f"Share your {goal} project with peers or online communities. Get feedback, iterate, and celebrate the milestone.",
         ]
 
     due_labels = ["Day 1–3"] + [f"Week {i}" for i in range(1, weeks + 1)]
@@ -432,6 +520,7 @@ Keep the roadmap concrete, varied, and aligned with the student's current level.
 
     text = ask_gemini(prompt)
     if not text:
+        print(f"[gemini_service] Gemini returned empty for goal='{goal}', using contextual-fallback")
         return {
             "source": "contextual-fallback",
             "steps": _contextual_roadmap_steps(goal, timeline, cluster_tag, brief, description, extension_summary, keywords, strengths, gaps),
@@ -440,10 +529,12 @@ Keep the roadmap concrete, varied, and aligned with the student's current level.
     parsed = extract_json(text, fallback)
     steps = _normalize_roadmap_steps(parsed.get("steps"))
     if not steps:
+        print(f"[gemini_service] Could not parse Gemini response for goal='{goal}', using contextual-fallback")
         return {
             "source": "contextual-fallback",
             "steps": _contextual_roadmap_steps(goal, timeline, cluster_tag, brief, description, extension_summary, keywords, strengths, gaps),
         }
+    print(f"[gemini_service] Successfully generated {len(steps)} steps via Gemini for goal='{goal}'")
     return {"source": "genai", "steps": steps}
 
 

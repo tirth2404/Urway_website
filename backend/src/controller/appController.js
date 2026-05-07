@@ -183,6 +183,75 @@ function deriveKeywordHints(text = "") {
   };
 }
 
+function buildTargetKeywordHints(targetName = "", description = "") {
+  const targetText = String(targetName || "").toLowerCase();
+  const descriptionText = String(description || "").toLowerCase();
+  const combined = `${targetText} ${descriptionText}`;
+  const hints = [];
+
+  const pushHint = (value) => {
+    const normalized = String(value).trim().toLowerCase();
+    if (normalized && !hints.includes(normalized)) {
+      hints.push(normalized);
+    }
+  };
+
+  if (/(node\s*js|node\.js|nodejs|backend|server|api|express|nestjs|npm|typescript)/.test(combined)) {
+    pushHint("node.js");
+    pushHint("express");
+    pushHint("javascript");
+    pushHint("api");
+  }
+
+  if (/(react|frontend|ui|spa)/.test(combined)) {
+    pushHint("react");
+    pushHint("javascript");
+  }
+
+  if (/(machine learning|ml|ai|deep learning|data science|python)/.test(combined)) {
+    pushHint("machine learning");
+    pushHint("python");
+  }
+
+  if (/(architecture|design|autocad|revit|3d|sketching|cad|bim)/.test(combined)) {
+    pushHint("architecture");
+    pushHint("design");
+  }
+
+  const derived = deriveKeywordHints(`${targetText} ${descriptionText}`);
+  for (const keyword of derived.keywordsList) {
+    pushHint(keyword);
+  }
+
+  return {
+    keywordsRaw: hints.slice(0, 7).join(", "),
+    keywordsList: hints.slice(0, 7),
+  };
+}
+
+function estimateCareerCluster(onboardingInputs = {}) {
+  const combinedText = [
+    onboardingInputs.ug_course,
+    onboardingInputs.ug_specialization,
+    onboardingInputs.skills,
+    onboardingInputs.interests,
+  ]
+    .flatMap((value) => Array.isArray(value) ? value : [value])
+    .join(" ")
+    .toLowerCase();
+
+  if (/(node\s*js|node\.js|nodejs|react|frontend|backend|web|javascript|typescript|full stack|full-stack|express)/.test(combinedText)) {
+    return { cluster: 1, confidence: 0.58, source: "heuristic-fallback" };
+  }
+  if (/(machine learning|ml|ai|deep learning|data science|python|pandas|numpy|tensorflow|pytorch)/.test(combinedText)) {
+    return { cluster: 2, confidence: 0.58, source: "heuristic-fallback" };
+  }
+  if (/(design|architecture|autocad|revit|cad|bim|3d|sketching)/.test(combinedText)) {
+    return { cluster: 3, confidence: 0.58, source: "heuristic-fallback" };
+  }
+  return { cluster: 0, confidence: 0.45, source: "heuristic-fallback" };
+}
+
 async function runMlPredictions(onboardingInputs = {}) {
   // Career ML prediction
   let careerPrediction = null;
@@ -200,8 +269,9 @@ async function runMlPredictions(onboardingInputs = {}) {
       ug_score: onboardingInputs.ug_score || "70-80",
     };
     careerPrediction = await requestCareerPrediction(mlPayload);
-  } catch {
-    careerPrediction = { cluster: -1, confidence: 0 };
+  } catch (err) {
+    console.error("[runMlPredictions] Career prediction failed:", err.message || String(err));
+    careerPrediction = estimateCareerCluster(onboardingInputs);
   }
 
   // Wellness ML prediction
@@ -216,7 +286,7 @@ async function runMlPredictions(onboardingInputs = {}) {
     };
     wellnessPrediction = await requestWellnessPrediction(wellnessPayload);
   } catch (err) {
-    console.error("Wellness prediction failed:", err.message);
+    console.error("[runMlPredictions] Wellness prediction failed:", err.message || String(err));
     wellnessPrediction = { health_score: 0, health_floor: "Unknown", floor_num: -1 };
   }
 
@@ -236,7 +306,7 @@ async function runMlPredictions(onboardingInputs = {}) {
     };
     careerPathPrediction = await requestCareerPathPrediction(careerPathPayload);
   } catch (err) {
-    console.error("Career Path prediction failed:", err.message);
+    console.error("[runMlPredictions] Career Path prediction failed:", err.message || String(err));
     careerPathPrediction = { cluster_id: -1, cluster_name: "Unknown" };
   }
 
@@ -257,7 +327,7 @@ async function runMlPredictions(onboardingInputs = {}) {
     };
     studentPerformancePrediction = await requestStudentPerformancePrediction(studentPerformancePayload);
   } catch (err) {
-    console.error("Student Performance prediction failed:", err.message);
+    console.error("[runMlPredictions] Student Performance prediction failed:", err.message || String(err));
     studentPerformancePrediction = { cluster_id: -1, cluster_name: "Unknown" };
   }
 
@@ -331,7 +401,8 @@ export async function onboarding(req, res) {
   let cluster = fallbackCluster();
   try {
     cluster = await requestCluster(onboardingInputs);
-  } catch {
+  } catch (err) {
+    console.error("[onboarding] Cluster classification failed:", err.message || String(err));
     cluster = fallbackCluster();
   }
 
@@ -537,6 +608,29 @@ export async function createTarget(req, res) {
     ? `Recent: ${learningMins} mins on learning sites, ${distractingMins} mins on distracting sites.`
     : "No extension data available.";
 
+  // Extract technology keywords from the target description via the Flan-T5 service FIRST
+  // (must happen before roadmap generation so keywords are available in the prompt)
+  let keywordsRaw  = "";
+  let keywordsList = [];
+  const targetKeywordHints = buildTargetKeywordHints(payload.targetName || "", payload.description || "");
+  try {
+    const keywordSourceText = `${payload.targetName || ""} ${payload.description || ""}`.trim();
+    const kwResult = await requestKeywordPrediction(keywordSourceText);
+    const serviceKeywords = Array.isArray(kwResult.keywords_list) ? kwResult.keywords_list : [];
+    const mergedKeywords = [...targetKeywordHints.keywordsList, ...serviceKeywords].filter((item, index, array) => array.indexOf(item) === index);
+    keywordsRaw = mergedKeywords.join(", ");
+    keywordsList = mergedKeywords;
+  } catch (err) {
+    console.warn("[createTarget] Keyword extraction failed (non-fatal):", err.message);
+    keywordsRaw = targetKeywordHints.keywordsRaw;
+    keywordsList = targetKeywordHints.keywordsList;
+  }
+
+  if (!keywordsList.length) {
+    keywordsRaw = targetKeywordHints.keywordsRaw;
+    keywordsList = targetKeywordHints.keywordsList;
+  }
+
   let roadmapResult = fallbackRoadmap();
   try {
     roadmapResult = await requestRoadmap({
@@ -562,22 +656,9 @@ export async function createTarget(req, res) {
         description: payload.description,
       },
     });
-  } catch {
-    roadmapResult = fallbackRoadmap();
-  }
-
-  // Extract technology keywords from the target description via the Flan-T5 service
-  let keywordsRaw  = "";
-  let keywordsList = [];
-  try {
-    const kwResult = await requestKeywordPrediction(payload.description);
-    keywordsRaw  = kwResult.keywords_raw  || "";
-    keywordsList = kwResult.keywords_list || [];
   } catch (err) {
-    console.warn("[createTarget] Keyword extraction failed (non-fatal):", err.message);
-    const derived = deriveKeywordHints(`${payload.targetName || ""} ${payload.description || ""}`);
-    keywordsRaw = derived.keywordsRaw;
-    keywordsList = derived.keywordsList;
+    console.error("[createTarget] Roadmap generation failed:", err.message || String(err));
+    roadmapResult = fallbackRoadmap();
   }
 
   const target = await Target.create({

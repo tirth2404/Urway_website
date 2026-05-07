@@ -11,6 +11,7 @@ async function postJson(path, payload) {
   const timer      = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
 
   try {
+    console.log(`[genaiClient] POST ${path} to GenAI service at`, genaiBaseUrl);
     const response = await fetch(`${genaiBaseUrl}${path}`, {
       method:  "POST",
       headers: {
@@ -23,13 +24,17 @@ async function postJson(path, payload) {
 
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
+      console.error(`[genaiClient] GenAI service error at ${path} (${response.status}):`, data);
       throw new Error(data.error || `GenAI service error at ${path} (${response.status})`);
     }
+    console.log(`[genaiClient] GenAI service success at ${path}`);
     return data;
   } catch (err) {
     if (err.name === "AbortError") {
+      console.error(`[genaiClient] GenAI service timed out at ${path} after ${REQUEST_TIMEOUT}ms`);
       throw new Error(`GenAI service timed out at ${path}`);
     }
+    console.error(`[genaiClient] GenAI service failed at ${path}:`, err.message);
     throw err;
   } finally {
     clearTimeout(timer);
@@ -49,6 +54,7 @@ export async function requestCareerPrediction(payload) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
   try {
+    console.log("[genaiClient] Calling Career ML at:", `${careerMlUrl}/predict`);
     const response = await fetch(`${careerMlUrl}/predict`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -57,11 +63,17 @@ export async function requestCareerPrediction(payload) {
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
+      console.error("[genaiClient] Career ML error response:", response.status, data);
       throw new Error(data.error || `Career ML service error (${response.status})`);
     }
+    console.log("[genaiClient] Career ML success, cluster:", data.cluster);
     return data;
   } catch (err) {
-    if (err.name === "AbortError") throw new Error("Career ML service timed out");
+    if (err.name === "AbortError") {
+      console.error("[genaiClient] Career ML service timed out after", REQUEST_TIMEOUT, "ms");
+      throw new Error("Career ML service timed out");
+    }
+    console.error("[genaiClient] Career ML call failed:", err.message);
     throw err;
   } finally {
     clearTimeout(timer);
@@ -75,6 +87,7 @@ export async function requestWellnessPrediction(payload) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
   try {
+    console.log("[genaiClient] Calling Wellness ML at:", `${wellnessMlUrl}/predict`);
     const response = await fetch(`${wellnessMlUrl}/predict`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -83,11 +96,17 @@ export async function requestWellnessPrediction(payload) {
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
+      console.error("[genaiClient] Wellness ML error response:", response.status, data);
       throw new Error(data.error || `Wellness ML service error (${response.status})`);
     }
+    console.log("[genaiClient] Wellness ML success");
     return data;
   } catch (err) {
-    if (err.name === "AbortError") throw new Error("Wellness ML service timed out");
+    if (err.name === "AbortError") {
+      console.error("[genaiClient] Wellness ML service timed out after", REQUEST_TIMEOUT, "ms");
+      throw new Error("Wellness ML service timed out");
+    }
+    console.error("[genaiClient] Wellness ML call failed:", err.message);
     throw err;
   } finally {
     clearTimeout(timer);
@@ -101,6 +120,7 @@ export async function requestCareerPathPrediction(payload) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
   try {
+    console.log("[genaiClient] Calling Career Path ML at:", `${careerPathMlUrl}/predict`);
     const response = await fetch(`${careerPathMlUrl}/predict`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -109,11 +129,17 @@ export async function requestCareerPathPrediction(payload) {
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
+      console.error("[genaiClient] Career Path ML error response:", response.status, data);
       throw new Error(data.error || `Career Path ML service error (${response.status})`);
     }
+    console.log("[genaiClient] Career Path ML success");
     return data;
   } catch (err) {
-    if (err.name === "AbortError") throw new Error("Career Path ML service timed out");
+    if (err.name === "AbortError") {
+      console.error("[genaiClient] Career Path ML service timed out after", REQUEST_TIMEOUT, "ms");
+      throw new Error("Career Path ML service timed out");
+    }
+    console.error("[genaiClient] Career Path ML call failed:", err.message);
     throw err;
   } finally {
     clearTimeout(timer);
@@ -127,6 +153,7 @@ export async function requestStudentPerformancePrediction(payload) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
   try {
+    console.log("[genaiClient] Calling Student Performance ML at:", `${studentPerformanceMlUrl}/predict`);
     const response = await fetch(`${studentPerformanceMlUrl}/predict`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -135,11 +162,17 @@ export async function requestStudentPerformancePrediction(payload) {
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
+      console.error("[genaiClient] Student Performance ML error response:", response.status, data);
       throw new Error(data.error || `Student Performance ML service error (${response.status})`);
     }
+    console.log("[genaiClient] Student Performance ML success");
     return data;
   } catch (err) {
-    if (err.name === "AbortError") throw new Error("Student Performance ML service timed out");
+    if (err.name === "AbortError") {
+      console.error("[genaiClient] Student Performance ML service timed out after", REQUEST_TIMEOUT, "ms");
+      throw new Error("Student Performance ML service timed out");
+    }
+    console.error("[genaiClient] Student Performance ML call failed:", err.message);
     throw err;
   } finally {
     clearTimeout(timer);
