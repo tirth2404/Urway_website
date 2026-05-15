@@ -286,3 +286,4 @@ Response includes `scanned`, `updated`, and `failed` counts.
 
 U'rWay is built to be an active growth partner: observe, personalize, guide, and adapt.
 
+# Contributors
